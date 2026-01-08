@@ -1,0 +1,116 @@
+/* Admin-specific styles - scoped to override Pico.css */
+
+/* Typography */
+.admin html,
+.admin body,
+.admin form {
+    font-size: 15px;
+}
+
+@media (min-width: 1200px) {
+
+    .admin html,
+    .admin body,
+    .admin form {
+        font-size: 15px;
+    }
+}
+
+.admin h1 {
+    font-size: 2rem;
+}
+
+.admin h2 {
+    font-size: 1.5rem;
+}
+
+.admin h3 {
+    font-size: 1.25rem;
+}
+
+/* Buttons */
+.admin form button,
+.admin button {
+    font-size: 15px;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    min-width: fit-content;
+    margin-bottom: 0;
+}
+
+.admin button.red {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+}
+
+.admin button.red:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+    color: #fff;
+}
+
+.admin button.green {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: #fff;
+}
+
+.admin button.green:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+    color: #fff;
+}
+
+/* Flexbox utilities */
+.admin .flex {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.admin .flex>* {
+    width: 100%;
+}
+
+.admin .flex>.c-2 {
+    width: 49%;
+}
+
+.admin .flex>.c-3 {
+    width: 30%;
+}
+
+.admin .flex>.c-4 {
+    width: 20%;
+}
+
+
+@media (max-width: 768px) {
+    .admin .flex>.c-2 {
+        width: 100%;
+    }
+
+    .admin .flex>.c-3 {
+        width: 100%;
+    }
+
+    .admin .flex>.c-4 {
+        width: 49%;
+    }
+}
+
+.admin .align-center {
+    align-items: center;
+}
+
+.admin .full {
+    width: 100%;
+}
+
+.admin .block-editor {
+    border: 1px solid #ddd; 
+    padding: 1rem; 
+    margin-bottom: 1rem; 
+    border-radius: 8px;
+}

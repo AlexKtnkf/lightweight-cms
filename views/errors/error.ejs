@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Erreur <%= status %></title>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <main class="container error-page">
+    <h1>Erreur <%= status %></h1>
+    <p><%= message %></p>
+    <a href="/" class="btn">Retour à l'accueil</a>
+    <% if (error && process.env.NODE_ENV === 'development') { %>
+    <pre><%= error.stack %></pre>
+    <% } %>
+  </main>
+</body>
+</html>

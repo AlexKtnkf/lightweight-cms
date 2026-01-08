@@ -1,0 +1,25 @@
+<section class="hero" aria-labelledby="hero-title-<%= block.id || 'default' %>">
+  <div class="container">
+    <% if (block.block_data.tagline) { %>
+    <span class="tagline"><%= block.block_data.tagline %></span>
+    <% } %>
+    <h1 id="hero-title-<%= block.id || 'default' %>">
+      <%= block.block_data.textePrincipal || block.block_data.title || '' %>
+    </h1>
+    <% if (block.block_data.sousTexte || block.block_data.description) { %>
+    <p><%= block.block_data.sousTexte || block.block_data.description || '' %></p>
+    <% } %>
+    <div class="hero-btns">
+      <% if (block.block_data.texteBoutonPrincipal || block.block_data.button_primary_text) { %>
+      <a href="<%= block.block_data.urlBoutonPrincipal || block.block_data.button_primary_url || '#' %>" class="btn btn-green">
+        <%= block.block_data.texteBoutonPrincipal || block.block_data.button_primary_text %>
+      </a>
+      <% } %>
+      <% if (block.block_data.texteBoutonSecondaire || block.block_data.button_secondary_text) { %>
+      <a href="<%= block.block_data.urlBoutonSecondaire || block.block_data.button_secondary_url || '#' %>" class="btn btn-gold">
+        <%= block.block_data.texteBoutonSecondaire || block.block_data.button_secondary_text %>
+      </a>
+      <% } %>
+    </div>
+  </div>
+</section>

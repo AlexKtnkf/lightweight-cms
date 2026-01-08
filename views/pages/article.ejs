@@ -1,0 +1,76 @@
+<%
+  const title = article.meta_title || article.title;
+  const metaDescription = article.meta_description || '';
+  const ogTitle = article.og_title || article.title;
+  const ogDescription = article.og_description || metaDescription;
+%>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - <%= settings?.site_title || 'My Site' %></title>
+  <meta name="description" content="<%= metaDescription %>">
+  <meta property="og:title" content="<%= ogTitle %>">
+  <meta property="og:description" content="<%= ogDescription %>">
+  <meta property="og:type" content="article">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <% if (article.og_image_id) { %>
+  <meta property="og:image" content="<%= baseUrl %>/api/media/<%= article.og_image_id %>">
+  <% } %>
+  <% if (typeof jsonLd !== 'undefined' && jsonLd && jsonLd.length > 0) { %>
+  <% jsonLd.forEach(schema => { %>
+  <script type="application/ld+json"><%= JSON.stringify(schema, null, 2) %></script>
+  <% }); %>
+  <% } %>
+  <link rel="stylesheet" href="/css/main.css">
+  <% if (gaId) { %>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=<%= gaId %>"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '<%= gaId %>');
+  </script>
+  <% } %>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+  
+  <%- include('../partials/navbar', { settings, pages }) %>
+
+  <main id="main-content" class="container article">
+    <article>
+      <h1><%= article.title %></h1>
+      <time><%= new Date(article.published_at || article.created_at).toLocaleDateString('fr-FR') %></time>
+      
+      <% if (article.blocks && article.blocks.length > 0) { %>
+        <% article.blocks.forEach(block => { %>
+          <% 
+          // Use try-catch to handle missing block types gracefully
+          try {
+            const blockPartial = '../partials/blocks/' + block.block_type;
+          %>
+          <%- include(blockPartial, { block, settings, baseUrl }) %>
+          <% } catch (e) { %>
+          <!-- Block type <%= block.block_type %> not found -->
+          <% } %>
+        <% }); %>
+      <% } %>
+    </article>
+  </main>
+
+  <nav aria-label="Navigation de l'article">
+    <div class="container">
+      <a href="/blog">← Retour au blog</a>
+    </div>
+  </nav>
+
+  <%- include('../partials/footer', { settings }) %>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

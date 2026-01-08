@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page non trouvée</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <% if (gaId) { %>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=<%= gaId %>"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '<%= gaId %>');
+  </script>
+  <% } %>
+</head>
+<body>
+  <main class="container error-page">
+    <h1>404</h1>
+    <p>La page que vous recherchez n'existe pas.</p>
+    <a href="/" class="btn">Retour à l'accueil</a>
+  </main>
+</body>
+</html>

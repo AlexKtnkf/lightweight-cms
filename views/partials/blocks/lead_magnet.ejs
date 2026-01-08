@@ -1,0 +1,23 @@
+<section class="lead-magnet section-padding container">
+  <% if (block.block_data.icon) { %>
+  <div class="icon">
+    <% if (block.block_data.icon === 'seedling') { %>
+    <%- include('../icons/seedling') %>
+    <% } else { %>
+    <i class="<%= block.block_data.icon %>"></i>
+    <% } %>
+  </div>
+  <% } %>
+  <% if (block.block_data.title) { %>
+  <h2><%= block.block_data.title %></h2>
+  <% } %>
+  <% if (block.block_data.description) { %>
+  <p><%= block.block_data.description %></p>
+  <% } %>
+  <form class="lead-magnet-form" method="POST" action="<%= block.block_data.action_url || '#' %>">
+    <input type="email" name="email" placeholder="Your best email" class="input-field" required>
+    <button type="submit" class="btn btn-green" style="padding: 1rem 1.5rem;">
+      <%= block.block_data.button_text || 'Send' %>
+    </button>
+  </form>
+</section>

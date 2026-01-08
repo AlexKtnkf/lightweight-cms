@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+
+# Database
+database.db
+database.db-journal
+*.db
+*.db-journal
+
+# Uploads (keep directory structure)
+public/uploads/*
+!public/uploads/.gitkeep
+!public/uploads/images/.gitkeep
+
+# Generated static files
+public/static/*
+!public/static/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sessions
+db/sessions.db

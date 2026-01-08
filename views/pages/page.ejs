@@ -1,0 +1,64 @@
+<%
+  const siteTitle = settings?.site_title || 'My Site';
+  const title = page.meta_title || page.title;
+  const metaDescription = page.meta_description || '';
+  const ogTitle = page.og_title || page.title;
+  const ogDescription = page.og_description || metaDescription;
+%>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - <%= siteTitle %></title>
+  <meta name="description" content="<%= metaDescription %>">
+  <meta property="og:title" content="<%= ogTitle %>">
+  <meta property="og:description" content="<%= ogDescription %>">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <% if (typeof jsonLd !== 'undefined' && jsonLd && jsonLd.length > 0) { %>
+  <% jsonLd.forEach(schema => { %>
+  <script type="application/ld+json"><%= JSON.stringify(schema, null, 2) %></script>
+  <% }); %>
+  <% } %>
+  <link rel="stylesheet" href="/css/main.css">
+  <% if (gaId) { %>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=<%= gaId %>"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '<%= gaId %>');
+  </script>
+  <% } %>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+  
+  <%- include('../partials/navbar', { settings, pages }) %>
+
+  <main id="main-content" class="container page">
+    <h1><%= page.title %></h1>
+    
+    <% if (page.blocks && page.blocks.length > 0) { %>
+      <% page.blocks.forEach(block => { %>
+        <% 
+        // Use try-catch to handle missing block types gracefully
+        try {
+          const blockPartial = '../partials/blocks/' + block.block_type;
+        %>
+        <%- include(blockPartial, { block, settings, baseUrl }) %>
+        <% } catch (e) { %>
+        <!-- Block type <%= block.block_type %> not found -->
+        <% } %>
+      <% }); %>
+    <% } %>
+  </main>
+
+  <%- include('../partials/footer', { settings }) %>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

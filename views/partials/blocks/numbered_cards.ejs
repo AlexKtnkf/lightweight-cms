@@ -1,0 +1,24 @@
+<% if (block.block_data.cards && block.block_data.cards.length > 0) { %>
+<section class="dark-block section-padding">
+  <div class="container">
+    <% if (block.block_data.section_title) { %>
+    <h2 style="margin-bottom: 4rem; color: var(--secondary-gold);"><%= block.block_data.section_title %></h2>
+    <% } %>
+    <div class="<%= block.block_data.cards.length > 1 ? 'ritual-grid numbered-cards-grid' : 'numbered-cards' %>">
+      <% block.block_data.cards.forEach((card, index) => { %>
+      <div class="ritual-card numbered-card">
+        <div class="ritual-num numbered-card-num"><%= String(card.number || index + 1).padStart(2, '0') %></div>
+        <div>
+          <% if (card.title) { %>
+          <h3><%= card.title %></h3>
+          <% } %>
+          <% if (card.description) { %>
+          <p><%- card.description %></p>
+          <% } %>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+<% } %>

@@ -1,0 +1,69 @@
+<%
+  // Build navigation menu
+  const navLinks = [];
+  
+  // Add header menu links from settings
+  if (settings && settings.header_menu_links && Array.isArray(settings.header_menu_links)) {
+    navLinks.push(...settings.header_menu_links);
+  }
+  
+  // Add pages if they exist
+  if (typeof pages !== 'undefined' && pages && Array.isArray(pages)) {
+    pages.forEach(page => {
+      navLinks.push({
+        label: page.title,
+        url: `/${page.slug}`,
+        order: navLinks.length
+      });
+    });
+  }
+  
+  // Sort by order
+  navLinks.sort((a, b) => (a.order || 0) - (b.order || 0));
+  
+  const siteTitle = settings?.site_title || 'My Site';
+  const logoMediaId = settings?.logo_media_id;
+%>
+<nav x-data="{ open: false }" class="navbar" role="navigation" aria-label="Navigation principale" style="padding: 1.2rem 6%; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(0,0,0,0.05);">
+  <a href="/" class="nav-logo" aria-label="Retour à l'accueil" style="font-family: var(--font-title); font-size: 1.4rem; font-weight: 800; color: var(--primary-green-dark); text-decoration: none;">
+    <% if (logoMediaId) { %>
+    <img src="/api/media/<%= logoMediaId %>" alt="<%= siteTitle %>" height="24" width="24" style="display: inline-block; vertical-align: middle;">
+    <% } %>
+    <% 
+    const titleWords = siteTitle.split(' ');
+    if (titleWords.length > 1) {
+    %>
+    <span><%= titleWords[0] %><span style="color: var(--secondary-gold);"><%= titleWords.slice(1).join(' ') %></span></span>
+    <% } else { %>
+    <span><%= siteTitle %></span>
+    <% } %>
+  </a>
+  <div style="display: flex; align-items: center; gap: 1.5rem;">
+    <% 
+    // Separate CTA link from regular nav links
+    const ctaLink = navLinks.find(link => link.cta);
+    const regularLinks = navLinks.filter(link => !link.cta);
+    %>
+    <% if (regularLinks.length > 0) { %>
+    <ul 
+      id="main-menu"
+      :class="open ? 'nav-menu active' : 'nav-menu'"
+      role="menubar"
+      style="display: flex; list-style: none; gap: 1.5rem; margin: 0; padding: 0;"
+    >
+      <% regularLinks.forEach(link => { %>
+      <li role="none">
+        <a href="<%= link.url %>" role="menuitem" style="text-decoration: none; color: var(--text-main); font-weight: 500;" <%= link.url.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : '' %>>
+          <%= link.label %>
+        </a>
+      </li>
+      <% }); %>
+    </ul>
+    <% } %>
+    <% if (ctaLink) { %>
+    <a href="<%= ctaLink.url %>" style="color: var(--primary-green-dark); font-weight: 700; font-size: 0.9rem; text-decoration: none;" <%= ctaLink.url.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : '' %>>
+      <%= ctaLink.label.toUpperCase() %>
+    </a>
+    <% } %>
+  </div>
+</nav>

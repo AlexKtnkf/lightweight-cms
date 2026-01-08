@@ -1,0 +1,11 @@
+<article class="accroche" aria-labelledby="accroche-<%= block.id || 'default' %>-title">
+  <% if (block.block_data.image_media_id) { %>
+  <img src="/api/media/<%= block.block_data.image_media_id %>" alt="<%= block.block_data.title || 'Illustration' %>" loading="lazy">
+  <% } %>
+  <% if (block.block_data.title) { %>
+  <h3 id="accroche-<%= block.id || 'default' %>-title"><%= block.block_data.title %></h3>
+  <% } %>
+  <% if (block.block_data.content) { %>
+  <div><%- block.block_data.content %></div>
+  <% } %>
+</article>

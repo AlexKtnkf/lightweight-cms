@@ -1,0 +1,10 @@
+export interface Settings {
+  id: number;
+  site_title: string;
+  site_tagline?: string;
+  logo_media_id?: number;
+  header_menu_links?: Array<{ label: string; url: string; order: number }>;
+  footer_menu_links?: Array<{ label: string; url: string; order: number }>;
+  footer_text?: string;
+  updated_at: string;
+}

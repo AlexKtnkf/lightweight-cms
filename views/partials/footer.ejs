@@ -1,0 +1,56 @@
+<%
+  // Build footer menu
+  const footerLinks = [];
+  
+  // Add footer menu links from settings
+  if (settings && settings.footer_menu_links && Array.isArray(settings.footer_menu_links)) {
+    footerLinks.push(...settings.footer_menu_links);
+  }
+  
+  // Sort by order
+  footerLinks.sort((a, b) => (a.order || 0) - (b.order || 0));
+  
+  const footerText = settings?.footer_text || `© ${new Date().getFullYear()} ${settings?.site_title || 'My Site'}. Tous droits réservés.`;
+%>
+<footer role="contentinfo" style="background: #1A1A1A; color: white; text-align: center; padding: 4rem 6%;">
+  <div class="container">
+    <div style="font-family: var(--font-title); color: white; margin-bottom: 1rem; font-size: 1.4rem; font-weight: 800;">
+      <% 
+      const siteTitle = settings?.site_title || 'My Site';
+      const titleWords = siteTitle.split(' ');
+      if (titleWords.length > 1) {
+      %>
+      <span><%= titleWords[0] %><span style="color: var(--secondary-gold);"><%= titleWords.slice(1).join(' ') %></span></span>
+      <% } else { %>
+      <span><%= siteTitle %></span>
+      <% } %>
+    </div>
+    <% if (settings?.footer_text) { %>
+    <p style="opacity: 0.6; font-size: 0.9rem; margin-bottom: 2rem;"><%= settings.footer_text %></p>
+    <% } %>
+    <% 
+    // Social links from settings (assuming they're stored as an array or object)
+    const socialLinks = settings?.social_links || [];
+    if (socialLinks.length > 0) {
+    %>
+    <div class="social-links" style="display: flex; justify-content: center; gap: 2rem; font-size: 1.5rem; margin: 2rem 0;">
+      <% socialLinks.forEach(link => { %>
+      <a href="<%= link.url %>" target="_blank" rel="noopener noreferrer" aria-label="<%= link.platform || link.label %>" style="color: var(--secondary-gold); text-decoration: none;">
+        <% if (link.platform === 'instagram' || link.icon === 'instagram') { %>
+        <%- include('../icons/instagram') %>
+        <% } else if (link.platform === 'tiktok' || link.icon === 'tiktok') { %>
+        <%- include('../icons/tiktok') %>
+        <% } else if (link.platform === 'linkedin' || link.icon === 'linkedin') { %>
+        <%- include('../icons/linkedin') %>
+        <% } else { %>
+        <%= link.label || link.platform %>
+        <% } %>
+      </a>
+      <% }); %>
+    </div>
+    <% } %>
+    <div style="font-size: 0.7rem; opacity: 0.4; margin-top: 3rem;">
+      &copy; <%= new Date().getFullYear() %> <%= siteTitle.toUpperCase() %>. ALL RIGHTS RESERVED.
+    </div>
+  </div>
+</footer>

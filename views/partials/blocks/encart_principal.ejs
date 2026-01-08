@@ -1,0 +1,14 @@
+<div class="block-encart">
+  <% if (block.block_data.image_id) { %>
+  <img src="/api/media/<%= block.block_data.image_id %>" alt="<%= block.block_data.titre || 'Illustration' %>">
+  <% } %>
+  <% if (block.block_data.titre) { %>
+  <h2><%= block.block_data.titre %></h2>
+  <% } %>
+  <% if (block.block_data.texte) { %>
+  <div><%- block.block_data.texte %></div>
+  <% } %>
+  <% if (block.block_data.url && block.block_data.lien) { %>
+  <a href="<%= block.block_data.url %>"><%= block.block_data.lien %></a>
+  <% } %>
+</div>

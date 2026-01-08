@@ -1,0 +1,48 @@
+const LoginUser = require('../../domains/auth/application/LoginUser');
+const userRepository = require('../../domains/auth/infrastructure/userRepository');
+
+const loginUser = new LoginUser(userRepository);
+
+class AdminController {
+  // Login - returns JSON for React admin
+  async login(req, res, next) {
+    try {
+      const { username, password } = req.body;
+      
+      // Trim whitespace from inputs
+      const trimmedUsername = username ? username.trim() : '';
+      const trimmedPassword = password ? password.trim() : '';
+      
+      if (!trimmedUsername || !trimmedPassword) {
+        return res.status(400).json({ error: 'Nom d\'utilisateur et mot de passe requis' });
+      }
+      
+      const user = await loginUser.execute(trimmedUsername, trimmedPassword);
+      
+      // Set session
+      if (!req.session) {
+        return res.status(500).json({ error: 'Erreur de session' });
+      }
+      
+      req.session.userId = user.id;
+      req.session.username = user.username;
+      
+      // Return success (React will handle redirect)
+      res.json({ success: true, redirect: '/admin' });
+    } catch (error) {
+      res.status(401).json({ error: error.message || 'Invalid username or password' });
+    }
+  }
+
+  // Logout
+  async logout(req, res) {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Session destroy error:', err);
+      }
+      res.redirect('/admin/login');
+    });
+  }
+}
+
+module.exports = new AdminController();

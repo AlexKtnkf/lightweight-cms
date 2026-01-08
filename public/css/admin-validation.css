@@ -1,0 +1,67 @@
+/**
+ * Styles for client-side validation
+ * Works with Pico CSS
+ */
+
+/* Error message styling */
+label .error-message {
+  display: block;
+  color: var(--del-color, #d32f2f);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  font-weight: normal;
+}
+
+/* Invalid input styling */
+input.invalid,
+textarea.invalid {
+  border-color: var(--del-color, #d32f2f);
+  background-color: rgba(211, 47, 47, 0.05);
+}
+
+input.invalid:focus,
+textarea.invalid:focus {
+  border-color: var(--del-color, #d32f2f);
+  box-shadow: 0 0 0 0.2rem rgba(211, 47, 47, 0.25);
+}
+
+/* Success state (optional, for when field becomes valid) */
+input.valid,
+textarea.valid {
+  border-color: var(--ins-color, #2e7d32);
+}
+
+input.valid:focus,
+textarea.valid:focus {
+  border-color: var(--ins-color, #2e7d32);
+  box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25);
+}
+
+/* Accessibility: Ensure error messages are visible to screen readers */
+.error-message[role="alert"] {
+  position: relative;
+}
+
+/* Form validation summary (for form-level errors) */
+.validation-summary {
+  background-color: rgba(211, 47, 47, 0.1);
+  border: 1px solid var(--del-color, #d32f2f);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.validation-summary h3 {
+  margin-top: 0;
+  color: var(--del-color, #d32f2f);
+  font-size: 1rem;
+}
+
+.validation-summary ul {
+  margin: 0.5rem 0 0 0;
+  padding-left: 1.5rem;
+}
+
+.validation-summary li {
+  margin: 0.25rem 0;
+}
