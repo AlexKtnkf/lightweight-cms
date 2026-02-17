@@ -12,21 +12,21 @@
   
   const footerText = settings?.footer_text || `© ${new Date().getFullYear()} ${settings?.site_title || 'My Site'}. Tous droits réservés.`;
 %>
-<footer role="contentinfo" style="background: #1A1A1A; color: white; text-align: center; padding: 4rem 6%;">
+<footer role="contentinfo">
   <div class="container">
-    <div style="font-family: var(--font-title); color: white; margin-bottom: 1rem; font-size: 1.4rem; font-weight: 800;">
+    <div class="footer-title">
       <% 
       const siteTitle = settings?.site_title || 'My Site';
       const titleWords = siteTitle.split(' ');
       if (titleWords.length > 1) {
       %>
-      <span><%= titleWords[0] %><span style="color: var(--secondary-gold);"><%= titleWords.slice(1).join(' ') %></span></span>
+      <span><%= titleWords[0] %><span class="footer-gold-accent"><%= titleWords.slice(1).join(' ') %></span></span>
       <% } else { %>
       <span><%= siteTitle %></span>
       <% } %>
     </div>
     <% if (settings?.footer_text) { %>
-    <p style="opacity: 0.6; font-size: 0.9rem; margin-bottom: 2rem;"><%= settings.footer_text %></p>
+    <p class="footer-description"><%= settings.footer_text %></p>
     <% } %>
     
     <% 
@@ -34,15 +34,13 @@
     const validFooterLinks = footerLinks.filter(link => link && link.label && link.url && link.label.trim() && link.url.trim());
     %>
     <% if (validFooterLinks.length > 0) { %>
-    <nav style="margin-bottom: 2rem;" aria-label="Liens du pied de page">
-      <ul style="display: flex; justify-content: center; flex-wrap: wrap; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
+    <nav class="footer-nav" aria-label="Liens du pied de page">
+      <ul>
         <% validFooterLinks.forEach(link => { %>
           <li>
             <a 
               href="<%= link.url %>" 
-              style="color: rgba(255, 255, 255, 0.8); text-decoration: none; font-size: 0.9rem; transition: color 0.2s;"
-              onmouseover="this.style.color='var(--secondary-gold)'"
-              onmouseout="this.style.color='rgba(255, 255, 255, 0.8)'"
+              class="footer-link"
               <%= link.url.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : '' %>
             >
               <%= link.label %>
@@ -58,9 +56,9 @@
     const socialLinks = settings?.social_links || [];
     if (socialLinks.length > 0) {
     %>
-    <div class="social-links" style="display: flex; justify-content: center; gap: 2rem; font-size: 1.5rem; margin: 2rem 0;">
+    <div class="social-links">
       <% socialLinks.forEach(link => { %>
-      <a href="<%= link.url %>" target="_blank" rel="noopener noreferrer" aria-label="<%= link.platform || link.label %>" style="color: var(--secondary-gold); text-decoration: none;">
+      <a href="<%= link.url %>" target="_blank" rel="noopener noreferrer" aria-label="<%= link.platform || link.label %>">
         <% if (link.platform === 'instagram' || link.icon === 'instagram') { %>
         <%- include('icons/instagram') %>
         <% } else if (link.platform === 'facebook' || link.icon === 'facebook') { %>
@@ -76,7 +74,7 @@
       <% }); %>
     </div>
     <% } %>
-    <div style="font-size: 0.7rem; opacity: 0.4; margin-top: 3rem;">
+    <div class="footer-copyright">
       &copy; <%= new Date().getFullYear() %> <%= siteTitle.toUpperCase() %>. ALL RIGHTS RESERVED.
     </div>
   </div>
