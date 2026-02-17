@@ -40,10 +40,21 @@
   <%- include('../partials/navbar', { settings, pages }) %>
 
   <main id="main-content" class="container page">
-    <h1><%= page.title %></h1>
+    <% 
+    // Find hero block if it exists - it should always come first
+    const heroBlock = page.blocks?.find(b => b.block_type === 'hero');
+    // Filter out hero block from the blocks array for rendering (hero is already rendered first above)
+    const otherBlocks = page.blocks?.filter(b => b.block_type !== 'hero') || [];
+    %>
     
-    <% if (page.blocks && page.blocks.length > 0) { %>
-      <% page.blocks.forEach(block => { %>
+    <% if (heroBlock) { %>
+      <%- include('../partials/blocks/hero', { block: heroBlock, settings, baseUrl }) %>
+    <% } else { %>
+      <h1><%= page.title %></h1>
+    <% } %>
+    
+    <% if (otherBlocks.length > 0) { %>
+      <% otherBlocks.forEach(block => { %>
         <% 
         // Use try-catch to handle missing block types gracefully
         try {

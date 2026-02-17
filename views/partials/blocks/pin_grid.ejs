@@ -1,19 +1,28 @@
+<!--
+  Block: Pin Grid (Instagram-style Gallery)
+  Purpose: Display images in a responsive grid layout with optional labels/captions
+  Expected Data: block.block_data = { section_title, pins: [{ image_media_id, label }] }
+  Usage: Photography gallery, visual grid, inspiration boards; responsive 2-column mobile, 4-column desktop
+  Design: Images with gradient overlays on labels, masonry-like layout with offset rows
+-->
 <% if (block.block_data.pins && block.block_data.pins.length > 0) { %>
-<section class="section-padding container">
-  <% if (block.block_data.section_title) { %>
-  <h2 style="text-align: center; margin-bottom: 3rem; font-size: 1.2rem; color: var(--gold-dark);"><%= block.block_data.section_title %></h2>
-  <% } %>
-  <div class="pin-grid">
-    <% block.block_data.pins.forEach((pin, index) => { %>
-    <div class="pin">
-      <% if (pin.image_media_id) { %>
-      <img src="/api/media/<%= pin.image_media_id %>" alt="<%= pin.label || 'Image' %>" loading="lazy">
-      <% } %>
-      <% if (pin.label) { %>
-      <div class="pin-label"><%= pin.label %></div>
-      <% } %>
+<section class="section-padding">
+  <div class="container">
+    <% if (block.block_data.section_title) { %>
+    <h2 class="pin-grid-title"><%= block.block_data.section_title %></h2>
+    <% } %>
+    <div class="pin-grid">
+      <% block.block_data.pins.forEach((pin, index) => { %>
+      <div class="pin">
+        <% if (pin.image_media_id) { %>
+        <img src="/api/media/<%= pin.image_media_id %>" alt="<%= pin.label || 'Image' %>" loading="lazy">
+        <% } %>
+        <% if (pin.label) { %>
+        <div class="pin-label"><%= pin.label %></div>
+        <% } %>
+      </div>
+      <% }); %>
     </div>
-    <% }); %>
   </div>
 </section>
 <% } %>

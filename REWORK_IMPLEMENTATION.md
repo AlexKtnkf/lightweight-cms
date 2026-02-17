@@ -5,7 +5,7 @@
 ### Step 1: Create Domain Layer Structure
 
 ```bash
-mkdir -p src/domains/{content,media,settings,auth}/{domain,application,infrastructure}
+mkdir -p src/domain/{content,media,settings,auth}/{domain,application,infrastructure}
 mkdir -p src/infrastructure/{database,static,storage}
 mkdir -p src/presentation/{api/{admin,public},web}
 mkdir -p src/shared/{errors,utils}
@@ -26,7 +26,7 @@ class DomainError extends Error {
 module.exports = DomainError;
 ```
 
-**File: `src/domains/content/domain/Slug.js`** (Value Object)
+**File: `src/domain/content/domain/Slug.js`** (Value Object)
 ```javascript
 class Slug {
   constructor(value) {
@@ -55,7 +55,7 @@ class Slug {
 module.exports = Slug;
 ```
 
-**File: `src/domains/content/domain/Page.js`** (Domain Model)
+**File: `src/domain/content/domain/Page.js`** (Domain Model)
 ```javascript
 const Slug = require('./Slug');
 const DomainError = require('../../../shared/errors/DomainError');
@@ -131,7 +131,7 @@ module.exports = Page;
 
 ### Step 3: Create Use Cases
 
-**File: `src/domains/content/application/CreatePage.js`**
+**File: `src/domain/content/application/CreatePage.js`**
 ```javascript
 const Page = require('../domain/Page');
 const slugify = require('../../../shared/utils/slugify');
@@ -179,7 +179,7 @@ class CreatePage {
 module.exports = CreatePage;
 ```
 
-**File: `src/domains/content/application/UpdatePage.js`**
+**File: `src/domain/content/application/UpdatePage.js`**
 ```javascript
 const Page = require('../domain/Page');
 
@@ -241,7 +241,7 @@ class UpdatePage {
 module.exports = UpdatePage;
 ```
 
-**File: `src/domains/content/application/GetPage.js`**
+**File: `src/domain/content/application/GetPage.js`**
 ```javascript
 const Page = require('../domain/Page');
 
@@ -274,7 +274,7 @@ class GetPage {
 module.exports = GetPage;
 ```
 
-**File: `src/domains/content/application/ListPages.js`**
+**File: `src/domain/content/application/ListPages.js`**
 ```javascript
 class ListPages {
   constructor(pageRepository) {
@@ -372,11 +372,11 @@ const blockRepository = require('../repositories/blockRepository');
 const staticGenerator = require('../utils/staticGenerator');
 
 // Use cases (application)
-const CreatePage = require('../src/domains/content/application/CreatePage');
-const UpdatePage = require('../src/domains/content/application/UpdatePage');
-const GetPage = require('../src/domains/content/application/GetPage');
-const ListPages = require('../src/domains/content/application/ListPages');
-const DeletePage = require('../src/domains/content/application/DeletePage');
+const CreatePage = require('../src/domain/content/application/CreatePage');
+const UpdatePage = require('../src/domain/content/application/UpdatePage');
+const GetPage = require('../src/domain/content/application/GetPage');
+const ListPages = require('../src/domain/content/application/ListPages');
+const DeletePage = require('../src/domain/content/application/DeletePage');
 
 // Controllers (presentation)
 const PagesController = require('../src/presentation/api/admin/pagesController');
@@ -422,7 +422,7 @@ app.use('/api/admin', adminApiRoutes);
 
 ### Step 7: React Admin Setup
 
-**File: `admin/src/domains/content/types.ts`** (TypeScript)
+**File: `admin/src/domain/content/types.ts`** (TypeScript)
 ```typescript
 export interface Page {
   id: number;
@@ -460,7 +460,7 @@ export type BlockType =
 **File: `admin/src/shared/api/pages.ts`**
 ```typescript
 import api from './client';
-import { Page } from '../../domains/content/types';
+import { Page } from '../../domain/content/types';
 
 export const pagesApi = {
   list: (): Promise<Page[]> => 
@@ -487,7 +487,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Page } from '../../domains/content/types';
+import { Page } from '../../domain/content/types';
 import { pagesApi } from '../../shared/api/pages';
 import { BlockEditor } from '../blocks/BlockEditor';
 

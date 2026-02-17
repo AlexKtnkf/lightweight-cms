@@ -1,5 +1,5 @@
-const articleRepository = require('../../domains/content/infrastructure/articleRepository');
-const pageRepository = require('../../domains/content/infrastructure/pageRepository');
+const articleRepository = require('../../domain/content/infrastructure/articleRepository');
+const pageRepository = require('../../domain/content/infrastructure/pageRepository');
 
 class SitemapGenerator {
   constructor(articleRepository, pageRepository) {

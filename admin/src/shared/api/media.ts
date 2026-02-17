@@ -1,5 +1,5 @@
 import api from './client';
-import type { Media } from '../../domains/media/types';
+import type { Media } from '../../domain/media/types';
 
 export const mediaApi = {
   list: (): Promise<Media[]> => 

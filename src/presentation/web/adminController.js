@@ -1,5 +1,5 @@
-const LoginUser = require('../../domains/auth/application/LoginUser');
-const userRepository = require('../../domains/auth/infrastructure/userRepository');
+const LoginUser = require('../../domain/auth/application/LoginUser');
+const userRepository = require('../../domain/auth/infrastructure/userRepository');
 
 const loginUser = new LoginUser(userRepository);
 
@@ -27,8 +27,29 @@ class AdminController {
       req.session.userId = user.id;
       req.session.username = user.username;
       
-      // Return success (React will handle redirect)
-      res.json({ success: true, redirect: '/admin' });
+      // Force save session and wait for it before responding
+      await new Promise((resolve, reject) => {
+        req.session.save((err) => {
+          if (err) {
+            console.error('[Login] Session save error:', err);
+            return reject(err);
+          }
+          console.log('[Login] Session saved successfully:', {
+            sessionID: req.sessionID,
+            userId: req.session.userId
+          });
+          resolve();
+        });
+      });
+      
+      // Log response headers to verify cookie is being set
+      console.log('[Login] Response headers before send:', {
+        'Set-Cookie': res.getHeader('Set-Cookie'),
+        allHeaders: res.getHeaders()
+      });
+      
+      // express-session will set the cookie automatically
+      res.json({ success: true, sessionId: req.sessionID });
     } catch (error) {
       res.status(401).json({ error: error.message || 'Invalid username or password' });
     }

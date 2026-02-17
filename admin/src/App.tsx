@@ -4,11 +4,11 @@ import { PagesList } from './features/pages/PagesList';
 import { PageEditor } from './features/pages/PageEditor';
 import { ArticlesList } from './features/articles/ArticlesList';
 import { ArticleEditor } from './features/articles/ArticleEditor';
-import { MediaList } from './features/media/MediaList';
+import { ImagesList } from './features/media/MediaList';
 import { SettingsEditor } from './features/settings/SettingsEditor';
 import { Dashboard } from './features/dashboard/Dashboard';
 import { Login } from './features/auth/Login';
-import './index.css';
+import { ProtectedRoute } from './features/auth/ProtectedRoute';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,7 +25,11 @@ function App() {
       <BrowserRouter basename="/admin">
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/*" element={<AdminApp />} />
+          <Route path="/*" element={
+            <ProtectedRoute>
+              <AdminApp />
+            </ProtectedRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
@@ -40,12 +44,12 @@ function AdminApp() {
               <div className="flex justify-between h-16">
                 <div className="flex">
                   <Link to="/" className="flex items-center px-2 py-2 text-gray-900 font-semibold">
-                    Admin Panel
+                    OB Admin
                   </Link>
                 </div>
                 <div className="flex items-center space-x-4">
                   <Link to="/" className="text-gray-700 hover:text-gray-900 px-3 py-2">
-                    Dashboard
+                    Tableau de bord
                   </Link>
                   <Link to="/pages" className="text-gray-700 hover:text-gray-900 px-3 py-2">
                     Pages
@@ -54,13 +58,13 @@ function AdminApp() {
                     Articles
                   </Link>
                   <Link to="/media" className="text-gray-700 hover:text-gray-900 px-3 py-2">
-                    Media
+                    Images
                   </Link>
                   <Link to="/settings" className="text-gray-700 hover:text-gray-900 px-3 py-2">
-                    Settings
+                    Paramètres
                   </Link>
                   <a href="/admin/logout" className="text-gray-700 hover:text-gray-900 px-3 py-2">
-                    Logout
+                    Déconnexion
                   </a>
                 </div>
               </div>
@@ -75,7 +79,7 @@ function AdminApp() {
               <Route path="/articles" element={<ArticlesList />} />
               <Route path="/articles/new" element={<ArticleEditor />} />
               <Route path="/articles/:id" element={<ArticleEditor />} />
-              <Route path="/media" element={<MediaList />} />
+              <Route path="/media" element={<ImagesList />} />
               <Route path="/settings" element={<SettingsEditor />} />
             </Routes>
           </main>

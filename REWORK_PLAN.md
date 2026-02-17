@@ -55,7 +55,7 @@
 ```
 lightweight-cms/
 ├── src/
-│   ├── domains/
+│   ├── domain/
 │   │   ├── content/
 │   │   │   ├── domain/
 │   │   │   │   ├── Page.js              # Domain model
@@ -120,7 +120,7 @@ lightweight-cms/
 │           └── sanitize.js
 ├── admin/                                 # React admin panel
 │   ├── src/
-│   │   ├── domains/                      # Frontend domain models
+│   │   ├── domain/                      # Frontend domain models
 │   │   │   ├── content/
 │   │   │   │   └── types.ts             # TypeScript types
 │   │   │   └── media/
@@ -296,7 +296,7 @@ class PagesController {
 ```javascript
 // routes/admin-api.js
 const pagesController = require('../src/presentation/api/admin/pagesController');
-const createPage = require('../src/domains/content/application/CreatePage');
+const createPage = require('../src/domain/content/application/CreatePage');
 // ... wire up dependencies
 
 router.post('/api/admin/pages', requireAuth, (req, res, next) => {
@@ -309,7 +309,7 @@ router.post('/api/admin/pages', requireAuth, (req, res, next) => {
 ### Domain Types
 
 ```typescript
-// admin/src/domains/content/types.ts
+// admin/src/domain/content/types.ts
 export interface Page {
   id: number;
   title: string;
@@ -346,7 +346,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Page } from '../../domains/content/types';
+import { Page } from '../../domain/content/types';
 import { pagesApi } from '../../shared/api/pages';
 
 const pageSchema = z.object({

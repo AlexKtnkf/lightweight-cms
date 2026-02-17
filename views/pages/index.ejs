@@ -1,5 +1,5 @@
 <%
-  const siteTitle = settings?.site_title || 'My Site';
+  const siteTitle = settings?.site_title || 'Adeline Hage - Diététicienne';
   const title = homepage.meta_title || homepage.title || siteTitle;
   const metaDescription = homepage.meta_description || settings?.site_tagline || '';
   const ogTitle = homepage.og_title || homepage.meta_title || homepage.title || siteTitle;
@@ -43,14 +43,14 @@
 
   <main id="main-content">
     <% 
-    // Find hero block if it exists
+    // Find hero block if it exists - it should always come first
     const heroBlock = homepage.blocks?.find(b => b.block_type === 'hero');
     %>
     <% if (heroBlock) { %>
       <%- include('../partials/blocks/hero', { block: heroBlock, settings, baseUrl }) %>
     <% } else { %>
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="container">
+    <section class="hero hero-fullscreen" aria-labelledby="hero-title">
+      <div class="container hero-content-wrapper">
         <% if (settings?.logo_media_id) { %>
         <img src="/api/media/<%= settings.logo_media_id %>" alt="Logo <%= siteTitle %>" class="hero-logo">
         <% } else { %>
@@ -61,29 +61,16 @@
           <p class="hero-subtitle"><%= homepage.meta_description || settings?.site_tagline || 'Diététicienne-Nutritionniste' %></p>
         </div>
       </div>
-      <div class="waves">
-        <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" style="height: 60px; width: 100%;">
-          <defs>
-            <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-          </defs>
-          <g class="parallax">
-            <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(34, 181, 115, 0.3)" />
-            <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(34, 181, 115, 0.2)" />
-            <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(34, 181, 115, 0.1)" />
-            <use xlink:href="#gentle-wave" x="48" y="7" fill="#FFFFFF" />
-          </g>
-        </svg>
-      </div>
     </section>
     <% } %>
 
-    <% if (homepage.blocks && homepage.blocks.length > 0) { %>
-      <% homepage.blocks.forEach((block) => { %>
+    <% 
+    // Filter out hero block from the blocks array for rendering (hero is already rendered first above)
+    const otherBlocks = homepage.blocks?.filter(b => b.block_type !== 'hero') || [];
+    %>
+    <% if (otherBlocks.length > 0) { %>
+      <% otherBlocks.forEach((block) => { %>
         <% 
-        // Skip hero block if we already rendered it above
-        if (block.block_type === 'hero' && heroBlock) {
-          return;
-        }
         // Use try-catch to handle missing block types gracefully
         try {
           const blockPartial = '../partials/blocks/' + block.block_type;

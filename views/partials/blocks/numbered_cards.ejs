@@ -1,19 +1,26 @@
+<!--
+  Block: Numbered Cards (Steps/Features Section)
+  Purpose: Display numbered cards/steps in a dark green section with gold number accents
+  Expected Data: block.block_data = { section_title, cards: [{ number, title, description }] }
+  Usage: Used for process steps, features, or rituals; responsive grid on desktop, single column on mobile
+  Design: Dark green background (#1A8F5A), gold text for numbers, white text, rounded section
+-->
 <% if (block.block_data.cards && block.block_data.cards.length > 0) { %>
 <section class="dark-block section-padding">
   <div class="container">
     <% if (block.block_data.section_title) { %>
-    <h2 style="margin-bottom: 4rem; color: var(--secondary-gold);"><%= block.block_data.section_title %></h2>
+    <h2 class="dark-block-title"><%= block.block_data.section_title %></h2>
     <% } %>
     <div class="<%= block.block_data.cards.length > 1 ? 'ritual-grid numbered-cards-grid' : 'numbered-cards' %>">
       <% block.block_data.cards.forEach((card, index) => { %>
       <div class="ritual-card numbered-card">
         <div class="ritual-num numbered-card-num"><%= String(card.number || index + 1).padStart(2, '0') %></div>
-        <div>
+        <div class="numbered-card-content">
           <% if (card.title) { %>
-          <h3><%= card.title %></h3>
+          <h3 class="numbered-card-title"><%= card.title %></h3>
           <% } %>
           <% if (card.description) { %>
-          <p><%- card.description %></p>
+          <p class="numbered-card-description"><%- card.description %></p>
           <% } %>
         </div>
       </div>

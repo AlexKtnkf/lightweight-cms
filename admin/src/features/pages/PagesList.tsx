@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { pagesApi } from '../../shared/api/pages';
-import type { Page } from '../../domains/content/types';
+import type { Page } from '../../domain/content/types';
+import { Loading } from '../../shared/components/Loading';
 
 export function PagesList() {
   const navigate = useNavigate();
@@ -20,13 +21,13 @@ export function PagesList() {
   });
 
   const handleDelete = async (id: number, title: string) => {
-    if (confirm(`Are you sure you want to delete "${title}"?`)) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer "${title}" ?`)) {
       await deleteMutation.mutateAsync(id);
     }
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return <Loading />;
   }
 
   return (
@@ -37,7 +38,7 @@ export function PagesList() {
           onClick={() => navigate('/pages/new')}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
-          New Page
+          Nouvelle page
         </button>
       </div>
 
@@ -47,13 +48,13 @@ export function PagesList() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Title
+                  Titre
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Slug
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  Statut
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -77,22 +78,22 @@ export function PagesList() {
                           : 'bg-gray-100 text-gray-800'
                       }`}
                     >
-                      {page.published ? 'Published' : 'Draft'}
+                      {page.published ? 'Publié' : 'Brouillon'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
-                      onClick={() => navigate(`/admin/pages/${page.id}`)}
+                      onClick={() => navigate(`/pages/${page.id}`)}
                       className="text-blue-600 hover:text-blue-900 mr-4"
                     >
-                      Edit
+                      Modifier
                     </button>
                     <button
                       onClick={() => handleDelete(page.id, page.title)}
                       className="text-red-600 hover:text-red-900"
                       disabled={deleteMutation.isPending}
                     >
-                      {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+                      {deleteMutation.isPending ? 'Suppression en cours...' : 'Supprimer'}
                     </button>
                   </td>
                 </tr>
@@ -102,7 +103,7 @@ export function PagesList() {
         </div>
       ) : (
         <div className="bg-white shadow rounded-lg p-8 text-center">
-          <p className="text-gray-500">No pages found. Create your first page!</p>
+          <p className="text-gray-500">Aucune page.</p>
         </div>
       )}
     </div>

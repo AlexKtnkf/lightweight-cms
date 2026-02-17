@@ -22,9 +22,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Redirect to login if unauthorized (only if not already on login page)
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/admin/login';
+      const isLoginRequest = error.config?.url?.includes('/login') || error.config?.url === '/admin/login';
+      const isOnLoginPage = window.location.pathname.includes('/login');
+      if (!isLoginRequest && !isOnLoginPage) {
+        window.location.replace('/admin/login');
       }
     }
     return Promise.reject(error);

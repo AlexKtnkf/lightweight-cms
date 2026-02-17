@@ -1,4 +1,4 @@
-import type { Block } from '../../../domains/content/types';
+import type { Block } from '../../../domain/content/types';
 
 interface QuestionReponseBlockProps {
   block: Block;
@@ -18,7 +18,7 @@ export function QuestionReponseBlock({ block, onChange }: QuestionReponseBlockPr
           type="text"
           value={data.question || ''}
           onChange={(e) => onChange({ ...data, question: e.target.value })}
-          placeholder="Question text"
+          placeholder="Texte de la question"
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
         />
       </div>
@@ -29,7 +29,7 @@ export function QuestionReponseBlock({ block, onChange }: QuestionReponseBlockPr
         <textarea
           value={data.reponse || ''}
           onChange={(e) => onChange({ ...data, reponse: e.target.value })}
-          placeholder="Answer text"
+          placeholder="Texte de la réponse"
           rows={4}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
         />

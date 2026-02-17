@@ -1,6 +1,6 @@
 const RSS = require('rss');
-const articleRepository = require('../../domains/content/infrastructure/articleRepository');
-const settingsRepository = require('../../domains/settings/infrastructure/settingsRepository');
+const articleRepository = require('../../domain/content/infrastructure/articleRepository');
+const settingsRepository = require('../../domain/settings/infrastructure/settingsRepository');
 
 class FeedGenerator {
   constructor(articleRepository, settingsRepository) {

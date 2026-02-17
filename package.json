@@ -4,7 +4,7 @@
   "description": "Lightweight CMS for Adeline Hage website",
   "main": "server.js",
   "scripts": {
-    "dev": "concurrently \"npm:dev:server\" \"npm:dev:admin\"",
+    "dev": "node server.js",
     "dev:server": "node server.js",
     "dev:admin": "cd admin && npm run dev",
     "build:admin": "cd admin && npm run build",
@@ -36,6 +36,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "vite": "^7.2.4"
   }
 }

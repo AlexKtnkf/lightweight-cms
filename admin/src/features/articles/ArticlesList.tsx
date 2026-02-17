@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { articlesApi } from '../../shared/api/articles';
-import type { Article } from '../../domains/content/types';
+import type { Article } from '../../domain/content/types';
+import { Loading } from '../../shared/components/Loading';
 
 export function ArticlesList() {
   const navigate = useNavigate();
@@ -20,13 +21,13 @@ export function ArticlesList() {
   });
 
   const handleDelete = async (id: number, title: string) => {
-    if (confirm(`Are you sure you want to delete "${title}"?`)) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer "${title}" ?`)) {
       await deleteMutation.mutateAsync(id);
     }
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return <Loading />;
   }
 
   return (
@@ -37,7 +38,7 @@ export function ArticlesList() {
           onClick={() => navigate('/articles/new')}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
-          New Article
+          Nouvel article
         </button>
       </div>
 
@@ -47,16 +48,16 @@ export function ArticlesList() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Title
+                  Titre
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Slug
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  Statut
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Published
+                  Publié
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -80,7 +81,7 @@ export function ArticlesList() {
                           : 'bg-gray-100 text-gray-800'
                       }`}
                     >
-                      {article.published ? 'Published' : 'Draft'}
+                      {article.published ? 'Publié' : 'Brouillon'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -92,17 +93,17 @@ export function ArticlesList() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
-                      onClick={() => navigate(`/admin/articles/${article.id}`)}
+                      onClick={() => navigate(`/articles/${article.id}`)}
                       className="text-blue-600 hover:text-blue-900 mr-4"
                     >
-                      Edit
+                      Modifier
                     </button>
                     <button
                       onClick={() => handleDelete(article.id, article.title)}
                       className="text-red-600 hover:text-red-900"
                       disabled={deleteMutation.isPending}
                     >
-                      {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+                      {deleteMutation.isPending ? 'Supprimer...' : 'Supprimer'}
                     </button>
                   </td>
                 </tr>
@@ -112,7 +113,7 @@ export function ArticlesList() {
         </div>
       ) : (
         <div className="bg-white shadow rounded-lg p-8 text-center">
-          <p className="text-gray-500">No articles found. Create your first article!</p>
+          <p className="text-gray-500">Aucun article.</p>
         </div>
       )}
     </div>

@@ -4,16 +4,16 @@ const path = require('path');
 const fs = require('fs');
 
 // Use cases
-const GetPage = require('../src/domains/content/application/GetPage');
-const GetPageBySlug = require('../src/domains/content/application/GetPageBySlug');
-const GetArticleBySlug = require('../src/domains/content/application/GetArticleBySlug');
-const ListPublishedArticles = require('../src/domains/content/application/ListPublishedArticles');
+const GetPage = require('../src/domain/content/application/GetPage');
+const GetPageBySlug = require('../src/domain/content/application/GetPageBySlug');
+const GetArticleBySlug = require('../src/domain/content/application/GetArticleBySlug');
+const ListPublishedArticles = require('../src/domain/content/application/ListPublishedArticles');
 
 // Repositories
-const pageRepository = require('../src/domains/content/infrastructure/pageRepository');
-const articleRepository = require('../src/domains/content/infrastructure/articleRepository');
-const blockRepository = require('../src/domains/content/infrastructure/blockRepository');
-const mediaRepository = require('../src/domains/media/infrastructure/mediaRepository');
+const pageRepository = require('../src/domain/content/infrastructure/pageRepository');
+const articleRepository = require('../src/domain/content/infrastructure/articleRepository');
+const blockRepository = require('../src/domain/content/infrastructure/blockRepository');
+const mediaRepository = require('../src/domain/media/infrastructure/mediaRepository');
 
 // Instantiate use cases
 const getPage = new GetPage(pageRepository, blockRepository);

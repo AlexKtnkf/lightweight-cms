@@ -37,7 +37,7 @@ npx shadcn-ui@latest add button input textarea select card table form label
 cd .. # back to lightweight-cms root
 
 # Create domain structure
-mkdir -p src/domains/{content,media,settings,auth}/{domain,application,infrastructure}
+mkdir -p src/domain/{content,media,settings,auth}/{domain,application,infrastructure}
 mkdir -p src/infrastructure/{database,static,storage}
 mkdir -p src/presentation/{api/{admin,public},web}
 mkdir -p src/shared/{errors,utils}
@@ -69,7 +69,7 @@ mkdir -p src/shared/{errors,utils}
 ## Type Safety
 
 - **Backend ↔ Admin**: Type safety via TypeScript types in admin
-- **API Contracts**: Defined in `admin/src/domains/*/types.ts`
+- **API Contracts**: Defined in `admin/src/domain/*/types.ts`
 - **Runtime Validation**: Zod schemas in admin for form validation
 
 ## Next Steps

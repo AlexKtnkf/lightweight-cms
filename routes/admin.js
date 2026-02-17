@@ -5,13 +5,14 @@ const adminController = require('../src/presentation/web/adminController');
 const { loginLimiter } = require('../config/security');
 
 // Public admin routes (login only - React handles the rest)
-router.get('/login', (req, res) => {
-  // If already logged in, redirect to admin
+// Note: The login page is served by React, so we only handle redirects here
+router.get('/login', (req, res, next) => {
+  // If already logged in, redirect to admin dashboard
   if (req.session && req.session.userId) {
     return res.redirect('/admin');
   }
-  // Let React handle the login page
-  res.redirect('/admin/login');
+  // Otherwise, let the static file handler or Vite serve the React app
+  next();
 });
 
 router.post('/login', loginLimiter, adminController.login);

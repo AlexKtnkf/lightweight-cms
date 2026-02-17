@@ -1,6 +1,91 @@
 /* ============================================
    Dietician Website Design System
-   Based on brand colors: #22B573 (green) and #E9C46A (gold)
+   Frontend Design Overhaul v1.0
+   
+   This CSS file implements a comprehensive design system for the lightweight-cms
+   public website. All styling is based on CSS variables (custom properties) for
+   consistency, maintainability, and easy global updates.
+   
+   DESIGN TOKENS & VARIABLES:
+   
+   Brand Colors:
+   - --primary-green: #22B573 (main brand color)
+   - --primary-green-light: #4ECB8A (lighter variant)
+   - --primary-green-dark: #1A8F5A (darker variant)
+   - --secondary-gold: #E9C46A (accent color)
+   - --gold-light: #F2D08A (lighter gold)
+   - --gold-dark: #D4B05A (darker gold)
+   
+   Neutral Colors:
+   - --warm-beige: #F8F9FA (light background)
+   - --bg-light: #FCFDFB (page background)
+   - --cream-white: #FFFFFF (card backgrounds)
+   - --pure-white: #FFFFFF (pure white)
+   - --charcoal: #2C3E2D (dark text)
+   - --text-main: #2D3436 (main text)
+   - --text-muted: #636E72 (secondary text)
+   - --soft-gray: #6B7A6B (tertiary text)
+   
+   Spacing System (8px base unit):
+   - --spacing-xs: 0.5rem (4px)
+   - --spacing-s: 0.5rem (8px)
+   - --spacing-m: 1rem (16px)
+   - --spacing-l: 1.5rem (24px)
+   - --spacing-xl: 2rem (32px)
+   - --spacing-xxl: 3rem (48px)
+   - --spacing-xxxl: 4rem (64px)
+   - --section-spacing: 5rem (80px)
+   
+   Typography:
+   - --font-body: 'Inter', sans-serif
+   - --font-title: 'Montserrat', sans-serif
+   - --font-family: Inter
+   - --font-weight-light: 300
+   - --font-weight-normal: 400
+   - --font-weight-medium: 500
+   - --font-weight-semibold: 600
+   - --font-weight-bold: 700
+   
+   Transitions:
+   - --transition-fast: 0.2s ease
+   - --transition-normal: 0.3s ease
+   
+   RULES & GUIDELINES:
+   
+   1. NO INLINE STYLES — All styling uses CSS classes and variables
+   2. NO HARDCODED COLORS — Always use CSS variables (var(--primary-green), etc.)
+   3. NO HARDCODED SPACING — Use spacing variables (var(--spacing-m), etc.)
+   4. SEMANTIC HTML — Use proper HTML tags (<section>, <article>, <h1>, <button>, etc.)
+   5. ACCESSIBILITY FIRST — WCAG AA contrast, focus states, ARIA labels
+   6. MOBILE-FIRST — Design for mobile, enhance for desktop
+   7. RESPONSIVE — All blocks adapt to mobile (375px), tablet (768px), desktop (1200px+)
+   8. DOCUMENTATION — Comment blocks in EJS files describe purpose, data, usage
+   
+   CSS ORGANIZATION:
+   1. Variables & Design Tokens (this section)
+   2. Reset & Base Styles
+   3. Navigation & Layout
+   4. Hero Section
+   5. Buttons & Forms
+   6. Block-specific Styles (accroche, encart, lead-magnet, etc.)
+   7. Footer & Typography
+   8. Responsiveness (media queries)
+   9. Utilities (margin, padding, flex, grid, text, color, display)
+   10. Accessibility (focus states, animations)
+   
+   BLOCK STYLES INCLUDED:
+   - accroche (feature cards)
+   - contact-form (dynamic forms)
+   - encart-principal (info cards)
+   - hero (intro sections)
+   - lead-magnet (email capture)
+   - numbered-cards (steps/features)
+   - pin-grid (image galleries)
+   - question-reponse (Q&A)
+   - rich-text (flexible content)
+   
+   Version: 1.0
+   Last Updated: 2026-02-17
    ============================================ */
 
 :root {
@@ -38,8 +123,9 @@
   --section-spacing: 5rem; /* 80px */
   
   /* Typography */
-  --font-family: 'Inter', "Segoe UI", Arial, Helvetica, sans-serif;
-  --font-title: 'Montserrat', "Segoe UI", Arial, Helvetica, sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-title: 'Montserrat', sans-serif;
+  --font-family: var(--font-body);
   --font-weight-light: 300;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
@@ -67,13 +153,34 @@ html {
 }
 
 body {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-weight: var(--font-weight-light);
   line-height: 1.6;
   color: var(--text-main);
   background-color: var(--bg-light);
   max-width: 100%; 
   overflow-x: hidden;
+}
+
+h1, h2, h3, .logo {
+  font-family: var(--font-title);
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 /* Accessibility: Skip link */
@@ -107,9 +214,9 @@ body {
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 0 var(--spacing-m);
+  padding: 0 6%;
 }
 
 /* ============================================
@@ -218,9 +325,26 @@ body {
   min-height: auto;
 }
 
-.hero .container {
+.hero.hero-fullscreen {
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 6%;
+  position: relative;
+}
+
+.hero .container,
+.hero .hero-content-wrapper {
   max-width: 1100px;
   margin: 0 auto;
+  width: 100%;
+}
+
+.hero.hero-fullscreen .hero-content-wrapper {
+  position: relative;
+  z-index: 1;
 }
 
 .hero .tagline {
@@ -240,6 +364,14 @@ body {
   margin-bottom: 1.5rem;
   color: var(--text-main);
   letter-spacing: -0.5px;
+  font-family: var(--font-title);
+  text-transform: uppercase;
+}
+
+@media (min-width: 768px) {
+  .hero h1 {
+    font-size: 4rem;
+  }
 }
 
 .hero p {
@@ -256,6 +388,14 @@ body {
   gap: 1rem;
   align-items: center;
   justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .hero-buttons,
+  .hero-btns {
+    flex-direction: row;
+    justify-content: center;
+  }
 }
 
 /* Waves Animation */
@@ -311,15 +451,16 @@ body {
    ============================================ */
 .btn {
   display: inline-block;
-  padding: var(--spacing-m) var(--spacing-xl);
-  text-decoration: none;
-  border-radius: 8px;
-  transition: all var(--transition-fast);
-  border: 2px solid transparent;
+  padding: 1.1rem 2rem;
+  border-radius: 12px;
+  font-weight: 700;
+  text-align: center;
+  border: none;
   cursor: pointer;
+  font-family: var(--font-body);
   font-size: 1rem;
-  font-weight: var(--font-weight-medium);
-  font-family: var(--font-family);
+  text-decoration: none;
+  transition: all var(--transition-fast);
   min-height: 44px;
   display: inline-flex;
   align-items: center;
@@ -414,7 +555,7 @@ body {
   border-color: var(--primary-green);
 }
 
-.accroche img {
+.accroche-icon {
   width: 64px;
   height: 64px;
   object-fit: contain;
@@ -422,17 +563,17 @@ body {
   display: block;
 }
 
-.accroche h3 {
+.accroche-title {
   font-family: var(--font-title);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   letter-spacing: -0.01em;
   font-size: 1.5rem;
-  font-weight: var(--font-weight-medium);
   color: var(--primary-green);
   margin-bottom: var(--spacing-m);
+  text-transform: uppercase;
 }
 
-.accroche > div {
+.accroche-content {
   color: var(--soft-gray);
   line-height: 1.6;
 }
@@ -635,11 +776,32 @@ section:nth-child(odd) {
   border-left: 4px solid var(--primary-green);
 }
 
-.block-encart img {
+.encart-image {
   max-width: 100%;
   height: auto;
   border-radius: 8px;
   margin-bottom: var(--spacing-m);
+  display: block;
+}
+
+.encart-title {
+  font-family: var(--font-title);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
+  color: var(--primary-green);
+  margin-bottom: var(--spacing-m);
+  text-transform: uppercase;
+}
+
+.encart-content {
+  color: var(--text-main);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-m);
+}
+
+.encart-cta {
+  margin-top: var(--spacing-m);
+  display: inline-block;
 }
 
 .block-hero {
@@ -659,12 +821,18 @@ section:nth-child(odd) {
   border-radius: 4px;
 }
 
-.block-qa h3 {
+.qa-question {
   font-family: var(--font-title);
   font-weight: var(--font-weight-semibold);
   letter-spacing: -0.01em;
   margin-bottom: var(--spacing-m);
   color: var(--primary-green);
+  text-transform: uppercase;
+}
+
+.qa-response {
+  color: var(--text-main);
+  line-height: 1.6;
 }
 
 /* ============================================
@@ -777,6 +945,17 @@ select:focus {
 /* ============================================
    Pin Grid (Instagram Style)
    ============================================ */
+.pin-grid-title {
+  font-family: var(--font-title);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
+  text-align: center;
+  margin-bottom: 3rem;
+  font-size: 1.5rem;
+  color: var(--gold-dark);
+  text-transform: uppercase;
+}
+
 .pin-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -793,6 +972,12 @@ select:focus {
 
 .pin:nth-child(even) {
   transform: translateY(20px);
+}
+
+@media (max-width: 767px) {
+  .pin:nth-child(even) {
+    transform: translateY(0);
+  }
 }
 
 .pin img {
@@ -828,6 +1013,15 @@ select:focus {
   border-radius: 40px 40px 0 0;
 }
 
+.dark-block-title {
+  font-family: var(--font-title);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  margin-bottom: 4rem;
+  color: var(--secondary-gold);
+}
+
 .numbered-cards {
   display: flex;
   flex-direction: column;
@@ -851,16 +1045,24 @@ select:focus {
   flex-shrink: 0;
 }
 
+.numbered-card-content {
+  flex: 1;
+}
+
 .ritual-card h3,
-.numbered-card h3 {
+.numbered-card-title {
+  font-family: var(--font-title);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
   letter-spacing: 1px;
   color: white;
+  text-transform: uppercase;
 }
 
 .ritual-card p,
-.numbered-card p {
+.numbered-card-description {
   opacity: 0.8;
   font-size: 0.95rem;
   color: white;
@@ -888,24 +1090,33 @@ select:focus {
   background: var(--gold-light);
   border-radius: 30px;
   text-align: center;
-  margin: 0 6%;
+  margin: 0 auto;
+  max-width: 1100px;
   padding: 3rem 2rem;
 }
 
-.lead-magnet .icon {
+.lead-magnet-icon {
   font-size: 2.5rem;
   color: var(--primary-green-dark);
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-m);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.lead-magnet h2 {
-  margin-bottom: 1rem;
+.lead-magnet-title {
+  font-family: var(--font-title);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-m);
   color: var(--text-main);
 }
 
-.lead-magnet p {
-  margin-bottom: 2rem;
+.lead-magnet-description {
+  margin-bottom: var(--spacing-l);
   color: var(--text-muted);
+  font-size: 1rem;
 }
 
 .lead-magnet-form {
@@ -919,22 +1130,175 @@ select:focus {
   flex: 1;
 }
 
+@media (max-width: 767px) {
+  .lead-magnet-form {
+    flex-direction: column;
+  }
+  
+  .lead-magnet-form .input-field,
+  .lead-magnet-form .btn {
+    width: 100%;
+  }
+}
+
 /* ============================================
    Contact Form
    ============================================ */
+.contact-form-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.contact-form-title {
+  font-family: var(--font-title);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-m);
+}
+
+.contact-form-description {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
 .contact-form {
   display: grid;
   gap: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field-textarea,
+.form-field-select {
+  grid-column: 1 / -1;
 }
 
 .form-row {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-.label-style {
-  display: block;
+.required-indicator {
+  color: var(--primary-green);
+  font-weight: var(--font-weight-bold);
+}
+
+.contact-form-submit {
+  margin-top: var(--spacing-m);
+  align-self: center;
+  min-width: 200px;
+}
+
+textarea.input-field {
+  resize: none;
+  min-height: 120px;
+}
+
+@media (min-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+/* Spacing utilities */
+.m-0 { margin: 0; }
+.m-xs { margin: var(--spacing-xs); }
+.m-s { margin: var(--spacing-s); }
+.m-m { margin: var(--spacing-m); }
+.m-l { margin: var(--spacing-l); }
+.m-xl { margin: var(--spacing-xl); }
+.m-xxl { margin: var(--spacing-xxl); }
+
+.mt-m { margin-top: var(--spacing-m); }
+.mb-m { margin-bottom: var(--spacing-m); }
+.mt-l { margin-top: var(--spacing-l); }
+.mb-l { margin-bottom: var(--spacing-l); }
+.mt-xl { margin-top: var(--spacing-xl); }
+.mb-xl { margin-bottom: var(--spacing-xl); }
+
+.p-m { padding: var(--spacing-m); }
+.p-l { padding: var(--spacing-l); }
+.p-xl { padding: var(--spacing-xl); }
+.pt-m { padding-top: var(--spacing-m); }
+.pb-m { padding-bottom: var(--spacing-m); }
+.pt-l { padding-top: var(--spacing-l); }
+.pb-l { padding-bottom: var(--spacing-l); }
+
+/* Flex utilities */
+.flex { display: flex; }
+.flex-column { flex-direction: column; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-wrap { flex-wrap: wrap; }
+.gap-s { gap: var(--spacing-s); }
+.gap-m { gap: var(--spacing-m); }
+.gap-l { gap: var(--spacing-l); }
+
+/* Grid utilities */
+.grid { display: grid; }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.gap-m { gap: var(--spacing-m); }
+.gap-l { gap: var(--spacing-l); }
+
+/* Text alignment */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+/* Typography utilities */
+.text-uppercase { text-transform: uppercase; }
+.font-title { font-family: var(--font-title); }
+.font-body { font-family: var(--font-body); }
+.font-weight-light { font-weight: var(--font-weight-light); }
+.font-weight-normal { font-weight: var(--font-weight-normal); }
+.font-weight-medium { font-weight: var(--font-weight-medium); }
+.font-weight-semibold { font-weight: var(--font-weight-semibold); }
+.font-weight-bold { font-weight: var(--font-weight-bold); }
+
+/* Color utilities */
+.text-primary-green { color: var(--primary-green); }
+.text-primary-green-dark { color: var(--primary-green-dark); }
+.text-secondary-gold { color: var(--secondary-gold); }
+.text-muted { color: var(--text-muted); }
+.text-white { color: white; }
+
+.bg-primary-green { background: var(--primary-green); }
+.bg-gold-light { background: var(--gold-light); }
+.bg-cream-white { background: var(--cream-white); }
+.bg-white { background: white; }
+.bg-warm-beige { background: var(--warm-beige); }
+
+.border-primary-green { border: 1px solid var(--primary-green); }
+.border-green-light { border: 1px solid var(--primary-green-light); }
+.border-left-green { border-left: 4px solid var(--primary-green); }
+.border-left-gold { border-left: 4px solid var(--secondary-gold); }
+
+/* Display utilities */
+.hidden { display: none; }
+.block { display: block; }
+.inline-block { display: inline-block; }
+
+@media (max-width: 767px) {
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+}
   font-size: 0.75rem;
   font-weight: var(--font-weight-bold);
   color: var(--gold-dark);
@@ -975,7 +1339,7 @@ select:focus {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .nav-toggle {
     display: block;
   }
@@ -997,9 +1361,15 @@ select:focus {
     display: flex;
   }
 
-  .hero {
-    padding: 78px var(--spacing-m) 78px;
+  .hero:not(.hero-fullscreen) {
+    padding: 4rem 6% 3rem;
     min-height: auto;
+  }
+
+  .hero.hero-fullscreen {
+    padding: 2rem 6%;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   .hero h1 {
@@ -1015,18 +1385,6 @@ select:focus {
   .hero-buttons .btn,
   .hero-btns .btn {
     width: 100%;
-  }
-  
-  @media (min-width: 768px) {
-    .hero h1 {
-      font-size: 4rem;
-    }
-    
-    .hero-buttons,
-    .hero-btns {
-      flex-direction: row;
-      justify-content: center;
-    }
   }
 
   .accroches-grid {
@@ -1046,8 +1404,115 @@ select:focus {
     min-height: 40px;
   }
 
-  section {
-    padding: var(--spacing-xxxl) 0;
+  section.section-padding {
+    padding: 3rem 6%;
+  }
+
+  .pin-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .pin:nth-child(even) {
+    transform: translateY(0);
+  }
+
+  .ritual-card,
+  .numbered-card {
+    flex-direction: column;
+    margin-bottom: 2rem;
+  }
+
+  .lead-magnet {
+    margin: 0 6%;
+    padding: 2rem 1.5rem;
+    max-width: none;
+  }
+
+  .lead-magnet-form {
+    flex-direction: column;
+  }
+
+  .lead-magnet-form .input-field,
+  .lead-magnet-form .btn {
+    width: 100%;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   Floating Bubbles Background
+   ============================================ */
+.bubble-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(8px);
+  opacity: 0.8;
+  mix-blend-mode: multiply;
+  transition: transform 0.3s ease;
+}
+
+.bubble-1 {
+  width: 120px;
+  height: 120px;
+  background-color: #ffadad; /* Soft Coral */
+  top: 15%;
+  left: 10%;
+  animation: float-around 25s infinite linear;
+}
+
+.bubble-2 {
+  width: 200px;
+  height: 200px;
+  background-color: #ffd6a5; /* Peach */
+  bottom: 20%;
+  right: 15%;
+  animation: float-around 30s infinite linear reverse;
+}
+
+.bubble-3 {
+  width: 150px;
+  height: 150px;
+  background-color: #9bf6ff; /* Sky Blue */
+  top: 50%;
+  left: 40%;
+  animation: float-around 20s infinite linear;
+}
+
+.bubble-4 {
+  width: 80px;
+  height: 80px;
+  background-color: #caffbf; /* Mint */
+  top: 10%;
+  right: 25%;
+  animation: float-around 15s infinite linear;
+}
+
+@keyframes float-around {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(100px, 50px) rotate(120deg); }
+  66% { transform: translate(-50px, 100px) rotate(240deg); }
+  100% { transform: translate(0, 0) rotate(360deg); }
+}
+
+/* Respect prefers-reduced-motion for bubbles */
+@media (prefers-reduced-motion: reduce) {
+  .bubble {
+    animation: none;
   }
 }
 

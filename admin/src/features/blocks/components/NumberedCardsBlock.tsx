@@ -1,4 +1,4 @@
-import type { Block } from '../../../domains/content/types';
+import type { Block } from '../../../domain/content/types';
 
 interface NumberedCardsBlockProps {
   block: Block;
@@ -27,61 +27,61 @@ export function NumberedCardsBlock({ block, onChange }: NumberedCardsBlockProps)
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Section Title
+          Titre de la section
         </label>
         <input
           type="text"
           value={data.section_title || ''}
           onChange={(e) => onChange({ ...data, section_title: e.target.value })}
-          placeholder="e.g., The Daily Rituals"
+          placeholder="ex. : Les Quatre Commandements"
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
         />
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Background Color
+          Couleur de fond
         </label>
         <select
           value={data.background_color || 'dark'}
           onChange={(e) => onChange({ ...data, background_color: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
         >
-          <option value="dark">Dark</option>
-          <option value="light">Light</option>
+          <option value="dark">Sombre</option>
+          <option value="light">Clair</option>
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Cards</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Cartes</label>
         {cards.map((card: any, index: number) => (
           <div key={index} className="border border-gray-300 rounded-lg p-4 mb-4 bg-gray-50">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-gray-600">Card {index + 1}</span>
+              <span className="text-sm font-medium text-gray-600">Carte {index + 1}</span>
               <button
                 type="button"
                 onClick={() => removeCard(index)}
                 className="text-sm text-red-600 hover:text-red-800"
               >
-                Remove
+                Supprimer
               </button>
             </div>
             <div className="space-y-2">
               <div>
-                <label className="block text-xs text-gray-600 mb-1">Number</label>
+                <label className="block text-xs text-gray-600 mb-1">Numéro</label>
                 <input
                   type="text"
                   value={card.number || ''}
                   onChange={(e) => updateCard(index, { number: e.target.value })}
-                  placeholder="e.g., 01"
+                  placeholder="ex. : 01"
                   className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1">Title</label>
+                <label className="block text-xs text-gray-600 mb-1">Titre</label>
                 <input
                   type="text"
                   value={card.title || ''}
                   onChange={(e) => updateCard(index, { title: e.target.value })}
-                  placeholder="e.g., Morning Hydration"
+                  placeholder="ex. : Hydratation Matinale"
                   className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
                 />
               </div>
@@ -90,7 +90,7 @@ export function NumberedCardsBlock({ block, onChange }: NumberedCardsBlockProps)
                 <textarea
                   value={card.description || ''}
                   onChange={(e) => updateCard(index, { description: e.target.value })}
-                  placeholder="Description text"
+                  placeholder="Texte de description"
                   rows={2}
                   className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
                 />
@@ -103,7 +103,7 @@ export function NumberedCardsBlock({ block, onChange }: NumberedCardsBlockProps)
           onClick={addCard}
           className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
         >
-          + Add Card
+          + Ajouter une carte
         </button>
       </div>
     </div>

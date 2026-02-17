@@ -4,15 +4,15 @@ const ejs = require('ejs');
 const logger = require('../../../utils/logger');
 
 // Use cases
-const GetPage = require('../../domains/content/application/GetPage');
-const ListPages = require('../../domains/content/application/ListPages');
-const GetSettings = require('../../domains/settings/application/GetSettings');
-const CreatePage = require('../../domains/content/application/CreatePage');
+const GetPage = require('../../domain/content/application/GetPage');
+const ListPages = require('../../domain/content/application/ListPages');
+const GetSettings = require('../../domain/settings/application/GetSettings');
+const CreatePage = require('../../domain/content/application/CreatePage');
 
 // Repositories
-const pageRepository = require('../../domains/content/infrastructure/pageRepository');
-const blockRepository = require('../../domains/content/infrastructure/blockRepository');
-const settingsRepository = require('../../domains/settings/infrastructure/settingsRepository');
+const pageRepository = require('../../domain/content/infrastructure/pageRepository');
+const blockRepository = require('../../domain/content/infrastructure/blockRepository');
+const settingsRepository = require('../../domain/settings/infrastructure/settingsRepository');
 
 /**
  * Static file generator for pages

@@ -1,5 +1,5 @@
-const GetSettings = require('../src/domains/settings/application/GetSettings');
-const settingsRepository = require('../src/domains/settings/infrastructure/settingsRepository');
+const GetSettings = require('../src/domain/settings/application/GetSettings');
+const settingsRepository = require('../src/domain/settings/infrastructure/settingsRepository');
 
 const getSettings = new GetSettings(settingsRepository);
 

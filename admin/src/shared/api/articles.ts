@@ -1,5 +1,5 @@
 import api from './client';
-import type { Article } from '../../domains/content/types';
+import type { Article } from '../../domain/content/types';
 
 export const articlesApi = {
   list: (): Promise<Article[]> => 

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distinctive Floating Bubbles</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: #f0f4f8; /* Clean light grey-blue */
+            font-family: sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* The Background Layer */
+        .bubble-stage {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* Distinctive Bubble Styling */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            /* Minimal blur for a soft edge, not a foggy look */
+            filter: blur(8px); 
+            opacity: 0.8;
+            mix-blend-mode: multiply;
+            transition: transform 0.3s ease;
+        }
+
+        /* Specific Bubble Definitions */
+        .bubble-1 {
+            width: 120px;
+            height: 120px;
+            background-color: #ffadad; /* Soft Coral */
+            top: 15%;
+            left: 10%;
+            animation: float-around 25s infinite linear;
+        }
+
+        .bubble-2 {
+            width: 200px;
+            height: 200px;
+            background-color: #ffd6a5; /* Peach */
+            bottom: 20%;
+            right: 15%;
+            animation: float-around 30s infinite linear reverse;
+        }
+
+        .bubble-3 {
+            width: 150px;
+            height: 150px;
+            background-color: #9bf6ff; /* Sky Blue */
+            top: 50%;
+            left: 40%;
+            animation: float-around 20s infinite linear;
+        }
+
+        .bubble-4 {
+            width: 80px;
+            height: 80px;
+            background-color: #caffbf; /* Mint */
+            top: 10%;
+            right: 25%;
+            animation: float-around 15s infinite linear;
+        }
+
+        /* Large fluid movement animation */
+        @keyframes float-around {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(100px, 50px) rotate(120deg); }
+            66% { transform: translate(-50px, 100px) rotate(240deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+
+        /* Simple content card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.4);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid white;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bubble-stage">
+        <div class="bubble bubble-1"></div>
+        <div class="bubble bubble-2"></div>
+        <div class="bubble bubble-3"></div>
+        <div class="bubble bubble-4"></div>
+    </div>
+
+    <div class="glass-card">
+        <h2>Modern Background</h2>
+        <p>Distinct, floating circles with a soft edge.</p>
+    </div>
+
+</body>
+</html>

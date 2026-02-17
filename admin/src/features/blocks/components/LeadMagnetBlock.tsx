@@ -1,4 +1,4 @@
-import type { Block } from '../../../domains/content/types';
+import type { Block } from '../../../domain/content/types';
 
 interface LeadMagnetBlockProps {
   block: Block;
@@ -12,25 +12,25 @@ export function LeadMagnetBlock({ block, onChange }: LeadMagnetBlockProps) {
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Icon
+          Icône
         </label>
         <input
           type="text"
           value={data.icon || ''}
           onChange={(e) => onChange({ ...data, icon: e.target.value })}
-          placeholder="Icon name or class"
+          placeholder="Nom ou classe de l'icône"
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
         />
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Title
+          Titre
         </label>
         <input
           type="text"
           value={data.title || ''}
           onChange={(e) => onChange({ ...data, title: e.target.value })}
-          placeholder="Title"
+          placeholder="Titre"
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
         />
       </div>
@@ -48,19 +48,19 @@ export function LeadMagnetBlock({ block, onChange }: LeadMagnetBlockProps) {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Button Text
+          Texte du bouton
         </label>
         <input
           type="text"
           value={data.button_text || ''}
           onChange={(e) => onChange({ ...data, button_text: e.target.value })}
-          placeholder="Button text"
+          placeholder="Texte du bouton"
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
         />
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Action URL
+          URL d'action
         </label>
         <input
           type="text"

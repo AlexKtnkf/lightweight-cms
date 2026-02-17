@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS settings (
   header_menu_links TEXT DEFAULT '[]', -- JSON array of {label, url, order}
   footer_menu_links TEXT DEFAULT '[]', -- JSON array of {label, url, order}
   footer_text TEXT,
+  social_links TEXT DEFAULT '[]', -- JSON array of {platform, url, icon}
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

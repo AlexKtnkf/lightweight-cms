@@ -1,18 +1,18 @@
 // Use cases
-const GetPage = require('../../domains/content/application/GetPage');
-const GetPageBySlug = require('../../domains/content/application/GetPageBySlug');
-const GetArticleBySlug = require('../../domains/content/application/GetArticleBySlug');
-const ListPublishedArticles = require('../../domains/content/application/ListPublishedArticles');
-const CreatePage = require('../../domains/content/application/CreatePage');
-const GetSettings = require('../../domains/settings/application/GetSettings');
+const GetPage = require('../../domain/content/application/GetPage');
+const GetPageBySlug = require('../../domain/content/application/GetPageBySlug');
+const GetArticleBySlug = require('../../domain/content/application/GetArticleBySlug');
+const ListPublishedArticles = require('../../domain/content/application/ListPublishedArticles');
+const CreatePage = require('../../domain/content/application/CreatePage');
+const GetSettings = require('../../domain/settings/application/GetSettings');
 const SitemapGenerator = require('../../infrastructure/seo/sitemapGenerator');
 const FeedGenerator = require('../../infrastructure/rss/feedGenerator');
 
 // Repositories
-const pageRepository = require('../../domains/content/infrastructure/pageRepository');
-const blockRepository = require('../../domains/content/infrastructure/blockRepository');
-const articleRepository = require('../../domains/content/infrastructure/articleRepository');
-const settingsRepository = require('../../domains/settings/infrastructure/settingsRepository');
+const pageRepository = require('../../domain/content/infrastructure/pageRepository');
+const blockRepository = require('../../domain/content/infrastructure/blockRepository');
+const articleRepository = require('../../domain/content/infrastructure/articleRepository');
+const settingsRepository = require('../../domain/settings/infrastructure/settingsRepository');
 
 // Infrastructure
 const staticGenerator = require('../../infrastructure/static/staticGenerator');

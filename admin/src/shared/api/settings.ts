@@ -1,5 +1,5 @@
 import api from './client';
-import type { Settings } from '../../domains/settings/types';
+import type { Settings } from '../../domain/settings/types';
 
 export const settingsApi = {
   get: (): Promise<Settings> => 

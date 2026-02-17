@@ -28,6 +28,31 @@
     <% if (settings?.footer_text) { %>
     <p style="opacity: 0.6; font-size: 0.9rem; margin-bottom: 2rem;"><%= settings.footer_text %></p>
     <% } %>
+    
+    <% 
+    // Filter out links without both label and url
+    const validFooterLinks = footerLinks.filter(link => link && link.label && link.url && link.label.trim() && link.url.trim());
+    %>
+    <% if (validFooterLinks.length > 0) { %>
+    <nav style="margin-bottom: 2rem;" aria-label="Liens du pied de page">
+      <ul style="display: flex; justify-content: center; flex-wrap: wrap; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
+        <% validFooterLinks.forEach(link => { %>
+          <li>
+            <a 
+              href="<%= link.url %>" 
+              style="color: rgba(255, 255, 255, 0.8); text-decoration: none; font-size: 0.9rem; transition: color 0.2s;"
+              onmouseover="this.style.color='var(--secondary-gold)'"
+              onmouseout="this.style.color='rgba(255, 255, 255, 0.8)'"
+              <%= link.url.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : '' %>
+            >
+              <%= link.label %>
+            </a>
+          </li>
+        <% }); %>
+      </ul>
+    </nav>
+    <% } %>
+    
     <% 
     // Social links from settings (assuming they're stored as an array or object)
     const socialLinks = settings?.social_links || [];
@@ -37,11 +62,13 @@
       <% socialLinks.forEach(link => { %>
       <a href="<%= link.url %>" target="_blank" rel="noopener noreferrer" aria-label="<%= link.platform || link.label %>" style="color: var(--secondary-gold); text-decoration: none;">
         <% if (link.platform === 'instagram' || link.icon === 'instagram') { %>
-        <%- include('../icons/instagram') %>
-        <% } else if (link.platform === 'tiktok' || link.icon === 'tiktok') { %>
-        <%- include('../icons/tiktok') %>
+        <%- include('icons/instagram') %>
+        <% } else if (link.platform === 'facebook' || link.icon === 'facebook') { %>
+        <%- include('icons/facebook') %>
         <% } else if (link.platform === 'linkedin' || link.icon === 'linkedin') { %>
-        <%- include('../icons/linkedin') %>
+        <%- include('icons/linkedin') %>
+        <% } else if (link.platform === 'tiktok' || link.icon === 'tiktok') { %>
+        <%- include('icons/tiktok') %>
         <% } else { %>
         <%= link.label || link.platform %>
         <% } %>

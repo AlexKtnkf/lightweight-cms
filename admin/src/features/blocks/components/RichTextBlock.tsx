@@ -1,6 +1,6 @@
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import type { Block } from '../../../domains/content/types';
+import type { Block } from '../../../domain/content/types';
 
 interface RichTextBlockProps {
   block: Block;
@@ -13,7 +13,7 @@ export function RichTextBlock({ block, onChange }: RichTextBlockProps) {
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">
-        Content
+        Contenu
       </label>
       <ReactQuill
         theme="snow"

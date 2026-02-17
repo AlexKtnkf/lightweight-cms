@@ -27,6 +27,17 @@ class UpdateSettings {
         .sort((a, b) => a.order - b.order);
     }
 
+    // Validate and sanitize social links
+    if (settingsData.social_links && Array.isArray(settingsData.social_links)) {
+      settingsData.social_links = settingsData.social_links
+        .filter(link => link.platform && link.url)
+        .map(link => ({
+          platform: link.platform.trim(),
+          url: link.url.trim(),
+          icon: link.icon || link.platform.trim() // Use platform as icon if icon not provided
+        }));
+    }
+
     return this.settingsRepository.update(settingsData);
   }
 }

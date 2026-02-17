@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const requireAuth = require('../middleware/auth');
+const { uploadLimiter } = require('../config/security');
 
 // Repositories (infrastructure) - from domain infrastructure
-const pageRepository = require('../src/domains/content/infrastructure/pageRepository');
-const articleRepository = require('../src/domains/content/infrastructure/articleRepository');
-const blockRepository = require('../src/domains/content/infrastructure/blockRepository');
-const mediaRepository = require('../src/domains/media/infrastructure/mediaRepository');
-const settingsRepository = require('../src/domains/settings/infrastructure/settingsRepository');
+const pageRepository = require('../src/domain/content/infrastructure/pageRepository');
+const articleRepository = require('../src/domain/content/infrastructure/articleRepository');
+const blockRepository = require('../src/domain/content/infrastructure/blockRepository');
+const mediaRepository = require('../src/domain/media/infrastructure/mediaRepository');
+const settingsRepository = require('../src/domain/settings/infrastructure/settingsRepository');
 
 // No services needed - all logic in use cases
 
@@ -16,27 +17,27 @@ const staticGenerator = require('../src/infrastructure/static/staticGenerator');
 const upload = require('../config/upload');
 
 // Use cases (application) - Pages
-const CreatePage = require('../src/domains/content/application/CreatePage');
-const UpdatePage = require('../src/domains/content/application/UpdatePage');
-const GetPage = require('../src/domains/content/application/GetPage');
-const ListPages = require('../src/domains/content/application/ListPages');
-const DeletePage = require('../src/domains/content/application/DeletePage');
+const CreatePage = require('../src/domain/content/application/CreatePage');
+const UpdatePage = require('../src/domain/content/application/UpdatePage');
+const GetPage = require('../src/domain/content/application/GetPage');
+const ListPages = require('../src/domain/content/application/ListPages');
+const DeletePage = require('../src/domain/content/application/DeletePage');
 
 // Use cases (application) - Articles
-const CreateArticle = require('../src/domains/content/application/CreateArticle');
-const UpdateArticle = require('../src/domains/content/application/UpdateArticle');
-const GetArticle = require('../src/domains/content/application/GetArticle');
-const ListArticles = require('../src/domains/content/application/ListArticles');
-const DeleteArticle = require('../src/domains/content/application/DeleteArticle');
+const CreateArticle = require('../src/domain/content/application/CreateArticle');
+const UpdateArticle = require('../src/domain/content/application/UpdateArticle');
+const GetArticle = require('../src/domain/content/application/GetArticle');
+const ListArticles = require('../src/domain/content/application/ListArticles');
+const DeleteArticle = require('../src/domain/content/application/DeleteArticle');
 
 // Use cases (application) - Media
-const UploadMedia = require('../src/domains/media/application/UploadMedia');
-const ListMedia = require('../src/domains/media/application/ListMedia');
-const DeleteMedia = require('../src/domains/media/application/DeleteMedia');
+const UploadMedia = require('../src/domain/media/application/UploadMedia');
+const ListMedia = require('../src/domain/media/application/ListMedia');
+const DeleteMedia = require('../src/domain/media/application/DeleteMedia');
 
 // Use cases (application) - Settings
-const GetSettings = require('../src/domains/settings/application/GetSettings');
-const UpdateSettings = require('../src/domains/settings/application/UpdateSettings');
+const GetSettings = require('../src/domain/settings/application/GetSettings');
+const UpdateSettings = require('../src/domain/settings/application/UpdateSettings');
 
 // Controllers (presentation)
 const PagesController = require('../src/presentation/api/admin/pagesController');
@@ -109,7 +110,8 @@ router.delete('/articles/:id', (req, res, next) => articlesController.delete(req
 
 // Media API routes
 router.get('/media', (req, res, next) => mediaController.list(req, res, next));
-router.post('/media/upload', upload.single('file'), (req, res, next) => mediaController.upload(req, res, next));
+// Apply upload limiter specifically for uploads (more lenient than general limiter)
+router.post('/media/upload', uploadLimiter, upload.single('file'), (req, res, next) => mediaController.upload(req, res, next));
 router.delete('/media/:id', (req, res, next) => mediaController.delete(req, res, next));
 
 // Settings API routes
