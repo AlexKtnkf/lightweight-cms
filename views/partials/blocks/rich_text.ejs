@@ -1,11 +1,10 @@
 <!--
-  Block: Rich Text (HTML Content)
-  Purpose: Allow arbitrary HTML/rich text content with proper spacing and styling
+  Block: Rich Text
+  Purpose: Contained rich HTML content (matches c-rich-text inside l-container l-section)
   Expected Data: block.block_data = { richText }
-  Usage: Flexible content block for articles, custom sections, or formatted text with embeds
-  Design: Responsive margins/padding, proper line-height, supports nested elements
-  Note: Content is rendered as HTML-safe (-) ; sanitization should be handled server-side
 -->
-<div class="block-rich-text">
-  <%- block.block_data.richText %>
-</div>
+<article class="l-container l-section" id="<%= block.id ? 'block-' + block.id : 'rich-text' %>">
+  <div class="c-rich-text">
+    <%- block.block_data.richText %>
+  </div>
+</article>

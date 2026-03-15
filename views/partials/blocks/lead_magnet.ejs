@@ -1,32 +1,28 @@
 <!--
-  Block: Lead Magnet (Email Capture)
-  Purpose: Email capture form with optional icon, title, description, and CTA for converting visitors
+  Block: Lead Magnet (Email capture)
+  Purpose: Centered CTA box with email form (matches c-lead / c-lead__form)
   Expected Data: block.block_data = { icon, title, description, action_url, placeholder, button_text }
-  Usage: Positioned to convert newsletter signups; icon can be FontAwesome class or 'seedling' for custom SVG
-  Design: Gold/yellow background, rounded, centered, responsive form layout
 -->
-<section class="lead-magnet">
-  <div class="container">
+<section class="l-container l-section" id="<%= block.id ? 'block-' + block.id : 'lead-magnet' %>">
+  <div class="c-lead">
     <% if (block.block_data.icon) { %>
-    <div class="lead-magnet-icon">
+    <div class="c-lead__icon">
       <% if (block.block_data.icon === 'seedling') { %>
       <%- include('../icons/seedling') %>
       <% } else { %>
-      <i class="<%= block.block_data.icon %>"></i>
+      <i class="<%= block.block_data.icon %>" aria-hidden="true"></i>
       <% } %>
     </div>
     <% } %>
     <% if (block.block_data.title) { %>
-    <h2 class="lead-magnet-title"><%= block.block_data.title %></h2>
+    <h3 class="c-lead__title"><%= block.block_data.title %></h3>
     <% } %>
     <% if (block.block_data.description) { %>
-    <p class="lead-magnet-description"><%= block.block_data.description %></p>
+    <p class="c-lead__description"><%= block.block_data.description %></p>
     <% } %>
-    <form class="lead-magnet-form" method="POST" action="<%= block.block_data.action_url || '#' %>">
-      <input type="email" name="email" placeholder="<%= block.block_data.placeholder || 'Votre meilleur email' %>" class="input-field" required>
-      <button type="submit" class="btn btn-green">
-        <%= block.block_data.button_text || 'Send' %>
-      </button>
+    <form class="c-lead__form" method="POST" action="<%= block.block_data.action_url || '#' %>">
+      <input type="email" name="email" placeholder="<%= block.block_data.placeholder || 'Votre email' %>" required>
+      <button type="submit" class="btn btn--primary"><%= block.block_data.button_text || 'S\'inscrire' %></button>
     </form>
   </div>
 </section>

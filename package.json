@@ -12,6 +12,7 @@
     "migrate": "node db/migrate.js",
     "create-admin": "node db/create-admin.js",
     "init-homepage": "node db/init-homepage.js",
+    "seed-homepage": "node db/seed-homepage.js",
     "generate-static": "node -e \"require('./src/infrastructure/static/staticGenerator').generateAll().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); })\""
   },
   "keywords": [],

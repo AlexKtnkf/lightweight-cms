@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Claire Vallet | Nutrition, Psychologie TCC & Sociologie</title>
+    
+    <!-- Polices : Sophistication & Science -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ============================================================
+           DESIGN SYSTEM (TOKENS)
+           ============================================================ */
+        :root {
+            --color-primary: #3d5a44;    /* Vert sauge profond (Expertise) */
+            --color-secondary: #c97c5d;  /* Terre cuite (Chaleur & Plaisir) */
+            --color-accent: #f4e9e2;     /* Amande douce (Bienveillance) */
+            --color-text: #2d2d2d;
+            --color-text-light: #666;
+            --color-white: #ffffff;
+            
+            --font-serif: 'Playfair Display', serif;
+            --font-sans: 'Inter', system-ui, sans-serif;
+            
+            --space-s: 1.5rem;
+            --space-m: 4rem;
+            --space-l: 8rem;
+            
+            --container-width: 1100px;
+            --border-radius: 4px;
+            --nav-height: 80px;
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Reset & Base */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: var(--font-sans); 
+            line-height: 1.7; 
+            color: var(--color-text);
+            padding-top: var(--nav-height);
+        }
+
+        /* Layout Helpers */
+        .l-container { max-width: var(--container-width); margin: 0 auto; padding: 0 var(--space-s); }
+        .l-section { padding: var(--space-l) 0; }
+        .l-full-page { min-height: calc(100vh - var(--nav-height)); display: flex; align-items: center; width: 100%; }
+
+        h1, h2, h3 { font-family: var(--font-serif); line-height: 1.1; font-weight: 700; }
+        img { max-width: 100%; height: auto; display: block; }
+        
+        .btn { 
+            display: inline-block; padding: 1.2rem 2.5rem; border-radius: var(--border-radius);
+            font-weight: 600; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem;
+            transition: var(--transition); border: none; cursor: pointer; text-decoration: none;
+        }
+        .btn--primary { background: var(--color-primary); color: white; }
+        .btn--outline { border: 1px solid var(--color-primary); color: var(--color-primary); }
+
+        /* ============================================================
+           COMPOSANTS
+           ============================================================ */
+
+        /* --- NAV (Sticky + Responsive) --- */
+        .c-nav { 
+            position: fixed; top: 0; left: 0; width: 100%; height: var(--nav-height);
+            background: var(--color-white); z-index: 1000; border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .c-nav__inner { display: flex; justify-content: space-between; align-items: center; height: 100%; }
+        .c-nav__logo { font-family: var(--font-serif); font-weight: 700; font-size: 1.3rem; color: var(--color-primary); text-decoration: none; z-index: 1001; }
+        .c-nav__menu { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: var(--color-accent);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2rem;
+            transform: translateY(-100%); transition: var(--transition);
+        }
+        .c-nav__menu.is-active { transform: translateY(0); }
+        .c-nav__link { font-family: var(--font-serif); font-size: 2rem; text-decoration: none; color: var(--color-primary); }
+        .c-nav__toggle { z-index: 1001; background: none; border: none; cursor: pointer; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
+
+        @media (min-width: 768px) {
+            .c-nav__menu { position: static; height: auto; width: auto; background: none; flex-direction: row; transform: none; gap: 2rem; }
+            .c-nav__link { font-family: var(--font-sans); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
+            .c-nav__toggle { display: none; }
+        }
+
+        /* --- HERO (Full-page, Aéré) --- */
+        .c-hero { background: var(--color-accent); text-align: center; justify-content: center; }
+        .c-hero__content { padding: var(--space-m) 0; width: 100%; }
+        .c-hero__tag { color: var(--color-secondary); font-weight: 600; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 2rem; display: block; }
+        .c-hero__title { font-size: clamp(2.5rem, 8vw, 4.5rem); max-width: 900px; margin: 0 auto 3rem; }
+        .c-hero__actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+        /* --- ACCROCHE (Contained) --- */
+        .c-headline { text-align: center; max-width: 800px; margin: 0 auto; }
+        .c-headline__title { font-size: 2.5rem; margin-bottom: 1.5rem; }
+        .c-headline__text { font-size: 1.25rem; color: var(--color-text-light); }
+
+        /* --- ENCART PRINCIPAL (Full-page Editorial) --- */
+        .c-main-feature__wrapper { display: flex; flex-direction: column; width: 100%; }
+        .c-main-feature__image { height: 50vh; width: 100%; }
+        .c-main-feature__image img { width: 100%; height: 100%; object-fit: cover; }
+        .c-main-feature__card { padding: var(--space-m); background: #fdfdfd; display: flex; flex-direction: column; justify-content: center; }
+        @media (min-width: 992px) {
+            .c-main-feature__wrapper { flex-direction: row; min-height: 85vh; }
+            .c-main-feature__image { flex: 1.1; height: auto; }
+            .c-main-feature__card { flex: 0.9; padding: var(--space-l); }
+        }
+
+        /* --- NUMBERED CARDS (Contained) --- */
+        .c-num-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 3rem; }
+        .c-num-card { border-top: 1px solid #ddd; padding-top: 2rem; }
+        .c-num-card__number { font-family: var(--font-serif); font-size: 3rem; color: var(--color-secondary); opacity: 0.3; display: block; }
+        .c-num-card__title { font-size: 1.6rem; margin: 1rem 0; }
+
+        /* --- INSTA CARD (Contained) --- */
+        .c-insta-card { 
+            background: var(--color-accent); aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; 
+            padding: var(--space-m); text-align: center; border-radius: var(--border-radius); position: relative; margin: 0 auto; max-width: 500px;
+        }
+        .c-insta-card__text { font-family: var(--font-serif); font-size: 1.8rem; font-style: italic; color: var(--color-primary); line-height: 1.3; }
+        .c-insta-card::before { content: "“"; position: absolute; top: 10%; left: 10%; font-size: 8rem; opacity: 0.1; font-family: var(--font-serif); }
+
+        /* --- PIN GRID (Contained, Scroll Mobile) --- */
+        .c-pin-grid { display: flex; overflow-x: auto; gap: 1.5rem; scroll-snap-type: x mandatory; padding-bottom: 1rem; }
+        .c-pin-grid__item { flex: 0 0 85%; scroll-snap-align: center; }
+        .c-pin-grid__item img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: var(--border-radius); }
+        .c-pin-grid__item figcaption { margin-top: 0.75rem; font-style: italic; font-size: 0.9rem; color: var(--color-text-light); }
+        @media (min-width: 768px) {
+            .c-pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); overflow: visible; }
+            .c-pin-grid__item { flex: none; }
+        }
+
+        /* --- RICH TEXT (Contained) --- */
+        .c-rich-text { max-width: 750px; margin: 0 auto; }
+        .c-rich-text > * + * { margin-top: 1.5rem; }
+        .c-rich-text blockquote { font-family: var(--font-serif); font-style: italic; font-size: 1.6rem; border-left: 3px solid var(--color-secondary); padding-left: 2rem; margin: 3rem 0; color: var(--color-primary); }
+
+        /* --- LEAD MAGNET (Contained) --- */
+        .c-lead { background: var(--color-primary); color: white; padding: var(--space-m); text-align: center; border-radius: var(--border-radius); }
+        .c-lead__form { display: flex; flex-direction: column; gap: 1rem; max-width: 500px; margin: 2.5rem auto 0; }
+        .c-lead__form input { padding: 1.2rem; border: none; border-radius: var(--border-radius); font-family: inherit; }
+
+        /* --- FAQ (Contained) --- */
+        .c-faq { border-bottom: 1px solid #eee; }
+        .c-faq summary { 
+            padding: 2rem 0; list-style: none; cursor: pointer; font-family: var(--font-serif); font-size: 1.4rem; font-weight: 700;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .c-faq summary::after { content: "+"; font-size: 1.8rem; font-weight: 300; transition: var(--transition); }
+        .c-faq[open] summary::after { transform: rotate(45deg); }
+        .c-faq__answer { padding-bottom: 2rem; color: var(--color-text-light); max-width: 850px; }
+
+        /* --- CONTACT FORM (Contained) --- */
+        .c-contact { background: var(--color-accent); padding: var(--space-m); border-radius: var(--border-radius); }
+        .c-contact__form { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .c-contact__group--full { grid-column: span 2; }
+        .c-contact__form input, .c-contact__form select, .c-contact__form textarea { 
+            width: 100%; padding: 1rem; border: 1px solid rgba(0,0,0,0.1); font-family: inherit; margin-top: 0.5rem;
+        }
+        @media (max-width: 600px) { .c-contact__form { grid-template-columns: 1fr; } .c-contact__group--full { grid-column: span 1; } }
+
+        /* --- FOOTER --- */
+        .c-footer { padding: var(--space-m) 0; border-top: 1px solid #eee; text-align: center; }
+        .c-footer__socials { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; }
+        .c-footer__socials svg { width: 24px; height: 24px; fill: var(--color-primary); transition: var(--transition); }
+        .c-footer__socials a:hover svg { fill: var(--color-secondary); transform: translateY(-3px); }
+
+    </style>
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <nav class="c-nav">
+        <div class="l-container c-nav__inner">
+            <a href="#" class="c-nav__logo">Dr. Claire Vallet</a>
+            <button class="c-nav__toggle" id="menuToggle">Menu</button>
+            <div class="c-nav__menu" id="navMenu">
+                <a href="#approche" class="c-nav__link">Mon Approche</a>
+                <a href="#methode" class="c-nav__link">La Méthode</a>
+                <a href="#science" class="c-nav__link">Science</a>
+                <a href="#faq" class="c-nav__link">FAQ</a>
+                <a href="#contact" class="btn btn--primary">Prendre RDV</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- COMPOSANT : HERO (Full Page) -->
+    <header class="c-hero l-full-page">
+        <div class="l-container">
+            <div class="c-hero__content">
+                <span class="c-hero__tag">Diététicienne & Docteur en Psychologie</span>
+                <h1 class="c-hero__title">Réconciliez votre esprit avec votre assiette.</h1>
+                <div class="c-hero__actions">
+                    <a href="#contact" class="btn btn--primary">Réserver une consultation</a>
+                    <a href="#approche" class="btn btn--outline">Ma philosophie</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- COMPOSANT : ACCROCHE (Contained) -->
+    <section class="l-container l-section" id="approche">
+        <div class="c-headline">
+            <h2 class="c-headline__title">Pourquoi cette approche ?</h2>
+            <p class="c-headline__text">Diplômée en TCC et nutrition, je déconstruis les régimes restrictifs pour reconstruire une relation saine et intuitive avec l'alimentation.</p>
+        </div>
+    </section>
+
+    <!-- COMPOSANT : NUMBERED CARDS (Contained) -->
+    <section class="l-container l-section" id="methode">
+        <div class="c-num-grid">
+            <div class="c-num-card">
+                <span class="c-num-card__number">01</span>
+                <h3 class="c-num-card__title">Analyse cognitive</h3>
+                <p>Comprendre vos déclencheurs et votre histoire singulière avec l'alimentation via les thérapies comportementales.</p>
+            </div>
+            <div class="c-num-card">
+                <span class="c-num-card__number">02</span>
+                <h3 class="c-num-card__title">Rééquilibrage somatique</h3>
+                <p>Réapprendre à écouter les signaux biologiques de faim et de satiété, souvent étouffés par des années de contrôle.</p>
+            </div>
+            <div class="c-num-card">
+                <span class="c-num-card__number">03</span>
+                <h3 class="c-num-card__title">Souveraineté plaisir</h3>
+                <p>Intégrer le plaisir gustatif non pas comme une exception, mais comme le pilier central de votre régulation métabolique.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPOSANT : INSTA CARD (Contained) -->
+    <section class="l-container l-section">
+        <div class="c-insta-card">
+            <p class="c-insta-card__text">"Le corps ne se bat jamais contre lui-même, il ne fait que répondre à un environnement et à des émotions."</p>
+        </div>
+    </section>
+
+    <!-- COMPOSANT : ENCART PRINCIPAL (Full Page Style Magazine) -->
+    <section class="c-main-feature">
+        <div class="c-main-feature__wrapper">
+            <div class="c-main-feature__image">
+                <img src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=1200" alt="Plaisir et santé">
+            </div>
+            <div class="c-main-feature__card">
+                <h2 class="c-headline__title" style="font-size: 3rem;">L'équilibre, au-delà des calories</h2>
+                <p style="margin-bottom: 2rem; font-size: 1.1rem;">Mon approche intègre la sociologie et les neurosciences pour comprendre vos comportements. On ne soigne pas un poids, on accompagne une personne dans sa globalité, son plaisir et sa santé mentale.</p>
+                <a href="#" class="btn btn--primary">Découvrir mon cursus</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPOSANT : RICH TEXT (Contained) -->
+    <article class="l-container l-section" id="science">
+        <div class="c-rich-text">
+            <h2>La science du plaisir</h2>
+            <p>Le plaisir n'est pas l'ennemi de la santé, c'en est le moteur physiologique principal. De nombreuses études en neurosciences démontrent que la restriction cognitive mène inévitablement à la désinhibition.</p>
+            <blockquote>
+                "Manger est un acte social, émotionnel et biologique. Ignorer l'un de ces piliers, c'est fragiliser tout l'édifice de la santé."
+            </blockquote>
+            <p>Dans mon cabinet, nous ne comptons pas les calories. Nous comptons sur votre capacité à retrouver une autonomie alimentaire complète, libérée de la charge mentale des régimes.</p>
+        </div>
+    </article>
+
+    <!-- COMPOSANT : PIN GRID (Contained) -->
+    <section class="l-container l-section">
+        <div class="c-pin-grid">
+            <figure class="c-pin-grid__item">
+                <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=800" alt="Nutrition">
+                <figcaption>La couleur comme nutriment.</figcaption>
+            </figure>
+            <figure class="c-pin-grid__item">
+                <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800" alt="Sérénité">
+                <figcaption>Apaiser le système nerveux.</figcaption>
+            </figure>
+            <figure class="c-pin-grid__item">
+                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800" alt="Échange">
+                <figcaption>Un espace d'écoute sans jugement.</figcaption>
+            </figure>
+        </div>
+    </section>
+
+    <!-- COMPOSANT : LEAD MAGNET (Contained) -->
+    <section class="l-container l-section">
+        <div class="c-lead">
+            <h3 style="font-family: var(--font-serif); font-size: 2.2rem;">Guide : 5 jours pour apaiser votre rapport à l'assiette</h3>
+            <p>Une initiation douce pour sortir de la culpabilité dès votre prochain repas.</p>
+            <form class="c-lead__form">
+                <input type="email" placeholder="Votre adresse email" required>
+                <button type="submit" class="btn btn--primary" style="background: var(--color-secondary);">Recevoir le guide</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- COMPOSANT : QUESTION REPONSE (Contained) -->
+    <section class="l-container l-section" id="faq">
+        <h2 class="c-headline__title" style="text-align: center;">Questions fréquentes</h2>
+        <details class="c-faq">
+            <summary>Proposez-vous des consultations à distance ?</summary>
+            <div class="c-faq__answer">Oui, toutes mes consultations de psychologie nutritionnelle sont disponibles en visioconférence sécurisée, où que vous soyez.</div>
+        </details>
+        <details class="c-faq">
+            <summary>Est-ce adapté aux troubles du comportement alimentaire (TCA) ?</summary>
+            <div class="c-faq__answer">C'est ma spécialité. Mon approche pluridisciplinaire (TCC, sociologie) est spécifiquement conçue pour accompagner l'anorexie, la boulimie et l'hyperphagie.</div>
+        </details>
+        <details class="c-faq">
+            <summary>Combien de séances sont nécessaires ?</summary>
+            <div class="c-faq__answer">Chaque chemin est unique. Nous définissons ensemble un rythme qui respecte vos besoins et vos capacités d'évolution.</div>
+        </details>
+    </section>
+
+    <!-- COMPOSANT : CONTACT FORM (Contained) -->
+    <section class="l-container l-section" id="contact">
+        <div class="c-contact">
+            <h2 class="c-headline__title" style="text-align: center;">Entamons la discussion</h2>
+            <form class="c-contact__form">
+                <div class="c-contact__group">
+                    <label>Votre Nom</label>
+                    <input type="text" required>
+                </div>
+                <div class="c-contact__group">
+                    <label>Votre Email</label>
+                    <input type="email" required>
+                </div>
+                <div class="c-contact__group--full">
+                    <label>Sujet de votre demande</label>
+                    <select>
+                        <option>Suivi individuel</option>
+                        <option>Conférence / Presse</option>
+                        <option>Autre</option>
+                    </select>
+                </div>
+                <div class="c-contact__group--full">
+                    <label>Message</label>
+                    <textarea rows="5"></textarea>
+                </div>
+                <div class="c-contact__group--full">
+                    <button type="submit" class="btn btn--primary" style="width: 100%;">Envoyer mon message</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- FOOTER & SOCIALS -->
+    <footer class="c-footer">
+        <div class="l-container">
+            <div class="c-footer__socials">
+                <a href="#" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                </a>
+                <a href="#" aria-label="LinkedIn">
+                    <svg viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                </a>
+            </div>
+            <p style="font-size: 0.8rem; opacity: 0.5;">© 2024 Dr. Claire Vallet. Expertise, Bienveillance & Plaisir.</p>
+        </div>
+    </footer>
+
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const navMenu = document.getElementById('navMenu');
+        
+        menuToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('is-active');
+            menuToggle.textContent = navMenu.classList.contains('is-active') ? 'Fermer' : 'Menu';
+        });
+
+        document.querySelectorAll('.c-nav__link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('is-active');
+                menuToggle.textContent = 'Menu';
+            });
+        });
+    </script>
+</body>
+</html>

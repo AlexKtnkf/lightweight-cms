@@ -73,20 +73,75 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   });
 });
 
-// Navbar scroll behavior (transparent to white)
+// Navbar scroll shadow: adds .scrolled class after 60px scroll (legacy .navbar)
 document.addEventListener('DOMContentLoaded', function() {
   const navbar = document.querySelector('.navbar');
   if (navbar) {
     function updateNavbar() {
-      const currentScroll = window.pageYOffset;
-      if (currentScroll <= 100) {
-        navbar.classList.add('transparent');
+      if (window.pageYOffset > 60) {
+        navbar.classList.add('scrolled');
       } else {
-        navbar.classList.remove('transparent');
+        navbar.classList.remove('scrolled');
       }
     }
-    
-    window.addEventListener('scroll', updateNavbar);
-    updateNavbar(); // Initial state
+    window.addEventListener('scroll', updateNavbar, { passive: true });
+    updateNavbar();
   }
+});
+
+// c-nav: mobile menu toggle (matches ai_studio_code.html)
+document.addEventListener('DOMContentLoaded', function() {
+  const menuToggle = document.getElementById('menuToggle');
+  const navMenu = document.getElementById('navMenu');
+  if (menuToggle && navMenu) {
+    menuToggle.addEventListener('click', function() {
+      navMenu.classList.toggle('is-active');
+      menuToggle.textContent = navMenu.classList.contains('is-active') ? 'Fermer' : 'Menu';
+      menuToggle.setAttribute('aria-expanded', navMenu.classList.contains('is-active'));
+    });
+    document.querySelectorAll('.c-nav__link').forEach(function(link) {
+      link.addEventListener('click', function() {
+        navMenu.classList.remove('is-active');
+        menuToggle.textContent = 'Menu';
+        menuToggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+});
+
+// Scroll reveal: animate elements with .reveal class as they enter viewport
+document.addEventListener('DOMContentLoaded', function() {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReducedMotion) return;
+
+  // Auto-tag common block elements for reveal animation
+  const selectors = [
+    '.c-headline', '.c-num-card', '.c-pin-grid__item', '.c-faq',
+    '.c-main-feature', '.c-lead', '.c-contact', '.c-insta-card'
+  ];
+  selectors.forEach(sel => {
+    document.querySelectorAll(sel).forEach((el, i) => {
+      el.classList.add('reveal');
+      // Stagger siblings: every 2nd and 3rd child get a small delay
+      const mod = i % 3;
+      if (mod === 1) el.classList.add('reveal-delay-1');
+      if (mod === 2) el.classList.add('reveal-delay-2');
+    });
+  });
+
+  // Also tag section titles
+  document.querySelectorAll('.section-title').forEach(el => {
+    el.classList.add('reveal');
+  });
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 });

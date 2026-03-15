@@ -1,25 +1,24 @@
 <!--
-  Block: Encart Principal (Info Card)
-  Purpose: Informational card with image, title, text content, and CTA button
+  Block: Encart Principal (Main Feature)
+  Purpose: Full-width image + card layout (matches c-main-feature: image left, card right on desktop)
   Expected Data: block.block_data = { image_id, titre, texte, url, lien }
-  Usage: Highlighting key information or call-to-action sections; can be used multiple times on a page
-  Design: Cream background with green left border accent, rounded corners, responsive layout
-  Note: Field names are in French (titre, texte, lien) to match legacy data structure
 -->
-<section class="section-padding">
-  <div class="container">
-    <article class="block-encart">
-      <% if (block.block_data.image_id) { %>
-      <img src="/api/media/<%= block.block_data.image_id %>" alt="<%= block.block_data.titre || 'Illustration' %>" class="encart-image">
-      <% } %>
+<section class="c-main-feature" aria-labelledby="encart-title-<%= block.id || 'default' %>">
+  <div class="c-main-feature__wrapper">
+    <% if (block.block_data.image_id) { %>
+    <div class="c-main-feature__image">
+      <img src="/api/media/<%= block.block_data.image_id %>" alt="<%= block.block_data.titre || 'Illustration' %>">
+    </div>
+    <% } %>
+    <div class="c-main-feature__card">
       <% if (block.block_data.titre) { %>
-      <h2 class="encart-title"><%= block.block_data.titre %></h2>
+      <h2 id="encart-title-<%= block.id || 'default' %>" class="c-headline__title"><%= block.block_data.titre %></h2>
       <% } %>
       <% if (block.block_data.texte) { %>
-      <div class="encart-content"><%- block.block_data.texte %></div>
+      <div class="c-main-feature__content"><%- block.block_data.texte %></div>
       <% } %>
       <% if (block.block_data.url && block.block_data.lien) { %>
-      <a href="<%= block.block_data.url %>" class="btn btn-green encart-cta"><%= block.block_data.lien %></a>
+      <a href="<%= block.block_data.url %>" class="btn btn--outline"><%= block.block_data.lien %></a>
       <% } %>
     </div>
   </div>

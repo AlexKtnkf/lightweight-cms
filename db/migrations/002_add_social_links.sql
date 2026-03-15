@@ -1,7 +1,4 @@
--- Add social_links column to settings table
-ALTER TABLE settings ADD COLUMN social_links TEXT DEFAULT '[]';
-
--- Set default social links for existing settings
+-- Backfill default social_links for existing settings rows (column is defined in 001_initial.sql)
 UPDATE settings 
 SET social_links = '[
   {"platform": "instagram", "url": "https://instagram.com", "icon": "instagram"},

@@ -1,39 +1,28 @@
 <!--
   Block: Hero Section
-  Purpose: Main intro/hero section with optional background effects, tagline, title, description, and CTA buttons
+  Purpose: Full-page hero with tagline, title, and CTA buttons (matches c-hero / l-full-page)
   Expected Data: block.block_data = { tagline, textePrincipal, title, sousTexte, description, texteBoutonPrincipal, button_primary_text, urlBoutonPrincipal, button_primary_url, texteBoutonSecondaire, button_secondary_text, urlBoutonSecondaire, button_secondary_url }
-  Usage: Typically used as first block on homepage; supports both French/English field names
 -->
-<section class="hero hero-fullscreen" aria-labelledby="hero-title-<%= block.id || 'default' %>">
-  <!-- Floating bubbles background -->
-  <div class="bubble-stage">
-    <div class="bubble bubble-1"></div>
-    <div class="bubble bubble-2"></div>
-    <div class="bubble bubble-3"></div>
-    <div class="bubble bubble-4"></div>
-  </div>
-  
-  <div class="container hero-content-wrapper">
-    <% if (block.block_data.tagline) { %>
-    <span class="tagline"><%= block.block_data.tagline %></span>
-    <% } %>
-    <h1 id="hero-title-<%= block.id || 'default' %>">
-      <%- (block.block_data.textePrincipal || block.block_data.title || '').replace(/\n/g, '<br>') %>
-    </h1>
-    <% if (block.block_data.sousTexte || block.block_data.description) { %>
-    <p><%= block.block_data.sousTexte || block.block_data.description || '' %></p>
-    <% } %>
-    <div class="hero-btns">
-      <% if (block.block_data.texteBoutonPrincipal || block.block_data.button_primary_text) { %>
-      <a href="<%= block.block_data.urlBoutonPrincipal || block.block_data.button_primary_url || '#' %>" class="btn btn-green">
-        <%= block.block_data.texteBoutonPrincipal || block.block_data.button_primary_text %>
-      </a>
+<header class="c-hero l-full-page" aria-labelledby="hero-title-<%= block.id || 'default' %>">
+  <div class="l-container">
+    <div class="c-hero__content">
+      <% if (block.block_data.tagline) { %>
+      <span class="c-hero__tag"><%= block.block_data.tagline %></span>
       <% } %>
-      <% if (block.block_data.texteBoutonSecondaire || block.block_data.button_secondary_text) { %>
-      <a href="<%= block.block_data.urlBoutonSecondaire || block.block_data.button_secondary_url || '#' %>" class="btn btn-gold">
-        <%= block.block_data.texteBoutonSecondaire || block.block_data.button_secondary_text %>
-      </a>
+      <h1 id="hero-title-<%= block.id || 'default' %>" class="c-hero__title">
+        <%- (block.block_data.textePrincipal || block.block_data.title || '').replace(/\n/g, '<br>') %>
+      </h1>
+      <% if (block.block_data.sousTexte || block.block_data.description) { %>
+      <p><%= block.block_data.sousTexte || block.block_data.description || '' %></p>
       <% } %>
+      <div class="c-hero__actions">
+        <% if (block.block_data.texteBoutonPrincipal || block.block_data.button_primary_text) { %>
+        <a href="<%= block.block_data.urlBoutonPrincipal || block.block_data.button_primary_url || '#' %>" class="btn btn--primary"><%= block.block_data.texteBoutonPrincipal || block.block_data.button_primary_text %></a>
+        <% } %>
+        <% if (block.block_data.texteBoutonSecondaire || block.block_data.button_secondary_text) { %>
+        <a href="<%= block.block_data.urlBoutonSecondaire || block.block_data.button_secondary_url || '#' %>" class="btn btn--outline"><%= block.block_data.texteBoutonSecondaire || block.block_data.button_secondary_text %></a>
+        <% } %>
+      </div>
     </div>
   </div>
-</section>
+</header>

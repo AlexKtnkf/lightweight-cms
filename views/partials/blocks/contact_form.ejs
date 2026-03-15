@@ -1,99 +1,42 @@
 <!--
-  Block: Contact Form (Dynamic Form)
-  Purpose: Flexible contact form with dynamic field support (text, email, textarea, select)
+  Block: Contact Form
+  Purpose: Form with dynamic fields (matches c-contact / c-contact__form / c-contact__group)
   Expected Data: block.block_data = { title, description, fields: [{ type, label, placeholder, required, options }], submit_button_text, action_url }
-  Usage: Contact forms, application forms, inquiry forms; supports any field configuration
-  Design: Centered heading, grouped form fields (2 per row on desktop, 1 on mobile), green submit button
-  Features: Automatic field grouping, required field indicators, responsive layout, accessibility
 -->
 <% if (block.block_data.fields && block.block_data.fields.length > 0) { %>
-<section id="contact" class="section-padding">
-  <div class="container">
-    <div class="contact-form-header">
-      <% if (block.block_data.title) { %>
-      <h2 class="contact-form-title"><%= block.block_data.title %></h2>
-      <% } %>
-      <% if (block.block_data.description) { %>
-      <p class="contact-form-description"><%= block.block_data.description %></p>
-      <% } %>
-    </div>
-    <form class="contact-form" method="POST" action="#">
-      <% 
-      // Group fields into rows for better layout
+<section id="contact" class="l-container l-section">
+  <div class="c-contact">
+    <% if (block.block_data.title) { %>
+    <h2 class="c-headline__title" style="text-align: center;"><%= block.block_data.title %></h2>
+    <% } %>
+    <% if (block.block_data.description) { %>
+    <p class="c-contact__description"><%= block.block_data.description %></p>
+    <% } %>
+    <form class="c-contact__form" method="POST" action="<%= block.block_data.action_url || '#' %>">
+      <%
       const fields = block.block_data.fields;
-      let currentRow = [];
+      fields.forEach((field, index) => {
+        const isFullWidth = field.type === 'textarea' || field.type === 'select';
       %>
-      <% fields.forEach((field, index) => { %>
+      <div class="c-contact__group<%= isFullWidth ? ' c-contact__group--full' : '' %>">
+        <label for="contact-field-<%= index %>"><%= field.label %><% if (field.required) { %> *<% } %></label>
         <% if (field.type === 'textarea') { %>
-        <div class="form-field form-field-textarea">
-          <label class="label-style"><%= field.label %><% if (field.required) { %> <span class="required-indicator">*</span><% } %></label>
-          <textarea 
-            name="field_<%= index %>" 
-            class="input-field" 
-            rows="4" 
-            placeholder="<%= field.placeholder || '' %>"
-            <% if (field.required) { %>required<% } %>
-          ></textarea>
-        </div>
+        <textarea id="contact-field-<%= index %>" name="field_<%= index %>" rows="5" placeholder="<%= field.placeholder || '' %>" <%= field.required ? 'required' : '' %>></textarea>
         <% } else if (field.type === 'select') { %>
-        <div class="form-field form-field-select">
-          <label class="label-style"><%= field.label %><% if (field.required) { %> <span class="required-indicator">*</span><% } %></label>
-          <select 
-            name="field_<%= index %>" 
-            class="input-field"
-            <% if (field.required) { %>required<% } %>
-          >
-            <option value=""><%= field.placeholder || 'Select...' %></option>
-            <% if (field.options && Array.isArray(field.options)) { %>
-              <% field.options.forEach(option => { %>
-              <option value="<%= option.value || option %>"><%= option.label || option %></option>
-              <% }); %>
-            <% } %>
-          </select>
-        </div>
+        <select id="contact-field-<%= index %>" name="field_<%= index %>" <%= field.required ? 'required' : '' %>>
+          <option value=""><%= field.placeholder || 'Choisir...' %></option>
+          <% if (field.options && Array.isArray(field.options)) { field.options.forEach(opt => { %>
+          <option value="<%= opt.value || opt %>"><%= opt.label || opt %></option>
+          <% }); } %>
+        </select>
         <% } else { %>
-        <% 
-        // For text/email fields, try to group them in rows
-        if (field.type === 'text' || field.type === 'email') {
-          currentRow.push({ field, index });
-          // If we have 2 fields or this is the last field, create a row
-          if (currentRow.length === 2 || index === fields.length - 1) {
-        %>
-        <div class="form-row">
-          <% currentRow.forEach(({ field: f, index: i }) => { %>
-          <div class="form-field">
-            <label class="label-style"><%= f.label %><% if (f.required) { %> <span class="required-indicator">*</span><% } %></label>
-            <input 
-              type="<%= f.type || 'text' %>" 
-              name="field_<%= i %>" 
-              class="input-field" 
-              placeholder="<%= f.placeholder || '' %>"
-              <% if (f.required) { %>required<% } %>
-            >
-          </div>
-          <% }); %>
-        </div>
-        <% 
-            currentRow = [];
-          }
-        } else {
-        %>
-        <div class="form-field">
-          <label class="label-style"><%= field.label %><% if (field.required) { %> <span class="required-indicator">*</span><% } %></label>
-          <input 
-            type="<%= field.type || 'text' %>" 
-            name="field_<%= index %>" 
-            class="input-field" 
-            placeholder="<%= field.placeholder || '' %>"
-            <% if (field.required) { %>required<% } %>
-          >
-        </div>
+        <input type="<%= field.type || 'text' %>" id="contact-field-<%= index %>" name="field_<%= index %>" placeholder="<%= field.placeholder || '' %>" <%= field.required ? 'required' : '' %>>
         <% } %>
-        <% } %>
+      </div>
       <% }); %>
-      <button type="submit" class="btn btn-green contact-form-submit">
-        <%= block.block_data.submit_button_text || 'Submit Application' %>
-      </button>
+      <div class="c-contact__group c-contact__group--full">
+        <button type="submit" class="btn btn--primary"><%= block.block_data.submit_button_text || 'Envoyer' %></button>
+      </div>
     </form>
   </div>
 </section>

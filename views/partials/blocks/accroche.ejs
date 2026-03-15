@@ -1,22 +1,18 @@
 <!--
-  Block: Accroche (Feature Card)
-  Purpose: Highlight/feature card with optional image, title, and descriptive content
-  Expected Data: block.block_data = { image_media_id, title, content }
-  Usage: Used to showcase key features or benefits; cards are typically displayed in a grid layout
-  Design: White card with green border, centered text, hover effect with lift and shadow
+  Block: Accroche (Headline)
+  Purpose: Centered headline with title and optional content (matches c-headline)
+  Expected Data: block.block_data = { image_media_id, title, content, section_id }
 -->
-<section class="section-padding">
-  <div class="container">
-    <article class="accroche" aria-labelledby="accroche-<%= block.id || 'default' %>-title">
-      <% if (block.block_data.image_media_id) { %>
-      <img src="/api/media/<%= block.block_data.image_media_id %>" alt="<%= block.block_data.title || 'Illustration' %>" loading="lazy" class="accroche-icon">
-      <% } %>
-      <% if (block.block_data.title) { %>
-      <h3 id="accroche-<%= block.id || 'default' %>-title" class="accroche-title"><%= block.block_data.title %></h3>
-      <% } %>
-      <% if (block.block_data.content) { %>
-      <div class="accroche-content"><%- block.block_data.content %></div>
-      <% } %>
-    </article>
+<section class="l-container l-section" id="<%= block.block_data.section_id || (block.id ? 'block-' + block.id : 'accroche') %>" aria-labelledby="headline-<%= block.id || 'default' %>-title">
+  <div class="c-headline">
+    <% if (block.block_data.image_media_id) { %>
+    <img src="/api/media/<%= block.block_data.image_media_id %>" alt="<%= block.block_data.title || 'Illustration' %>" loading="lazy" class="c-headline__image">
+    <% } %>
+    <% if (block.block_data.title) { %>
+    <h2 id="headline-<%= block.id || 'default' %>-title" class="c-headline__title"><%= block.block_data.title %></h2>
+    <% } %>
+    <% if (block.block_data.content) { %>
+    <div class="c-headline__content"><%- block.block_data.content %></div>
+    <% } %>
   </div>
 </section>

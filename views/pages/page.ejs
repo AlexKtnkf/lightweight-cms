@@ -39,7 +39,7 @@
   
   <%- include('../partials/navbar', { settings, pages }) %>
 
-  <main id="main-content" class="container page">
+  <main id="main-content">
     <% 
     // Find hero block if it exists - it should always come first
     const heroBlock = page.blocks?.find(b => b.block_type === 'hero');

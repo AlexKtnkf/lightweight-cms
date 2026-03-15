@@ -49,19 +49,14 @@
     <% if (heroBlock) { %>
       <%- include('../partials/blocks/hero', { block: heroBlock, settings, baseUrl }) %>
     <% } else { %>
-    <section class="hero hero-fullscreen" aria-labelledby="hero-title">
-      <div class="container hero-content-wrapper">
-        <% if (settings?.logo_media_id) { %>
-        <img src="/api/media/<%= settings.logo_media_id %>" alt="Logo <%= siteTitle %>" class="hero-logo">
-        <% } else { %>
-        <img src="/android-chrome-512x512.png" alt="Logo <%= siteTitle %>" class="hero-logo">
-        <% } %>
-        <div class="hero-content">
-          <h1 id="hero-title"><%= homepage.title || siteTitle %></h1>
-          <p class="hero-subtitle"><%= homepage.meta_description || settings?.site_tagline || 'Diététicienne-Nutritionniste' %></p>
+    <header class="c-hero l-full-page" aria-labelledby="hero-title">
+      <div class="l-container">
+        <div class="c-hero__content">
+          <h1 id="hero-title" class="c-hero__title"><%= homepage.title || siteTitle %></h1>
+          <p><%= homepage.meta_description || settings?.site_tagline || '' %></p>
         </div>
       </div>
-    </section>
+    </header>
     <% } %>
 
     <% 

@@ -1,12 +1,12 @@
 <%
   // Build navigation menu
   const navLinks = [];
-  
+
   // Add header menu links from settings
   if (settings && settings.header_menu_links && Array.isArray(settings.header_menu_links)) {
     navLinks.push(...settings.header_menu_links);
   }
-  
+
   // Add pages if they exist
   if (typeof pages !== 'undefined' && pages && Array.isArray(pages)) {
     pages.forEach(page => {
@@ -17,54 +17,32 @@
       });
     });
   }
-  
+
   // Sort by order
   navLinks.sort((a, b) => (a.order || 0) - (b.order || 0));
-  
+
   const siteTitle = settings?.site_title || 'My Site';
   const logoMediaId = settings?.logo_media_id;
+  const ctaLink = navLinks.find(link => link.cta);
+  const regularLinks = navLinks.filter(link => !link.cta);
 %>
-<nav x-data="{ open: false }" class="navbar" role="navigation" aria-label="Navigation principale">
-  <a href="/" class="nav-logo" aria-label="Retour à l'accueil">
-    <% if (logoMediaId) { %>
-    <img src="/api/media/<%= logoMediaId %>" alt="<%= siteTitle %>" height="24" width="24">
-    <% } %>
-    <div class="nav-logo-text">
-      <% 
-      const titleWords = siteTitle.split(' ');
-      if (titleWords.length > 1) {
-      %>
-      <span><%= titleWords[0] %><span class="nav-logo-accent"><%= titleWords.slice(1).join(' ') %></span></span>
+<nav class="c-nav" role="navigation" aria-label="Navigation principale">
+  <div class="l-container c-nav__inner">
+    <a href="/" class="c-nav__logo" aria-label="Retour à l'accueil">
+      <% if (logoMediaId) { %>
+      <img src="/api/media/<%= logoMediaId %>" alt="<%= siteTitle %>" height="24" width="24">
       <% } else { %>
-      <span><%= siteTitle %></span>
+      <%= siteTitle %>
+      <% } %>
+    </a>
+    <button class="c-nav__toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="navMenu">Menu</button>
+    <div class="c-nav__menu" id="navMenu" role="menubar">
+      <% regularLinks.forEach(link => { %>
+      <a href="<%= link.url %>" class="c-nav__link" role="menuitem" <%= link.url.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : '' %>><%= link.label %></a>
+      <% }); %>
+      <% if (ctaLink) { %>
+      <a href="<%= ctaLink.url %>" class="btn btn--primary" <%= ctaLink.url.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : '' %>><%= ctaLink.label %></a>
       <% } %>
     </div>
-  </a>
-  <div class="nav-wrapper">
-    <% 
-    // Separate CTA link from regular nav links
-    const ctaLink = navLinks.find(link => link.cta);
-    const regularLinks = navLinks.filter(link => !link.cta);
-    %>
-    <% if (regularLinks.length > 0) { %>
-    <ul 
-      id="main-menu"
-      :class="open ? 'nav-menu active' : 'nav-menu'"
-      role="menubar"
-    >
-      <% regularLinks.forEach(link => { %>
-      <li role="none">
-        <a href="<%= link.url %>" role="menuitem" <%= link.url.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : '' %>>
-          <%= link.label %>
-        </a>
-      </li>
-      <% }); %>
-    </ul>
-    <% } %>
-    <% if (ctaLink) { %>
-    <a href="<%= ctaLink.url %>" class="nav-cta" <%= ctaLink.url.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : '' %>>
-      <%= ctaLink.label.toUpperCase() %>
-    </a>
-    <% } %>
   </div>
 </nav>

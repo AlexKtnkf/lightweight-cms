@@ -1,19 +1,15 @@
 <!--
-  Block: Question-Response (Q&A Block)
-  Purpose: Display a Q&A item with question as heading and response as content
+  Block: Question-Réponse (FAQ item)
+  Purpose: Single FAQ item as <details> (matches c-faq). Use multiple blocks for a FAQ section.
   Expected Data: block.block_data = { question, reponse }
-  Usage: Used for FAQs, testimonials, or Q&A sections; can be repeated multiple times
-  Design: Cream background with gold left border, green question heading, gray response text
 -->
-<section class="section-padding">
-  <div class="container">
-    <article class="block-qa">
-      <% if (block.block_data.question) { %>
-      <h3 class="qa-question"><%= block.block_data.question %></h3>
-      <% } %>
-      <% if (block.block_data.reponse) { %>
-      <div class="qa-response"><%- block.block_data.reponse %></div>
-      <% } %>
-    </article>
-  </div>
-</section>
+<% if (block.block_data.question || block.block_data.reponse) { %>
+<details class="c-faq" id="<%= block.id ? 'faq-' + block.id : '' %>">
+  <% if (block.block_data.question) { %>
+  <summary><%= block.block_data.question %></summary>
+  <% } %>
+  <% if (block.block_data.reponse) { %>
+  <div class="c-faq__answer"><%- block.block_data.reponse %></div>
+  <% } %>
+</details>
+<% } %>
