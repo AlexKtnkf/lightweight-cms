@@ -30,26 +30,13 @@ class AdminController {
       // Force save session and wait for it before responding
       await new Promise((resolve, reject) => {
         req.session.save((err) => {
-          if (err) {
-            console.error('[Login] Session save error:', err);
-            return reject(err);
-          }
-          console.log('[Login] Session saved successfully:', {
-            sessionID: req.sessionID,
-            userId: req.session.userId
-          });
+          if (err) return reject(err);
           resolve();
         });
       });
       
-      // Log response headers to verify cookie is being set
-      console.log('[Login] Response headers before send:', {
-        'Set-Cookie': res.getHeader('Set-Cookie'),
-        allHeaders: res.getHeaders()
-      });
-      
       // express-session will set the cookie automatically
-      res.json({ success: true, sessionId: req.sessionID });
+      res.json({ success: true });
     } catch (error) {
       res.status(401).json({ error: error.message || 'Invalid username or password' });
     }

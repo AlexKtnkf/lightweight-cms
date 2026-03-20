@@ -170,8 +170,17 @@ class PageController {
 
   async robots(req, res, next) {
     try {
+      const settings = await getSettings.execute();
+      const allowIndexing = settings?.allow_search_indexing !== undefined ? settings.allow_search_indexing : true;
       const baseUrl = `${req.protocol}://${req.get('host')}`;
-      const robots = sitemapGenerator.generateRobotsTxt(`${baseUrl}/sitemap.xml`);
+      
+      let robots;
+      if (allowIndexing) {
+        robots = `User-agent: *\nAllow: /\n\nSitemap: ${baseUrl}/sitemap.xml`;
+      } else {
+        robots = `User-agent: *\nDisallow: /`;
+      }
+      
       res.set('Content-Type', 'text/plain');
       res.send(robots);
     } catch (error) {

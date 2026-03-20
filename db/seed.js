@@ -310,7 +310,7 @@ async function updateSettingsLogo(logoId) {
   
   if (existing) {
     await db.run(
-      'UPDATE settings SET logo_media_id = ?, updated_at = datetime("now") WHERE id = ?',
+      "UPDATE settings SET logo_media_id = ?, updated_at = datetime('now') WHERE id = ?",
       [logoId, existing.id]
     );
     logger.info(`Settings updated with logo_media_id=${logoId}`);

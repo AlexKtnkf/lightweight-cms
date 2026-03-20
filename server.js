@@ -16,6 +16,12 @@ const adminApiRoutes = require('./routes/admin-api');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy when behind reverse proxy (nginx, Cloudflare, etc.)
+// Required for correct client IPs in rate limiting and logging
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // View engine setup
 const expressLayouts = require('express-ejs-layouts');
 app.set('view engine', 'ejs');
@@ -52,19 +58,33 @@ app.use(express.urlencoded({ extended: true }));
 // Session configuration
 // Set secure to false for localhost/HTTP development
 // In production with HTTPS, set FORCE_HTTPS=true in env
-app.use(session({
+const sessionConfig = {
   secret: process.env.SESSION_SECRET || 'change-this-secret-in-production',
   resave: false,
   saveUninitialized: false,
-  name: 'sessionId', // Explicit session name
+  name: '__Host-sid',
   cookie: {
     httpOnly: true,
-    secure: process.env.FORCE_HTTPS === 'true', // Only secure if explicitly enabled
-    sameSite: 'lax', // Allow cookies to be sent with same-site requests
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    path: '/' // Ensure cookie is available for all paths
+    path: '/'
   }
-}));
+};
+
+// Warn if default session secret is used in production
+if (process.env.NODE_ENV === 'production' && sessionConfig.secret === 'change-this-secret-in-production') {
+  logger.error('CRITICAL: Using default SESSION_SECRET in production. Set a strong random secret!');
+  process.exit(1);
+}
+
+// In development, allow insecure cookies and simpler name
+if (process.env.NODE_ENV !== 'production') {
+  sessionConfig.cookie.secure = false;
+  sessionConfig.name = 'sessionId';
+}
+
+app.use(session(sessionConfig));
 
 // Static files (including generated static pages)
 // In development, disable caching for CSS to see changes immediately

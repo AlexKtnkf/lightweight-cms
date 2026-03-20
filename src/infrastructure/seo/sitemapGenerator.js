@@ -41,11 +41,18 @@ class SitemapGenerator {
   }
 
   buildSitemapXML(urls) {
+    const escapeXml = (str) => str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+
     const urlElements = urls.map(url => {
-      const lastmod = url.lastmod ? `\n    <lastmod>${url.lastmod}</lastmod>` : '';
+      const lastmod = url.lastmod ? `\n    <lastmod>${escapeXml(String(url.lastmod))}</lastmod>` : '';
       return `  <url>
-    <loc>${url.loc}</loc>
-    <priority>${url.priority}</priority>${lastmod}
+    <loc>${escapeXml(url.loc)}</loc>
+    <priority>${escapeXml(String(url.priority))}</priority>${lastmod}
   </url>`;
     }).join('\n');
 

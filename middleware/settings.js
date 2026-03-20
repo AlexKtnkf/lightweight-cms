@@ -13,6 +13,9 @@ async function loadSettings(req, res, next) {
     const settings = await getSettings.execute();
     res.locals.settings = settings;
     
+    // Provide Turnstile site key to all views
+    res.locals.turnstileSiteKey = process.env.TURNSTILE_SITE_KEY || null;
+    
     // Load logo SVG for navbar
     try {
       const logoSvgPath = path.join(__dirname, '../public/media/logo.svg');

@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS settings (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   site_title TEXT NOT NULL DEFAULT 'My Site',
   site_tagline TEXT,
+  allow_search_indexing BOOLEAN DEFAULT 1,
   logo_media_id INTEGER,
   header_menu_links TEXT DEFAULT '[]', -- JSON array of {label, url, order}
   footer_menu_links TEXT DEFAULT '[]', -- JSON array of {label, url, order}
@@ -137,23 +138,15 @@ SET social_links = '[
 ]'
 WHERE social_links IS NULL OR social_links = '[]';
 
--- Add allow_search_indexing column to settings table
-ALTER TABLE settings 
-ADD COLUMN allow_search_indexing BOOLEAN DEFAULT 1;
-
--- Set default to 1 (allow indexing) for existing settings
+-- Set default to 0 (disallow indexing) for existing settings
 UPDATE settings 
-SET allow_search_indexing = 1 
+SET allow_search_indexing = 0 
 WHERE allow_search_indexing IS NULL;
 
 -- Add contact email field to settings table
 
 ALTER TABLE settings 
 ADD COLUMN contact_email TEXT;
-
--- Create index for faster lookups
-CREATE INDEX IF NOT EXISTS idx_settings_contact_email ON settings(contact_email);
-
 
 -- Add contact submissions table for storing contact form submissions
 

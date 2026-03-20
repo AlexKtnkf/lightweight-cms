@@ -39,10 +39,18 @@
         <% } %>
       </div>
       <% }); %>
+      <% if (typeof turnstileSiteKey !== 'undefined' && turnstileSiteKey) { %>
+      <div class="c-contact__group c-contact__group--full">
+        <div class="cf-turnstile" data-sitekey="<%= turnstileSiteKey %>" data-theme="light"></div>
+      </div>
+      <% } %>
       <div class="c-contact__group c-contact__group--full">
         <button type="submit" id="contact-submit-btn" class="btn btn--primary"><%= block.block_data.submit_button_text || 'Envoyer' %></button>
       </div>
     </form>
+    <% if (typeof turnstileSiteKey !== 'undefined' && turnstileSiteKey) { %>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <% } %>
     </div>
   </div>
 </section>
@@ -95,6 +103,20 @@
       );
       const name = nameField ? nameField.value : null;
 
+      // Get Turnstile token if available
+      let turnstileToken = null;
+      if (window.turnstile) {
+        turnstileToken = window.turnstile.getResponse();
+        if (!turnstileToken) {
+          messageDiv.style.display = 'block';
+          messageDiv.className = 'contact-form-error';
+          messageDiv.innerHTML = '<strong>✗ Erreur</strong>: Veuillez compléter la vérification Turnstile.';
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+          return;
+        }
+      }
+
       // Send to API
       const response = await fetch('/api/contact/submit', {
         method: 'POST',
@@ -104,7 +126,8 @@
         body: JSON.stringify({
           fields: fields,
           email: email,
-          name: name
+          name: name,
+          turnstileToken: turnstileToken
         })
       });
 
@@ -115,18 +138,18 @@
       
       if (response.ok && data.success) {
         messageDiv.className = 'contact-form-success';
-        messageDiv.innerHTML = '<strong>✓ Succès!</strong> ' + (data.message || 'Votre message a bien été reçu.');
+        messageDiv.textContent = '✓ ' + (data.message || 'Votre message a bien été reçu.');
         form.reset();
       } else {
         messageDiv.className = 'contact-form-error';
-        messageDiv.innerHTML = '<strong>✗ Erreur</strong>: ' + (data.message || 'Une erreur s\'est produite.');
+        messageDiv.textContent = '✗ ' + (data.message || 'Une erreur s\'est produite.');
       }
 
     } catch (error) {
       console.error('Form submission error:', error);
       messageDiv.style.display = 'block';
       messageDiv.className = 'contact-form-error';
-      messageDiv.innerHTML = '<strong>✗ Erreur</strong>: Impossible d\'envoyer le message. Vérifiez votre connexion.';
+      messageDiv.textContent = '✗ Impossible d\'envoyer le message. Vérifiez votre connexion.';
     } finally {
       // Re-enable submit button
       submitBtn.disabled = false;

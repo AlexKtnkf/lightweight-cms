@@ -4,7 +4,7 @@ const rateLimit = require('express-rate-limit');
 // Security headers middleware
 const cspDirectives = {
   defaultSrc: ["'self'"],
-  scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net", "https://cdn.quilljs.com"],
+  scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdn.quilljs.com", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
   styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdn.quilljs.com", "https://fonts.googleapis.com"],
   imgSrc: ["'self'", "data:", "https:"],
   fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com"],
@@ -23,7 +23,8 @@ const securityHeaders = helmet({
     directives: cspDirectives,
   },
   crossOriginEmbedderPolicy: false,
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
 });
 
 // General rate limiter (for public routes only)

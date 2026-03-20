@@ -10,7 +10,7 @@
       <span class="c-hero__tag"><%= block.block_data.tagline %></span>
       <% } %>
       <h1 id="hero-title-<%= block.id || 'default' %>" class="c-hero__title">
-        <%- (block.block_data.textePrincipal || block.block_data.title || '').replace(/\n/g, '<br>') %>
+        <%= (block.block_data.textePrincipal || block.block_data.title || '').split('\n').join(' ') %>
       </h1>
       <% if (block.block_data.sousTexte || block.block_data.description) { %>
       <p><%= block.block_data.sousTexte || block.block_data.description || '' %></p>

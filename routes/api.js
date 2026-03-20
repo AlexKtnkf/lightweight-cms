@@ -5,6 +5,9 @@ const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 
+// External deps
+const https = require('https');
+
 // Use cases
 const GetPage = require('../src/domain/content/application/GetPage');
 const GetPageBySlug = require('../src/domain/content/application/GetPageBySlug');
@@ -30,6 +33,62 @@ const listPublishedArticles = new ListPublishedArticles(articleRepository);
 // Instantiate services and repositories
 const contactSubmissionRepository = new ContactSubmissionRepository();
 const emailService = new EmailService();
+
+/**
+ * Verify Turnstile token with Cloudflare
+ */
+async function verifyTurnstile(token) {
+  if (!process.env.TURNSTILE_SECRET_KEY) {
+    logger.warn('Turnstile verification skipped: TURNSTILE_SECRET_KEY not configured');
+    return true; // Allow if not configured
+  }
+
+  if (!token) {
+    return false;
+  }
+
+  return new Promise((resolve, reject) => {
+    const postData = JSON.stringify({
+      secret: process.env.TURNSTILE_SECRET_KEY,
+      response: token
+    });
+
+    const options = {
+      hostname: 'challenges.cloudflare.com',
+      port: 443,
+      path: '/turnstile/v0/siteverify',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        try {
+          const result = JSON.parse(data);
+          resolve(result.success === true);
+        } catch (error) {
+          logger.error('Failed to parse Turnstile response:', error);
+          resolve(false);
+        }
+      });
+    });
+
+    req.on('error', (error) => {
+      logger.error('Turnstile verification error:', error);
+      resolve(false);
+    });
+
+    req.write(postData);
+    req.end();
+  });
+}
 
 // Rate limiting for contact form (prevent spam)
 // Allow 5 submissions per IP per 15 minutes
@@ -130,6 +189,17 @@ router.post(
   ],
   async (req, res, next) => {
     try {
+      // Verify Turnstile token if provided
+      if (req.body.turnstileToken) {
+        const isTurnstileValid = await verifyTurnstile(req.body.turnstileToken);
+        if (!isTurnstileValid) {
+          return res.status(400).json({
+            success: false,
+            message: 'Vérification échouée. Veuillez réessayer.'
+          });
+        }
+      }
+
       // Validate request
       const errors = validationResult(req);
       if (!errors.isEmpty()) {

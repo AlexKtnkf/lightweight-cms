@@ -62,39 +62,25 @@ class SettingsRepository {
       { platform: 'linkedin', url: 'https://linkedin.com', icon: 'linkedin' }
     ]);
     
-    // Try to update with social_links column
-    try {
-      const sql = `UPDATE settings 
-                   SET site_title = ?, site_tagline = ?, logo_media_id = ?,
-                       header_menu_links = ?, footer_menu_links = ?, footer_text = ?,
-                       social_links = ?,
-                       updated_at = datetime('now')
-                   WHERE id = 1`;
-      await db.run(sql, [
-        settingsData.site_title || 'AH',
-        settingsData.site_tagline || null,
-        settingsData.logo_media_id || null,
-        settingsData.header_menu_links ? JSON.stringify(settingsData.header_menu_links) : '[]',
-        settingsData.footer_menu_links ? JSON.stringify(settingsData.footer_menu_links) : '[]',
-        settingsData.footer_text || null,
-        settingsData.social_links ? JSON.stringify(settingsData.social_links) : defaultSocialLinks
-      ]);
-    } catch (err) {
-      // If social_links column doesn't exist, update without it
-      const sql = `UPDATE settings 
-                   SET site_title = ?, site_tagline = ?, logo_media_id = ?,
-                       header_menu_links = ?, footer_menu_links = ?, footer_text = ?,
-                       updated_at = datetime('now')
-                   WHERE id = 1`;
-      await db.run(sql, [
-        settingsData.site_title || 'AH',
-        settingsData.site_tagline || null,
-        settingsData.logo_media_id || null,
-        settingsData.header_menu_links ? JSON.stringify(settingsData.header_menu_links) : '[]',
-        settingsData.footer_menu_links ? JSON.stringify(settingsData.footer_menu_links) : '[]',
-        settingsData.footer_text || null
-      ]);
-    }
+    const sql = `UPDATE settings 
+                 SET site_title = ?, site_tagline = ?, logo_media_id = ?,
+                     header_menu_links = ?, footer_menu_links = ?, footer_text = ?,
+                     social_links = ?,
+                     allow_search_indexing = ?,
+                     contact_email = ?,
+                     updated_at = datetime('now')
+                 WHERE id = 1`;
+    await db.run(sql, [
+      settingsData.site_title || 'AH',
+      settingsData.site_tagline || null,
+      settingsData.logo_media_id || null,
+      settingsData.header_menu_links ? JSON.stringify(settingsData.header_menu_links) : '[]',
+      settingsData.footer_menu_links ? JSON.stringify(settingsData.footer_menu_links) : '[]',
+      settingsData.footer_text || null,
+      settingsData.social_links ? JSON.stringify(settingsData.social_links) : defaultSocialLinks,
+      settingsData.allow_search_indexing !== undefined ? (settingsData.allow_search_indexing ? 1 : 0) : 1,
+      settingsData.contact_email || null
+    ]);
     return this.get();
   }
 }
