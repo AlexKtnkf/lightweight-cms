@@ -13,7 +13,8 @@
     "seed": "node db/seed.js",
     "setup": "npm run migrate && npm run seed",
     "create-admin": "node db/create-admin.js",
-    "generate-static": "node -e \"require('./src/infrastructure/static/staticGenerator').generateAll().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); })\""
+    "generate-static": "node -e \"require('./src/infrastructure/static/staticGenerator').generateAll().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); })\"",
+    "postinstall": "node -e \"if(process.env.DATABASE_URL||process.env.DB_PATH){require('./db/migrate')}else{console.log('No database configured, skipping migrations')}\""
   },
   "keywords": [],
   "author": "",
@@ -21,6 +22,7 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^11.10.0",
+    "pg": "^8.11.0",
     "dompurify": "^3.0.6",
     "dotenv": "^16.3.1",
     "ejs": "^3.1.9",
@@ -36,6 +38,9 @@
     "rss": "^1.2.2",
     "sharp": "^0.33.1",
     "uuid": "^9.0.1"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

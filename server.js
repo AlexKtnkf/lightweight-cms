@@ -15,6 +15,9 @@ const adminApiRoutes = require('./routes/admin-api');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const uploadsRoot = process.env.UPLOADS_DIR
+  ? path.resolve(process.env.UPLOADS_DIR)
+  : path.join(__dirname, 'public/uploads');
 
 // Trust proxy when behind reverse proxy (nginx, Cloudflare, etc.)
 // Required for correct client IPs in rate limiting and logging
@@ -97,6 +100,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/static', express.static(path.join(__dirname, 'public/static')));
+app.use('/uploads', express.static(uploadsRoot));
 
 // Load settings middleware (for public routes)
 const loadSettings = require('./middleware/settings');
@@ -105,6 +109,25 @@ app.use(loadSettings);
 // Routes
 app.use('/api', apiRoutes);
 app.use('/api/admin', adminApiRoutes); // Admin API (JSON responses)
+
+// Health endpoint for load balancers / Railway
+app.get('/health', async (req, res) => {
+  try {
+    // Basic DB connectivity check
+    let dbOk = false;
+    try {
+      const row = await db.get('SELECT 1 AS ok');
+      if (row) dbOk = true;
+    } catch (err) {
+      // some DB adapters may throw for simple selects; treat as failure
+      dbOk = false;
+    }
+
+    return res.status(200).json({ status: 'ok', db: dbOk });
+  } catch (err) {
+    return res.status(500).json({ status: 'error' });
+  }
+});
 
 // Admin routes - only POST /admin/login and GET /admin/logout
 // GET /admin/login is handled by Vite (React app), not Express

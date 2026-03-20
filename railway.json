@@ -1,0 +1,30 @@
+{
+  "project": {
+    "name": "lightweight-cms"
+  },
+  "services": [
+    {
+      "name": "web",
+      "buildCommand": "npm install",
+      "startCommand": "npm run start",
+      "env": [
+        "DATABASE_URL",
+        "DB_PATH",
+        "SESSION_SECRET",
+        "SMTP_HOST",
+        "SMTP_PORT",
+        "SMTP_USER",
+        "SMTP_PASS",
+        "CONTACT_EMAIL_TO",
+        "SITE_HOST",
+        "UPLOADS_DIR"
+      ]
+      ,
+      "healthcheck": {
+        "path": "/health",
+        "port": "$PORT",
+        "interval": 10
+      }
+    }
+  ]
+}

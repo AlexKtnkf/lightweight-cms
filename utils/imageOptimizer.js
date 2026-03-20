@@ -6,14 +6,17 @@ const logger = require('./logger');
 
 const MAX_WIDTH = 1920;
 const THUMBNAIL_WIDTH = 300;
-const UPLOADS_DIR = path.join(__dirname, '../public/uploads/images');
+const UPLOADS_ROOT = process.env.UPLOADS_DIR
+  ? path.resolve(process.env.UPLOADS_DIR)
+  : path.join(__dirname, '../public/uploads');
+const UPLOADS_IMAGES_DIR = path.join(UPLOADS_ROOT, 'images');
 
 /**
  * Ensure uploads directory exists
  */
 async function ensureUploadsDir() {
   try {
-    await fs.mkdir(UPLOADS_DIR, { recursive: true });
+    await fs.mkdir(UPLOADS_IMAGES_DIR, { recursive: true });
       } catch (error) {
         logger.error('Error creating uploads directory:', error);
         throw error;
@@ -29,10 +32,10 @@ async function processImage(file) {
   
   const ext = path.extname(file.originalname).toLowerCase();
   const baseFilename = uuidv4();
-  const originalPath = path.join(UPLOADS_DIR, `${baseFilename}${ext}`);
-  const thumbnailPath = path.join(UPLOADS_DIR, `${baseFilename}_thumb${ext}`);
-  const webpPath = path.join(UPLOADS_DIR, `${baseFilename}.webp`);
-  const thumbnailWebpPath = path.join(UPLOADS_DIR, `${baseFilename}_thumb.webp`);
+  const originalPath = path.join(UPLOADS_IMAGES_DIR, `${baseFilename}${ext}`);
+  const thumbnailPath = path.join(UPLOADS_IMAGES_DIR, `${baseFilename}_thumb${ext}`);
+  const webpPath = path.join(UPLOADS_IMAGES_DIR, `${baseFilename}.webp`);
+  const thumbnailWebpPath = path.join(UPLOADS_IMAGES_DIR, `${baseFilename}_thumb.webp`);
 
   // Save original file
   await fs.writeFile(originalPath, file.buffer);
@@ -96,7 +99,8 @@ async function processImage(file) {
  */
 async function deleteImage(mediaPath) {
   try {
-    const basePath = path.join(__dirname, '../public', mediaPath);
+    const relativePath = mediaPath.replace(/^\/+/, '');
+    const basePath = path.join(UPLOADS_ROOT, relativePath.replace(/^uploads\//, ''));
     const ext = path.extname(basePath);
     const baseName = path.basename(basePath, ext);
     const dir = path.dirname(basePath);
