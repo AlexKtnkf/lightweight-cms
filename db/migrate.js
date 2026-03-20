@@ -11,7 +11,7 @@ async function runMigrations() {
   const isPostgres = !!process.env.DATABASE_URL;
 
   // Track migrations so postinstall can run safely on every deploy
-  await db.run('CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at DATETIME DEFAULT CURRENT_TIMESTAMP)');
+  await db.run('CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
 
   logger.info(`Found ${files.length} migration(s)`);
 
