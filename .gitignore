@@ -3,10 +3,14 @@ node_modules/
 
 # Environment
 .env
+.env.local
+.env.*.local
 
 # Database
 database.db
 database.db-journal
+database.db-shm
+database.db-wal
 *.db
 *.db-journal
 
@@ -22,6 +26,8 @@ public/static/*
 # Logs
 *.log
 logs/
+server.log
+server.err
 
 # OS
 .DS_Store
@@ -30,8 +36,18 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
+*.tsbuildinfo
+
+# Process management
+*.pid
+pids/
 
 # Sessions
 db/sessions.db
+
+# Crash dumps
+*.stackdump
+core.*
