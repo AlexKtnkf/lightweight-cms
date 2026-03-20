@@ -35,6 +35,8 @@ const settingsSchema = z.object({
   footer_menu_links: z.array(menuLinkSchema),
   footer_text: z.string(),
   social_links: z.array(socialLinkSchema),
+  allow_search_indexing: z.boolean().default(true),
+  contact_email: z.string().email('Email valide requis').optional().or(z.literal('')),
 });
 
 type SettingsForm = z.infer<typeof settingsSchema>;
@@ -133,7 +135,7 @@ export function SettingsEditor() {
     mutationFn: (data: Partial<Settings>) => settingsApi.update(data),
     onSuccess: (updated) => {
       queryClient.setQueryData(['settings'], updated);
-      alert('Enregistré !');
+      alert('Paramètres enregistrés ! Le site est en cours de régénération...');
     },
   });
 
@@ -146,6 +148,8 @@ export function SettingsEditor() {
       footer_menu_links: [],
       footer_text: '',
       social_links: [],
+      allow_search_indexing: true,
+      contact_email: '',
     };
     if (!settings) return empty;
 
@@ -157,6 +161,8 @@ export function SettingsEditor() {
       footer_menu_links: settings.footer_menu_links ?? [],
       footer_text: settings.footer_text ?? '',
       social_links: settings.social_links ?? [],
+      allow_search_indexing: settings.allow_search_indexing ?? true,
+      contact_email: settings.contact_email ?? '',
     };
   }, [settings]);
 
@@ -218,6 +224,19 @@ export function SettingsEditor() {
             </div>
           </div>
 
+          <div className="border-t border-gray-200 pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="text-sm font-medium text-gray-900">Autoriser le référencement par les moteurs de recherche</label>
+                <p className="text-xs text-gray-500 mt-1">Contrôle le fichier robots.txt pour permettre ou bloquer l'indexation du site</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input {...register('allow_search_indexing')} type="checkbox" className="sr-only peer" />
+                <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
+
           <MenuLinksSection name="header_menu_links" title="Menu Header" />
           <MenuLinksSection name="footer_menu_links" title="Menu Footer" />
 
@@ -227,6 +246,13 @@ export function SettingsEditor() {
           </div>
 
           <SocialLinksSection />
+
+          <div className="border-t border-gray-200 pt-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Email pour le formulaire de contact</label>
+            <p className="text-xs text-gray-500 mb-2">Les messages du formulaire de contact seront envoyés à cet email</p>
+            <input {...register('contact_email')} type="email" className="w-full px-3 py-2 border rounded-md" placeholder="admin@example.com" />
+            {errors.contact_email && <p className="text-red-500 text-xs mt-1">{errors.contact_email.message}</p>}
+          </div>
 
           <div className="flex justify-end pt-4 border-t">
             <button type="submit" disabled={mutation.isPending} className="px-6 py-2 bg-blue-600 text-white rounded-md disabled:bg-blue-300">

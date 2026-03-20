@@ -1,55 +1,93 @@
-const sqlite3 = require('sqlite3').verbose();
-const { promisify } = require('util');
+const Database = require('better-sqlite3');
 const path = require('path');
 const logger = require('../../../utils/logger');
 require('dotenv').config();
 
-class Database {
+class DatabaseWrapper {
   constructor(dbPath) {
-    this.db = new sqlite3.Database(dbPath, (err) => {
-      if (err) {
-        logger.error('Error opening database:', err);
-        throw err;
-      }
+    try {
+      // better-sqlite3 is synchronous and doesn't take a callback
+      this.db = new Database(dbPath);
+      this.db.pragma('journal_mode = WAL'); // Enable Write-Ahead Logging for better concurrency
       logger.info('Connected to SQLite database');
-    });
-    
-    // Promisify methods for async/await
-    // db.run needs special handling because it uses 'this' context
-    const self = this;
-    this.run = function(sql, params = []) {
-      return new Promise((resolve, reject) => {
-        self.db.run(sql, params, function(err) {
-          if (err) reject(err);
-          else resolve({ lastID: this.lastID, changes: this.changes });
-        });
-      });
-    };
-    
-    this.get = promisify(this.db.get.bind(this.db));
-    this.all = promisify(this.db.all.bind(this.db));
+    } catch (error) {
+      logger.error('Error opening database:', error);
+      throw error;
+    }
   }
 
-  // Execute migration SQL
+  /**
+   * Run a SQL query (INSERT, UPDATE, DELETE)
+   * Returns { lastID, changes } wrapped in a Promise for API compatibility
+   */
+  run(sql, params = []) {
+    return Promise.resolve().then(() => {
+      try {
+        const stmt = this.db.prepare(sql);
+        const result = stmt.run(...(Array.isArray(params) ? params : [params]));
+        return {
+          lastID: result.lastInsertRowid,
+          changes: result.changes
+        };
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    });
+  }
+
+  /**
+   * Get a single row
+   * Returns the row or undefined wrapped in a Promise for API compatibility
+   */
+  get(sql, params = []) {
+    return Promise.resolve().then(() => {
+      try {
+        const stmt = this.db.prepare(sql);
+        return stmt.get(...(Array.isArray(params) ? params : [params]));
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    });
+  }
+
+  /**
+   * Get all rows
+   * Returns an array of rows wrapped in a Promise for API compatibility
+   */
+  all(sql, params = []) {
+    return Promise.resolve().then(() => {
+      try {
+        const stmt = this.db.prepare(sql);
+        return stmt.all(...(Array.isArray(params) ? params : [params]));
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    });
+  }
+
+  /**
+   * Execute migration SQL (supports multiple statements)
+   */
   async migrate(sql) {
     return this.run(sql);
   }
 
-  // Close connection
+  /**
+   * Close database connection
+   */
   close() {
-    return new Promise((resolve, reject) => {
-      this.db.close((err) => {
-        if (err) reject(err);
-          else {
-            logger.info('Database connection closed');
-            resolve();
-          }
-      });
+    return Promise.resolve().then(() => {
+      try {
+        this.db.close();
+        logger.info('Database connection closed');
+      } catch (error) {
+        return Promise.reject(error);
+      }
     });
   }
 }
 
 const dbPath = process.env.DB_PATH || path.join(__dirname, '../../../database.db');
-const db = new Database(dbPath);
+const db = new DatabaseWrapper(dbPath);
 
 module.exports = db;

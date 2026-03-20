@@ -15,16 +15,16 @@ class SitemapGenerator {
     const pages = await this.pageRepository.findAll();
 
     const urls = [
-      { loc: baseUrl, changefreq: 'daily', priority: '1.0' },
-      { loc: `${baseUrl}/blog`, changefreq: 'weekly', priority: '0.8' }
+      { loc: baseUrl, priority: '1.0' },
+      { loc: `${baseUrl}/blog`, priority: '0.8' }
     ];
 
     // Add published pages
     pages.forEach(page => {
       urls.push({
         loc: `${baseUrl}/${page.slug}`,
-        changefreq: 'monthly',
-        priority: '0.7'
+        priority: '0.7',
+        lastmod: page.updated_at
       });
     });
 
@@ -32,7 +32,6 @@ class SitemapGenerator {
     articles.forEach(article => {
       urls.push({
         loc: `${baseUrl}/blog/${article.slug}`,
-        changefreq: 'monthly',
         priority: '0.6',
         lastmod: article.updated_at || article.published_at || article.created_at
       });
@@ -46,7 +45,6 @@ class SitemapGenerator {
       const lastmod = url.lastmod ? `\n    <lastmod>${url.lastmod}</lastmod>` : '';
       return `  <url>
     <loc>${url.loc}</loc>
-    <changefreq>${url.changefreq}</changefreq>
     <priority>${url.priority}</priority>${lastmod}
   </url>`;
     }).join('\n');

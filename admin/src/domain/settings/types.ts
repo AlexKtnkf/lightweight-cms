@@ -7,5 +7,7 @@ export interface Settings {
   footer_menu_links?: Array<{ label: string; url: string; order: number }>;
   footer_text?: string;
   social_links?: Array<{ platform: string; url: string; icon: string }>;
+  allow_search_indexing?: boolean;
+  contact_email?: string;
   updated_at: string;
 }

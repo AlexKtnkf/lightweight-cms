@@ -4,15 +4,20 @@
   Expected Data: block.block_data = { title, description, fields: [{ type, label, placeholder, required, options }], submit_button_text, action_url }
 -->
 <% if (block.block_data.fields && block.block_data.fields.length > 0) { %>
-<section id="contact" class="l-container l-section">
-  <div class="c-contact">
+<section id="contact" class="l-section">
+  <div class="l-container">
+    <div class="c-contact">
     <% if (block.block_data.title) { %>
     <h2 class="c-headline__title" style="text-align: center;"><%= block.block_data.title %></h2>
     <% } %>
     <% if (block.block_data.description) { %>
     <p class="c-contact__description"><%= block.block_data.description %></p>
     <% } %>
-    <form class="c-contact__form" method="POST" action="<%= block.block_data.action_url || '#' %>">
+    
+    <!-- Status messages -->
+    <div id="contact-form-message" style="display: none; margin-bottom: 20px; padding: 15px; border-radius: 4px;"></div>
+    
+    <form id="contact-form" class="c-contact__form">
       <%
       const fields = block.block_data.fields;
       fields.forEach((field, index) => {
@@ -21,23 +26,132 @@
       <div class="c-contact__group<%= isFullWidth ? ' c-contact__group--full' : '' %>">
         <label for="contact-field-<%= index %>"><%= field.label %><% if (field.required) { %> *<% } %></label>
         <% if (field.type === 'textarea') { %>
-        <textarea id="contact-field-<%= index %>" name="field_<%= index %>" rows="5" placeholder="<%= field.placeholder || '' %>" <%= field.required ? 'required' : '' %>></textarea>
+        <textarea id="contact-field-<%= index %>" name="field_<%= index %>" rows="5" placeholder="<%= field.placeholder || '' %>" data-label="<%= field.label %>" <%= field.required ? 'required' : '' %>></textarea>
         <% } else if (field.type === 'select') { %>
-        <select id="contact-field-<%= index %>" name="field_<%= index %>" <%= field.required ? 'required' : '' %>>
+        <select id="contact-field-<%= index %>" name="field_<%= index %>" data-label="<%= field.label %>" <%= field.required ? 'required' : '' %>>
           <option value=""><%= field.placeholder || 'Choisir...' %></option>
           <% if (field.options && Array.isArray(field.options)) { field.options.forEach(opt => { %>
           <option value="<%= opt.value || opt %>"><%= opt.label || opt %></option>
           <% }); } %>
         </select>
         <% } else { %>
-        <input type="<%= field.type || 'text' %>" id="contact-field-<%= index %>" name="field_<%= index %>" placeholder="<%= field.placeholder || '' %>" <%= field.required ? 'required' : '' %>>
+        <input type="<%= field.type || 'text' %>" id="contact-field-<%= index %>" name="field_<%= index %>" placeholder="<%= field.placeholder || '' %>" data-label="<%= field.label %>" <%= field.required ? 'required' : '' %>>
         <% } %>
       </div>
       <% }); %>
       <div class="c-contact__group c-contact__group--full">
-        <button type="submit" class="btn btn--primary"><%= block.block_data.submit_button_text || 'Envoyer' %></button>
+        <button type="submit" id="contact-submit-btn" class="btn btn--primary"><%= block.block_data.submit_button_text || 'Envoyer' %></button>
       </div>
     </form>
+    </div>
   </div>
 </section>
+
+<script>
+(function() {
+  const form = document.getElementById('contact-form');
+  const messageDiv = document.getElementById('contact-form-message');
+  const submitBtn = document.getElementById('contact-submit-btn');
+  
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Reset message
+    messageDiv.style.display = 'none';
+    messageDiv.textContent = '';
+    messageDiv.className = '';
+    
+    // Disable submit button
+    submitBtn.disabled = true;
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Envoi en cours...';
+
+    try {
+      // Collect form data
+      const formData = new FormData(form);
+      const fields = [];
+      
+      Array.from(form.elements).forEach(el => {
+        if (el.name && el.name.startsWith('field_')) {
+          const label = el.getAttribute('data-label') || el.name;
+          fields.push({
+            label: label,
+            value: el.value
+          });
+        }
+      });
+
+      // Find email field if it exists
+      const emailField = Array.from(form.elements).find(el => el.type === 'email');
+      const email = emailField ? emailField.value : null;
+      
+      // Find name field if it exists
+      const nameField = Array.from(form.elements).find(el => 
+        el.getAttribute('data-label')?.toLowerCase().includes('nom') || 
+        el.name.includes('name') || 
+        el.name.includes('nom')
+      );
+      const name = nameField ? nameField.value : null;
+
+      // Send to API
+      const response = await fetch('/api/contact/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fields: fields,
+          email: email,
+          name: name
+        })
+      });
+
+      const data = await response.json();
+
+      // Show message
+      messageDiv.style.display = 'block';
+      
+      if (response.ok && data.success) {
+        messageDiv.className = 'contact-form-success';
+        messageDiv.innerHTML = '<strong>✓ Succès!</strong> ' + (data.message || 'Votre message a bien été reçu.');
+        form.reset();
+      } else {
+        messageDiv.className = 'contact-form-error';
+        messageDiv.innerHTML = '<strong>✗ Erreur</strong>: ' + (data.message || 'Une erreur s\'est produite.');
+      }
+
+    } catch (error) {
+      console.error('Form submission error:', error);
+      messageDiv.style.display = 'block';
+      messageDiv.className = 'contact-form-error';
+      messageDiv.innerHTML = '<strong>✗ Erreur</strong>: Impossible d\'envoyer le message. Vérifiez votre connexion.';
+    } finally {
+      // Re-enable submit button
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    }
+  });
+
+  // Add CSS for messages if not already present
+  if (!document.getElementById('contact-form-styles')) {
+    const style = document.createElement('style');
+    style.id = 'contact-form-styles';
+    style.textContent = `
+      .contact-form-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .contact-form-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+})();
+</script>
 <% } %>

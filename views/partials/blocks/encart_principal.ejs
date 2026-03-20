@@ -3,8 +3,9 @@
   Purpose: Full-width image + card layout (matches c-main-feature: image left, card right on desktop)
   Expected Data: block.block_data = { image_id, titre, texte, url, lien }
 -->
-<section class="c-main-feature" aria-labelledby="encart-title-<%= block.id || 'default' %>">
-  <div class="c-main-feature__wrapper">
+<section class="l-section" aria-labelledby="encart-title-<%= block.id || 'default' %>">
+  <div class="c-main-feature">
+    <div class="c-main-feature__wrapper">
     <% if (block.block_data.image_id) { %>
     <div class="c-main-feature__image">
       <img src="/api/media/<%= block.block_data.image_id %>" alt="<%= block.block_data.titre || 'Illustration' %>">
@@ -20,6 +21,7 @@
       <% if (block.block_data.url && block.block_data.lien) { %>
       <a href="<%= block.block_data.url %>" class="btn btn--outline"><%= block.block_data.lien %></a>
       <% } %>
+    </div>
     </div>
   </div>
 </section>

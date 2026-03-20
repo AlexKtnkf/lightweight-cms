@@ -27,10 +27,11 @@ class PageRepository {
     return db.all(sql);
   }
 
-  // List all (for admin) - exclude homepage (id = 1)
-  async findAllAdmin(limit = 50, offset = 0) {
+  // List all (for admin) - optionally exclude homepage (id = 1)
+  async findAllAdmin(limit = 50, offset = 0, excludeHomepage = false) {
+    const where = excludeHomepage ? 'WHERE id != 1' : '';
     const sql = `SELECT * FROM pages 
-                 WHERE id != 1
+                 ${where}
                  ORDER BY created_at DESC
                  LIMIT ? OFFSET ?`;
     return db.all(sql, [limit, offset]);

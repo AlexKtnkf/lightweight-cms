@@ -1,3 +1,5 @@
+const fs = require('fs').promises;
+const path = require('path');
 const GetSettings = require('../src/domain/settings/application/GetSettings');
 const settingsRepository = require('../src/domain/settings/infrastructure/settingsRepository');
 
@@ -10,6 +12,16 @@ async function loadSettings(req, res, next) {
   try {
     const settings = await getSettings.execute();
     res.locals.settings = settings;
+    
+    // Load logo SVG for navbar
+    try {
+      const logoSvgPath = path.join(__dirname, '../public/media/logo.svg');
+      res.locals.logoSvg = await fs.readFile(logoSvgPath, 'utf8');
+    } catch (err) {
+      // Logo SVG not found, navbar will use text fallback
+      res.locals.logoSvg = '';
+    }
+    
     next();
   } catch (error) {
     // If settings don't exist, create defaults
@@ -22,6 +34,7 @@ async function loadSettings(req, res, next) {
       footer_menu_links: [],
       footer_text: null
     };
+    res.locals.logoSvg = '';
     next();
   }
 }

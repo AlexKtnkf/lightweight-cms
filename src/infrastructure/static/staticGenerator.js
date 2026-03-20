@@ -27,6 +27,7 @@ class StaticGenerator {
     this.pageRepository = pageRepository;
     this.staticDir = path.join(__dirname, '../../../public/static');
     this.viewsDir = path.join(__dirname, '../../../views');
+    this.publicDir = path.join(__dirname, '../../../public');
   }
 
   /**
@@ -181,6 +182,15 @@ class StaticGenerator {
       // For static generation, use SITE_HOST from env or default
       const baseUrl = process.env.SITE_HOST ? `https://${process.env.SITE_HOST}` : 'https://example.com';
       
+      // Read logo SVG for navbar
+      const logoSvgPath = path.join(this.publicDir, 'media/logo.svg');
+      let logoSvg = '';
+      try {
+        logoSvg = await fs.readFile(logoSvgPath, 'utf8');
+      } catch (err) {
+        logger.warn('Logo SVG not found, navbar will use text fallback');
+      }
+      
       // Generate JSON-LD schemas
       const orgSchema = JSONLD.organization(baseUrl, settings);
       const websiteSchema = JSONLD.website(baseUrl, settings);
@@ -189,6 +199,7 @@ class StaticGenerator {
         homepage: homepage,
         pages: pages, // For navigation
         settings: settings,
+        logoSvg: logoSvg,
         baseUrl: baseUrl,
         jsonLd: [orgSchema, websiteSchema],
         gaId: process.env.GA_ID || ''

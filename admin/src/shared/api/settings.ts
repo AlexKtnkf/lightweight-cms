@@ -7,4 +7,7 @@ export const settingsApi = {
   
   update: (data: Partial<Settings>): Promise<Settings> => 
     api.put('/admin/settings', data).then(r => r.data),
+
+  regenerate: (): Promise<{ success: boolean; message: string }> =>
+    api.post('/admin/regenerate').then(r => r.data),
 };

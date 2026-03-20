@@ -3,8 +3,9 @@
   Purpose: Centered CTA box with email form (matches c-lead / c-lead__form)
   Expected Data: block.block_data = { icon, title, description, action_url, placeholder, button_text }
 -->
-<section class="l-container l-section" id="<%= block.id ? 'block-' + block.id : 'lead-magnet' %>">
-  <div class="c-lead">
+<section class="l-section" id="<%= block.id ? 'block-' + block.id : 'lead-magnet' %>">
+  <div class="l-container">
+    <div class="c-lead">
     <% if (block.block_data.icon) { %>
     <div class="c-lead__icon">
       <% if (block.block_data.icon === 'seedling') { %>
@@ -24,5 +25,6 @@
       <input type="email" name="email" placeholder="<%= block.block_data.placeholder || 'Votre email' %>" required>
       <button type="submit" class="btn btn--primary"><%= block.block_data.button_text || 'S\'inscrire' %></button>
     </form>
+    </div>
   </div>
 </section>

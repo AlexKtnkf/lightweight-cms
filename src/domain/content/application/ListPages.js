@@ -4,7 +4,7 @@ class ListPages {
   }
 
   async execute(options = {}) {
-    const { limit = 50, offset = 0, excludeHomepage = true } = options;
+    const { limit = 50, offset = 0, excludeHomepage = false } = options;
     const pages = await this.pageRepository.findAllAdmin(limit, offset, excludeHomepage);
     return pages;
   }

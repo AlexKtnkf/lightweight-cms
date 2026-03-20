@@ -127,3 +127,49 @@ INSERT OR IGNORE INTO pages (
   datetime('now'),
   datetime('now')
 );
+
+-- Backfill default social_links for existing settings rows (column is defined in 001_initial.sql)
+UPDATE settings 
+SET social_links = '[
+  {"platform": "instagram", "url": "https://instagram.com", "icon": "instagram"},
+  {"platform": "facebook", "url": "https://facebook.com", "icon": "facebook"},
+  {"platform": "linkedin", "url": "https://linkedin.com", "icon": "linkedin"}
+]'
+WHERE social_links IS NULL OR social_links = '[]';
+
+-- Add allow_search_indexing column to settings table
+ALTER TABLE settings 
+ADD COLUMN allow_search_indexing BOOLEAN DEFAULT 1;
+
+-- Set default to 1 (allow indexing) for existing settings
+UPDATE settings 
+SET allow_search_indexing = 1 
+WHERE allow_search_indexing IS NULL;
+
+-- Add contact email field to settings table
+
+ALTER TABLE settings 
+ADD COLUMN contact_email TEXT;
+
+-- Create index for faster lookups
+CREATE INDEX IF NOT EXISTS idx_settings_contact_email ON settings(contact_email);
+
+
+-- Add contact submissions table for storing contact form submissions
+
+CREATE TABLE IF NOT EXISTS contact_submissions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  form_data TEXT NOT NULL,      -- JSON with all form fields
+  visitor_email TEXT,           -- Extracted email for easy querying
+  visitor_ip TEXT,              -- IP address for spam detection
+  submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  read BOOLEAN DEFAULT 0,       -- Admin has read/reviewed
+  responded_at DATETIME,        -- When admin responded
+  notes TEXT,                   -- Admin notes
+  archived BOOLEAN DEFAULT 0    -- Soft delete
+);
+
+-- Index for common queries
+CREATE INDEX IF NOT EXISTS idx_contact_submitted_at ON contact_submissions(submitted_at DESC);
+CREATE INDEX IF NOT EXISTS idx_contact_read ON contact_submissions(read);
+CREATE INDEX IF NOT EXISTS idx_contact_archived ON contact_submissions(archived);

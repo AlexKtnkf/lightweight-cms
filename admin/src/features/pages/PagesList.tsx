@@ -88,13 +88,15 @@ export function PagesList() {
                     >
                       Modifier
                     </button>
-                    <button
-                      onClick={() => handleDelete(page.id, page.title)}
-                      className="text-red-600 hover:text-red-900"
-                      disabled={deleteMutation.isPending}
-                    >
-                      {deleteMutation.isPending ? 'Suppression en cours...' : 'Supprimer'}
-                    </button>
+                    {page.id !== 1 && (
+                      <button
+                        onClick={() => handleDelete(page.id, page.title)}
+                        className="text-red-600 hover:text-red-900"
+                        disabled={deleteMutation.isPending}
+                      >
+                        {deleteMutation.isPending ? 'Suppression en cours...' : 'Supprimer'}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

@@ -14,6 +14,7 @@ const settingsRepository = require('../src/domain/settings/infrastructure/settin
 
 // Infrastructure
 const staticGenerator = require('../src/infrastructure/static/staticGenerator');
+const RobotsGenerator = require('../src/shared/utils/robotsGenerator');
 const upload = require('../config/upload');
 
 // Use cases (application) - Pages
@@ -88,8 +89,11 @@ const mediaController = new MediaController(uploadMedia, listMedia, deleteMedia)
 const getSettings = new GetSettings(settingsRepository);
 const updateSettings = new UpdateSettings(settingsRepository);
 
+// Instantiate infrastructure - Robots generator
+const robotsGenerator = new RobotsGenerator();
+
 // Instantiate controller - Settings
-const settingsController = new SettingsController(getSettings, updateSettings);
+const settingsController = new SettingsController(getSettings, updateSettings, staticGenerator, robotsGenerator);
 
 // All routes require authentication
 router.use(requireAuth);
@@ -117,5 +121,6 @@ router.delete('/media/:id', (req, res, next) => mediaController.delete(req, res,
 // Settings API routes
 router.get('/settings', (req, res, next) => settingsController.get(req, res, next));
 router.put('/settings', (req, res, next) => settingsController.update(req, res, next));
+router.post('/regenerate', (req, res, next) => settingsController.regenerate(req, res, next));
 
 module.exports = router;

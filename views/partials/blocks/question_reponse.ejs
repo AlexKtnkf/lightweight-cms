@@ -1,15 +1,19 @@
 <!--
   Block: Question-Réponse (FAQ item)
-  Purpose: Single FAQ item as <details> (matches c-faq). Use multiple blocks for a FAQ section.
+  Purpose: Single FAQ item as <details> (matches c-faq). Multiple blocks create a FAQ section.
   Expected Data: block.block_data = { question, reponse }
 -->
-<% if (block.block_data.question || block.block_data.reponse) { %>
-<details class="c-faq" id="<%= block.id ? 'faq-' + block.id : '' %>">
-  <% if (block.block_data.question) { %>
-  <summary><%= block.block_data.question %></summary>
-  <% } %>
-  <% if (block.block_data.reponse) { %>
-  <div class="c-faq__answer"><%- block.block_data.reponse %></div>
-  <% } %>
-</details>
-<% } %>
+<section class="l-section" id="<%= block.id ? 'faq-section-' + block.id : '' %>">
+  <div class="l-container">
+    <% if (block.block_data.question || block.block_data.reponse) { %>
+    <details class="c-faq" id="<%= block.id ? 'faq-' + block.id : '' %>">
+      <% if (block.block_data.question) { %>
+      <summary><%= block.block_data.question %></summary>
+      <% } %>
+      <% if (block.block_data.reponse) { %>
+      <div class="c-faq__answer"><%- block.block_data.reponse %></div>
+      <% } %>
+    </details>
+    <% } %>
+  </div>
+</section>

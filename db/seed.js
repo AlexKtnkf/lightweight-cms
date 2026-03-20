@@ -1,45 +1,55 @@
 /**
- * Seed homepage with content from the Dr. Claire Vallet example page (ai_studio_code.html).
- * Run after migrations: npm run seed-homepage
- *
- * - Upserts settings (site title, nav, footer, socials)
- * - Updates page id=1 (homepage) meta
- * - Replaces all content_blocks for page 1 with the example blocks
- *
- * Images (encart_principal, pin_grid) are left null; add media via admin and edit blocks to set image_id / image_media_id.
+ * Comprehensive Database Seeding Script
+ * 
+ * Combines initialization and seeding of:
+ * - Homepage page (page id=1)
+ * - Site settings (title, menus, branding)
+ * - Homepage content blocks (hero, sections, FAQ, contact form)
+ * - Logo media file
+ * 
+ * Run: npm run seed
  */
 
 const db = require('../src/infrastructure/database/database');
 const logger = require('../utils/logger');
+const path = require('path');
+const fs = require('fs');
 
 const CONTENT_TYPE = 'page';
 const HOMEPAGE_ID = 1;
+const LOGO_PATH = path.join(__dirname, '../public/media/logo.svg');
+const LOGO_FILENAME = 'logo.svg';
+const LOGO_ORIGINAL_FILENAME = 'logo.svg';
+const LOGO_MIME_TYPE = 'image/svg+xml';
+const LOGO_STORAGE_PATH = 'media/logo.svg';
 
+// Site settings (customizable for each deployment)
 const SETTINGS = {
-  site_title: 'Dr. Claire Vallet',
+  site_title: 'Adeline Hage | Diététique',
   site_tagline: 'Diététique, Psychologie & Plaisir',
   header_menu_links: [
-    { label: 'Approche', url: '#approche', order: 0 },
-    { label: 'Accompagnement', url: '#accompagnement', order: 1 },
-    { label: 'Articles', url: '#articles', order: 2 },
-    { label: 'FAQ', url: '#faq', order: 3 },
-    { label: 'Prendre RDV', url: '#contact', order: 4, cta: true },
+    { label: 'Mon approche', url: '#approche', order: 0 },
+    { label: 'Infos pratiques', url: '#accompagnement', order: 1 },
+    { label: 'RDV Doctolib', url: 'https://www.doctolib.fr/dieteticien/lille/adeline-hage', order: 2 }
   ],
-  footer_text: '© 2024 Dr. Claire Vallet. Mentions Légales.',
+  footer_text: '© Adeline Hage',
   social_links: [
-    { platform: 'instagram', url: 'https://instagram.com', icon: 'instagram' },
-    { platform: 'linkedin', url: 'https://linkedin.com', icon: 'linkedin' },
+    { platform: 'instagram', url: 'https://www.instagram.com/adeline.mindandmeal', icon: 'instagram' },
+    { platform: 'linkedin', url: 'https://fr.linkedin.com/in/adeline-hage-826391102', icon: 'linkedin' },
+    { platform: 'facebook', url: 'https://www.facebook.com/dieteticiennelille/', icon: 'facebook' },
   ],
 };
 
+// Homepage page metadata
 const HOMEPAGE_PAGE = {
-  title: 'Dr. Claire Vallet | Diététique, Psychologie & Plaisir',
+  title: 'Adeline Hage | Diététique',
   slug: 'homepage',
   published: 1,
-  meta_title: 'Dr. Claire Vallet | Diététique, Psychologie & Plaisir',
+  meta_title: 'Adeline Hage | Diététique',
   meta_description: 'Retrouvez la paix avec votre corps et votre assiette. Méthode scientifique et bienveillante.',
 };
 
+// Homepage content blocks
 const BLOCKS = [
   {
     block_type: 'hero',
@@ -159,12 +169,16 @@ const BLOCKS = [
   },
 ];
 
+/**
+ * Seed or update site settings
+ */
 async function seedSettings() {
   const headerLinks = JSON.stringify(SETTINGS.header_menu_links);
   const footerLinks = JSON.stringify([]);
   const socialLinks = JSON.stringify(SETTINGS.social_links);
 
   const existing = await db.get('SELECT id FROM settings WHERE id = 1');
+  
   if (existing) {
     await db.run(
       `UPDATE settings SET
@@ -180,19 +194,23 @@ async function seedSettings() {
         socialLinks,
       ]
     );
-    logger.info('Settings updated');
+    logger.info('✓ Settings updated');
   } else {
     await db.run(
       `INSERT INTO settings (id, site_title, site_tagline, logo_media_id, header_menu_links, footer_menu_links, footer_text, social_links, updated_at)
        VALUES (1, ?, ?, NULL, ?, ?, ?, ?, datetime('now'))`,
       [SETTINGS.site_title, SETTINGS.site_tagline || null, headerLinks, footerLinks, SETTINGS.footer_text || null, socialLinks]
     );
-    logger.info('Settings created');
+    logger.info('✓ Settings created');
   }
 }
 
+/**
+ * Seed or update homepage page
+ */
 async function seedHomepagePage() {
   const existing = await db.get('SELECT id FROM pages WHERE id = ?', [HOMEPAGE_ID]);
+  
   if (existing) {
     await db.run(
       `UPDATE pages SET title = ?, slug = ?, published = ?, meta_title = ?, meta_description = ?, updated_at = datetime('now') WHERE id = ?`,
@@ -205,7 +223,7 @@ async function seedHomepagePage() {
         HOMEPAGE_ID,
       ]
     );
-    logger.info('Homepage page (id=1) updated');
+    logger.info('✓ Homepage page (id=1) updated');
   } else {
     await db.run(
       `INSERT INTO pages (id, title, slug, published, meta_title, meta_description, created_at, updated_at)
@@ -219,10 +237,13 @@ async function seedHomepagePage() {
         HOMEPAGE_PAGE.meta_description,
       ]
     );
-    logger.info('Homepage page (id=1) created');
+    logger.info('✓ Homepage page (id=1) created');
   }
 }
 
+/**
+ * Seed homepage content blocks
+ */
 async function seedBlocks() {
   await db.run('DELETE FROM content_blocks WHERE content_type = ? AND content_id = ?', [CONTENT_TYPE, HOMEPAGE_ID]);
   logger.info('Cleared existing homepage blocks');
@@ -234,18 +255,88 @@ async function seedBlocks() {
       [CONTENT_TYPE, HOMEPAGE_ID, block.block_type, block.block_order, JSON.stringify(block.block_data)]
     );
   }
-  logger.info(`Inserted ${BLOCKS.length} homepage blocks`);
+  logger.info(`✓ Inserted ${BLOCKS.length} homepage blocks`);
 }
 
+/**
+ * Seed logo media file (optional - only if file exists)
+ */
+async function seedLogo() {
+  if (!fs.existsSync(LOGO_PATH)) {
+    logger.warn('Logo file not found at ' + LOGO_PATH + ', skipping logo seeding');
+    return;
+  }
+
+  try {
+    // Check if logo already exists
+    const existing = await db.get('SELECT id FROM media WHERE filename = ?', [LOGO_FILENAME]);
+    
+    if (existing) {
+      logger.info(`Logo already exists (id=${existing.id}), updating settings`);
+      await updateSettingsLogo(existing.id);
+      return;
+    }
+
+    // Get file size
+    const stats = fs.statSync(LOGO_PATH);
+    const fileSize = stats.size;
+
+    // Insert logo into media table (SVG is scalable, so width/height are null)
+    const result = await db.run(
+      `INSERT INTO media (filename, original_filename, path, mime_type, file_size, width, height, thumbnail_path, webp_path, alt_text, uploaded_at)
+       VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, ?, datetime('now'))`,
+      [
+        LOGO_FILENAME,
+        LOGO_ORIGINAL_FILENAME,
+        LOGO_STORAGE_PATH,
+        LOGO_MIME_TYPE,
+        fileSize,
+        'Website logo'
+      ]
+    );
+
+    logger.info(`Logo inserted (id=${result.lastID}, size=${fileSize} bytes)`);
+    await updateSettingsLogo(result.lastID);
+  } catch (err) {
+    logger.warn('Logo seeding skipped:', err.message);
+  }
+}
+
+/**
+ * Update settings with logo_media_id
+ */
+async function updateSettingsLogo(logoId) {
+  const existing = await db.get('SELECT id FROM settings LIMIT 1');
+  
+  if (existing) {
+    await db.run(
+      'UPDATE settings SET logo_media_id = ?, updated_at = datetime("now") WHERE id = ?',
+      [logoId, existing.id]
+    );
+    logger.info(`Settings updated with logo_media_id=${logoId}`);
+  } else {
+    await db.run(
+      `INSERT INTO settings (id, site_title, logo_media_id, updated_at)
+       VALUES (1, 'My Site', ?, datetime('now'))`,
+      [logoId]
+    );
+    logger.info(`Settings created with logo_media_id=${logoId}`);
+  }
+}
+
+/**
+ * Main seed execution
+ */
 async function run() {
   try {
-    logger.info('Seeding homepage (Dr. Claire Vallet example)...');
+    logger.info('🌱 Starting database seeding...');
     await seedSettings();
     await seedHomepagePage();
     await seedBlocks();
-    logger.info('✓ Homepage seed completed');
+    await seedLogo();
+    logger.info('✓ Database seeding completed successfully');
   } catch (err) {
-    logger.error('Seed failed:', err);
+    logger.error('✗ Seeding failed:', err);
     throw err;
   } finally {
     await db.close();

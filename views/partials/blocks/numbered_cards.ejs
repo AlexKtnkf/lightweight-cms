@@ -4,11 +4,12 @@
   Expected Data: block.block_data = { section_title, cards: [{ number, title, description }] }
 -->
 <% if (block.block_data.cards && block.block_data.cards.length > 0) { %>
-<section class="l-container l-section" id="<%= block.id ? 'block-' + block.id : 'numbered-cards' %>">
-  <% if (block.block_data.section_title) { %>
-  <h2 class="c-headline__title" style="text-align: center; margin-bottom: 3rem;"><%= block.block_data.section_title %></h2>
-  <% } %>
-  <div class="c-num-grid">
+<section class="l-section" id="<%= block.id ? 'block-' + block.id : 'numbered-cards' %>">
+  <div class="l-container">
+    <% if (block.block_data.section_title) { %>
+    <h2 class="c-headline__title" style="text-align: center; margin-bottom: 3rem;"><%= block.block_data.section_title %></h2>
+    <% } %>
+    <div class="c-num-grid">
     <% block.block_data.cards.forEach((card, index) => { %>
     <div class="c-num-card">
       <span class="c-num-card__number"><%= String(card.number != null ? card.number : index + 1).padStart(2, '0') %></span>
@@ -20,6 +21,7 @@
       <% } %>
     </div>
     <% }); %>
+    </div>
   </div>
 </section>
 <% } %>

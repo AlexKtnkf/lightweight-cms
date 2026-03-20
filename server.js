@@ -170,11 +170,12 @@ if (process.env.NODE_ENV === 'production') {
       app.use(vite.middlewares);
       
       logger.info('Vite dev server initialized');
-      // Start server after Vite is ready
-      startServer();
     } catch (err) {
-      logger.error('Failed to start Vite dev server:', err);
-      process.exit(1);
+      logger.error('Failed to start Vite dev server:', err.message);
+      logger.warn('Admin panel will not be available, but backend API continues to work');
+    } finally {
+      // Start server regardless of Vite success (backend API should work)
+      startServer();
     }
   })();
 }

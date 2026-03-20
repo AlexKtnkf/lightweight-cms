@@ -3,8 +3,9 @@
   Purpose: Centered headline with title and optional content (matches c-headline)
   Expected Data: block.block_data = { image_media_id, title, content, section_id }
 -->
-<section class="l-container l-section" id="<%= block.block_data.section_id || (block.id ? 'block-' + block.id : 'accroche') %>" aria-labelledby="headline-<%= block.id || 'default' %>-title">
-  <div class="c-headline">
+<section class="l-section" id="<%= block.block_data.section_id || (block.id ? 'block-' + block.id : 'accroche') %>" aria-labelledby="headline-<%= block.id || 'default' %>-title">
+  <div class="l-container">
+    <div class="c-headline">
     <% if (block.block_data.image_media_id) { %>
     <img src="/api/media/<%= block.block_data.image_media_id %>" alt="<%= block.block_data.title || 'Illustration' %>" loading="lazy" class="c-headline__image">
     <% } %>
@@ -14,5 +15,6 @@
     <% if (block.block_data.content) { %>
     <div class="c-headline__content"><%- block.block_data.content %></div>
     <% } %>
+    </div>
   </div>
 </section>

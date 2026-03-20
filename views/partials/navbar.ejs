@@ -7,14 +7,16 @@
     navLinks.push(...settings.header_menu_links);
   }
 
-  // Add pages if they exist
+  // Add pages if they exist (exclude homepage with id=1 and unpublished pages)
   if (typeof pages !== 'undefined' && pages && Array.isArray(pages)) {
     pages.forEach(page => {
-      navLinks.push({
-        label: page.title,
-        url: `/${page.slug}`,
-        order: navLinks.length
-      });
+      if (page.id !== 1 && page.published) {
+        navLinks.push({
+          label: page.title,
+          url: `/${page.slug}`,
+          order: navLinks.length
+        });
+      }
     });
   }
 
@@ -25,23 +27,25 @@
   const logoMediaId = settings?.logo_media_id;
   const ctaLink = navLinks.find(link => link.cta);
   const regularLinks = navLinks.filter(link => !link.cta);
+  // Provide default empty string for logoSvg if not defined
+  const navLogoSvg = typeof logoSvg !== 'undefined' ? logoSvg : '';
 %>
 <nav class="c-nav" role="navigation" aria-label="Navigation principale">
   <div class="l-container c-nav__inner">
     <a href="/" class="c-nav__logo" aria-label="Retour à l'accueil">
-      <% if (logoMediaId) { %>
-      <img src="/api/media/<%= logoMediaId %>" alt="<%= siteTitle %>" height="24" width="24">
+      <% if (logoMediaId && navLogoSvg && navLogoSvg.trim()) { %>
+        <%- navLogoSvg %>
       <% } else { %>
-      <%= siteTitle %>
+        <%= siteTitle %>
       <% } %>
     </a>
     <button class="c-nav__toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="navMenu">Menu</button>
     <div class="c-nav__menu" id="navMenu" role="menubar">
       <% regularLinks.forEach(link => { %>
-      <a href="<%= link.url %>" class="c-nav__link" role="menuitem" <%= link.url.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : '' %>><%= link.label %></a>
+        <a href="<%= link.url %>" class="c-nav__link" role="menuitem" <%= link.url.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : '' %>><%= link.label %></a>
       <% }); %>
       <% if (ctaLink) { %>
-      <a href="<%= ctaLink.url %>" class="btn btn--primary" <%= ctaLink.url.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : '' %>><%= ctaLink.label %></a>
+        <a href="<%= ctaLink.url %>" class="btn btn--primary" <%= ctaLink.url.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : '' %>><%= ctaLink.label %></a>
       <% } %>
     </div>
   </div>
