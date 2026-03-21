@@ -8,7 +8,7 @@ function errorHandler(err, req, res, next) {
 
   // Don't expose internal errors in production
   const message = process.env.NODE_ENV === 'production' 
-    ? 'An error occurred' 
+    ? ''
     : err.message;
 
   const status = err.status || 500;
