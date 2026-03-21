@@ -30,7 +30,7 @@ export function ImagePicker({ onSelect, selectedId, mode = 'browse' }: ImagePick
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['media'] });
       // If deleted image was selected, clear selection
-      if (selectedId === id && onSelect) {
+      if (selectedId === deleteMutation.variables && onSelect) {
         onSelect(null);
       }
     },

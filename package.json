@@ -5,13 +5,11 @@
   "main": "server.js",
   "scripts": {
     "dev": "node server.js",
-    "dev:server": "node server.js",
     "dev:admin": "cd admin && npm run dev",
     "build": "npm run build:admin",
     "postinstall": "npm run build:admin",
-    "build:admin": "cd admin && npm install --include=dev --legacy-peer-deps && npm run build",
+    "build:admin": "cd admin && npm install --include=dev && npm run build",
     "start": "npm run migrate && NODE_ENV=production node server.js",
-    "start:railway": "npm run start",
     "migrate": "node db/migrate.js",
     "seed": "node db/seed.js",
     "setup": "npm run migrate && npm run seed",
@@ -44,8 +42,5 @@
   "engines": {
     "node": ">=20.19.0"
   },
-  "devDependencies": {
-    "concurrently": "^9.2.1",
-    "vite": "^7.2.4"
-  }
+  "devDependencies": {}
 }

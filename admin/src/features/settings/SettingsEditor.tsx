@@ -35,7 +35,7 @@ const settingsSchema = z.object({
   footer_menu_links: z.array(menuLinkSchema),
   footer_text: z.string(),
   social_links: z.array(socialLinkSchema),
-  allow_search_indexing: z.boolean().default(true),
+  allow_search_indexing: z.boolean(),
   contact_email: z.string().email('Email valide requis').optional().or(z.literal('')),
 });
 
