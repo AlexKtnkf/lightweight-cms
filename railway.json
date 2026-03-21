@@ -5,7 +5,7 @@
   "services": [
     {
       "name": "web",
-      "buildCommand": "npm install",
+      "buildCommand": "npm install && npm run build:admin",
       "startCommand": "npm run start:railway",
       "env": [
         "DATABASE_URL",

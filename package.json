@@ -7,7 +7,7 @@
     "dev": "node server.js",
     "dev:server": "node server.js",
     "dev:admin": "cd admin && npm run dev",
-    "build:admin": "cd admin && npm run build",
+    "build:admin": "cd admin && npm install && npm run build",
     "start": "npm run migrate && NODE_ENV=production node server.js",
     "start:railway": "npm run start",
     "migrate": "node db/migrate.js",
