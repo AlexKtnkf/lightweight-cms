@@ -9,7 +9,7 @@ class PageRepository {
 
   // Find by slug (published only)
   async findBySlug(slug) {
-    const sql = `SELECT * FROM pages WHERE slug = ? AND published = 1`;
+    const sql = `SELECT * FROM pages WHERE slug = ? AND published = TRUE`;
     return db.get(sql, [slug]);
   }
 
@@ -22,7 +22,7 @@ class PageRepository {
   // List all published (for navigation)
   async findAll() {
     const sql = `SELECT id, title, slug FROM pages 
-                 WHERE published = 1 
+                 WHERE published = TRUE 
                  ORDER BY title ASC`;
     return db.all(sql);
   }
@@ -42,9 +42,9 @@ class PageRepository {
     // Allow setting specific ID for homepage (id = 1)
     const sql = pageData.id 
       ? `INSERT INTO pages (id, title, slug, published, image_media_id, meta_title, meta_description, og_title, og_description, og_image_id, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
       : `INSERT INTO pages (title, slug, published, image_media_id, meta_title, meta_description, og_title, og_description, og_image_id, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`;
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
     
     const params = pageData.id
       ? [
@@ -80,7 +80,7 @@ class PageRepository {
     const sql = `UPDATE pages 
                  SET title = ?, slug = ?, published = ?, image_media_id = ?,
                      meta_title = ?, meta_description = ?, og_title = ?, og_description = ?, og_image_id = ?,
-                     updated_at = datetime('now')
+                     updated_at = CURRENT_TIMESTAMP
                  WHERE id = ?`;
     await db.run(sql, [
       pageData.title,

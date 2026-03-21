@@ -24,7 +24,7 @@ class MediaRepository {
   // Create
   async create(mediaData) {
     const sql = `INSERT INTO media (filename, original_filename, path, mime_type, file_size, width, height, thumbnail_path, webp_path, uploaded_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`;
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`;
     const result = await db.run(sql, [
       mediaData.filename,
       mediaData.original_filename,

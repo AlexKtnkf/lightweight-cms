@@ -14,7 +14,7 @@ class ContactSubmissionRepository {
     const sql = `
       INSERT INTO contact_submissions 
         (form_data, visitor_email, visitor_ip, submitted_at)
-      VALUES (?, ?, ?, datetime('now'))
+      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
     `;
 
     const result = await db.run(sql, [
@@ -38,12 +38,12 @@ class ContactSubmissionRepository {
 
     if (filters.read !== undefined) {
       sql += ' AND read = ?';
-      params.push(filters.read ? 1 : 0);
+      params.push(filters.read ? true : false);
     }
 
     if (filters.archived !== undefined) {
       sql += ' AND archived = ?';
-      params.push(filters.archived ? 1 : 0);
+      params.push(filters.archived ? true : false);
     }
 
     sql += ' ORDER BY submitted_at DESC LIMIT ? OFFSET ?';
@@ -71,12 +71,12 @@ class ContactSubmissionRepository {
 
     if (filters.read !== undefined) {
       sql += ' AND read = ?';
-      params.push(filters.read ? 1 : 0);
+      params.push(filters.read ? true : false);
     }
 
     if (filters.archived !== undefined) {
       sql += ' AND archived = ?';
-      params.push(filters.archived ? 1 : 0);
+      params.push(filters.archived ? true : false);
     }
 
     const result = await db.get(sql, params);
@@ -87,7 +87,7 @@ class ContactSubmissionRepository {
    * Mark submission as read
    */
   async markAsRead(id) {
-    const sql = 'UPDATE contact_submissions SET read = 1 WHERE id = ?';
+    const sql = 'UPDATE contact_submissions SET read = TRUE WHERE id = ?';
     await db.run(sql, [id]);
   }
 
@@ -95,7 +95,7 @@ class ContactSubmissionRepository {
    * Update submission notes
    */
   async updateNotes(id, notes) {
-    const sql = 'UPDATE contact_submissions SET notes = ?, responded_at = datetime("now") WHERE id = ?';
+    const sql = 'UPDATE contact_submissions SET notes = ?, responded_at = CURRENT_TIMESTAMP WHERE id = ?';
     await db.run(sql, [notes, id]);
   }
 
@@ -103,7 +103,7 @@ class ContactSubmissionRepository {
    * Soft delete submission
    */
   async archive(id) {
-    const sql = 'UPDATE contact_submissions SET archived = 1 WHERE id = ?';
+    const sql = 'UPDATE contact_submissions SET archived = TRUE WHERE id = ?';
     await db.run(sql, [id]);
   }
 
@@ -111,7 +111,7 @@ class ContactSubmissionRepository {
    * Get unread count
    */
   async getUnreadCount() {
-    const sql = 'SELECT COUNT(*) as count FROM contact_submissions WHERE read = 0 AND archived = 0';
+    const sql = 'SELECT COUNT(*) as count FROM contact_submissions WHERE read = FALSE AND archived = FALSE';
     const result = await db.get(sql);
     return result.count;
   }
@@ -123,8 +123,8 @@ class ContactSubmissionRepository {
   async deleteOldArchived(daysOld = 90) {
     const sql = `
       DELETE FROM contact_submissions 
-      WHERE archived = 1 
-        AND submitted_at < datetime('now', '-' || ? || ' days')
+      WHERE archived = TRUE 
+        AND submitted_at < CURRENT_TIMESTAMP - CAST(? || ' days' AS INTERVAL)
     `;
     const result = await db.run(sql, [daysOld]);
     return result.changes;

@@ -16,7 +16,7 @@ class UserRepository {
   // Create user
   async create(userData) {
     const sql = `INSERT INTO users (username, password_hash, created_at)
-                 VALUES (?, ?, datetime('now'))`;
+                 VALUES (?, ?, CURRENT_TIMESTAMP)`;
     const result = await db.run(sql, [
       userData.username,
       userData.password_hash
@@ -26,7 +26,7 @@ class UserRepository {
 
   // Update last login
   async updateLastLogin(id) {
-    const sql = `UPDATE users SET last_login = datetime('now') WHERE id = ?`;
+    const sql = `UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?`;
     await db.run(sql, [id]);
   }
 

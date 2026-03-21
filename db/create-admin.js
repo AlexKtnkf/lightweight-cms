@@ -15,7 +15,7 @@ async function createAdmin() {
       const passwordHash = await bcrypt.hash(password, saltRounds);
 
       try {
-        const sql = `INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, datetime('now'))`;
+        const sql = `INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, CURRENT_TIMESTAMP)`;
         await db.run(sql, [username, passwordHash]);
         logger.info(`✓ Utilisateur admin "${username}" créé avec succès`);
       } catch (error) {

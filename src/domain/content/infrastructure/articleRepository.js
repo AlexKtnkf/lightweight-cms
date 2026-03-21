@@ -9,7 +9,7 @@ class ArticleRepository {
 
   // Find by slug (published only)
   async findBySlug(slug) {
-    const sql = `SELECT * FROM articles WHERE slug = ? AND published = 1`;
+    const sql = `SELECT * FROM articles WHERE slug = ? AND published = TRUE`;
     return db.get(sql, [slug]);
   }
 
@@ -22,7 +22,7 @@ class ArticleRepository {
   // List all published (with pagination)
   async findAll(limit = 50, offset = 0) {
     const sql = `SELECT * FROM articles 
-                 WHERE published = 1 
+                 WHERE published = TRUE 
                  ORDER BY published_at DESC, created_at DESC
                  LIMIT ? OFFSET ?`;
     return db.all(sql, [limit, offset]);
@@ -38,7 +38,7 @@ class ArticleRepository {
 
   // Count published articles
   async count() {
-    const sql = `SELECT COUNT(*) as count FROM articles WHERE published = 1`;
+    const sql = `SELECT COUNT(*) as count FROM articles WHERE published = TRUE`;
     const result = await db.get(sql);
     return result.count;
   }
@@ -46,7 +46,7 @@ class ArticleRepository {
   // Create
   async create(articleData) {
     const sql = `INSERT INTO articles (title, slug, published_at, published, meta_title, meta_description, og_title, og_description, og_image_id, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`;
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
     const result = await db.run(sql, [
       articleData.title,
       articleData.slug,
@@ -66,7 +66,7 @@ class ArticleRepository {
     const sql = `UPDATE articles 
                  SET title = ?, slug = ?, published_at = ?, published = ?, 
                      meta_title = ?, meta_description = ?, og_title = ?, og_description = ?, og_image_id = ?,
-                     updated_at = datetime('now')
+                     updated_at = CURRENT_TIMESTAMP
                  WHERE id = ?`;
     await db.run(sql, [
       articleData.title,

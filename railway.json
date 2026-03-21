@@ -9,7 +9,6 @@
       "startCommand": "npm run start:railway",
       "env": [
         "DATABASE_URL",
-        "DB_PATH",
         "SESSION_SECRET",
         "SMTP_HOST",
         "SMTP_PORT",

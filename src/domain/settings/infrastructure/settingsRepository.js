@@ -15,11 +15,11 @@ class SettingsRepository {
       ]);
       // Try to create with social_links column, fallback if column doesn't exist
       try {
-        const createSql = `INSERT INTO settings (id, site_title, social_links, updated_at) VALUES (1, 'My Site', ?, datetime('now'))`;
+        const createSql = `INSERT INTO settings (id, site_title, social_links, updated_at) VALUES (1, 'My Site', ?, CURRENT_TIMESTAMP)`;
         await db.run(createSql, [defaultSocialLinks]);
       } catch (err) {
         // If social_links column doesn't exist, create without it
-        const createSql = `INSERT INTO settings (id, site_title, updated_at) VALUES (1, 'My Site', datetime('now'))`;
+        const createSql = `INSERT INTO settings (id, site_title, updated_at) VALUES (1, 'My Site', CURRENT_TIMESTAMP)`;
         await db.run(createSql);
       }
       settings = await db.get(sql);
@@ -68,7 +68,7 @@ class SettingsRepository {
                      social_links = ?,
                      allow_search_indexing = ?,
                      contact_email = ?,
-                     updated_at = datetime('now')
+                     updated_at = CURRENT_TIMESTAMP
                  WHERE id = 1`;
     await db.run(sql, [
       settingsData.site_title || 'AH',

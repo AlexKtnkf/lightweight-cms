@@ -1,19 +1,19 @@
 -- ============================================
 -- Initial Database Schema
 -- Lightweight CMS for Adeline Hage
+-- PostgreSQL
 -- ============================================
 
 -- Pages (static pages, appear in header/footer menus, use blocks like articles)
 CREATE TABLE IF NOT EXISTS pages (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   title TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
-  published BOOLEAN DEFAULT 0,
-  image_media_id INTEGER, -- For pages with featured images
-  lang TEXT DEFAULT 'fr', -- Language support (for future i18n)
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  -- SEO fields
+  published BOOLEAN DEFAULT FALSE,
+  image_media_id INTEGER,
+  lang TEXT DEFAULT 'fr',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   meta_title TEXT,
   meta_description TEXT,
   og_title TEXT,
@@ -23,15 +23,14 @@ CREATE TABLE IF NOT EXISTS pages (
 
 -- Articles (blog posts)
 CREATE TABLE IF NOT EXISTS articles (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   title TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
-  published_at DATETIME,
-  published BOOLEAN DEFAULT 0,
-  lang TEXT DEFAULT 'fr', -- Language support (for future i18n)
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  -- SEO fields
+  published_at TIMESTAMP,
+  published BOOLEAN DEFAULT FALSE,
+  lang TEXT DEFAULT 'fr',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   meta_title TEXT,
   meta_description TEXT,
   og_title TEXT,
@@ -41,32 +40,33 @@ CREATE TABLE IF NOT EXISTS articles (
 
 -- Unified blocks table (used by articles, pages, and homepage)
 CREATE TABLE IF NOT EXISTS content_blocks (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  content_type TEXT NOT NULL, -- 'article', 'page', or 'homepage'
-  content_id INTEGER NOT NULL, -- References articles(id), pages(id), or homepage(id)
-  block_type TEXT NOT NULL, -- 'rich_text', 'encart_principal', 'hero', 'question_reponse', 'accroche'
-  block_order INTEGER NOT NULL, -- Order of block within content
-  block_data TEXT NOT NULL, -- JSON data containing block-specific content
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  id SERIAL PRIMARY KEY,
+  content_type TEXT NOT NULL,
+  content_id INTEGER NOT NULL,
+  block_type TEXT NOT NULL,
+  block_order INTEGER NOT NULL,
+  block_data TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Site settings (site-wide configuration)
 CREATE TABLE IF NOT EXISTS settings (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   site_title TEXT NOT NULL DEFAULT 'My Site',
   site_tagline TEXT,
-  allow_search_indexing BOOLEAN DEFAULT 1,
+  allow_search_indexing BOOLEAN DEFAULT TRUE,
   logo_media_id INTEGER,
-  header_menu_links TEXT DEFAULT '[]', -- JSON array of {label, url, order}
-  footer_menu_links TEXT DEFAULT '[]', -- JSON array of {label, url, order}
+  header_menu_links TEXT DEFAULT '[]',
+  footer_menu_links TEXT DEFAULT '[]',
   footer_text TEXT,
-  social_links TEXT DEFAULT '[]', -- JSON array of {platform, url, icon}
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  social_links TEXT DEFAULT '[]',
+  contact_email TEXT,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Homepage content (hero section stored here, accroches stored as blocks)
 CREATE TABLE IF NOT EXISTS homepage (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   hero_title TEXT,
   hero_subtitle TEXT,
   hero_cta_text TEXT,
@@ -74,95 +74,58 @@ CREATE TABLE IF NOT EXISTS homepage (
   hero_cta_secondary_text TEXT,
   hero_cta_secondary_url TEXT,
   logo_media_id INTEGER,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
--- Media files (attached to blocks, not directly to articles/pages)
+
+-- Media files
 CREATE TABLE IF NOT EXISTS media (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   filename TEXT NOT NULL,
   original_filename TEXT NOT NULL,
-  path TEXT NOT NULL, -- Relative path from public/uploads/
+  path TEXT NOT NULL,
   mime_type TEXT,
-  file_size INTEGER, -- Size in bytes
-  width INTEGER, -- For images
-  height INTEGER, -- For images
-  thumbnail_path TEXT, -- Path to thumbnail if image
-  webp_path TEXT, -- Path to WebP version if image
-  alt_text TEXT, -- Accessibility: alt text for images
-  uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  file_size INTEGER,
+  width INTEGER,
+  height INTEGER,
+  thumbnail_path TEXT,
+  webp_path TEXT,
+  alt_text TEXT,
+  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Users (for admin authentication)
 CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   username TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL, -- bcrypt hash
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  last_login DATETIME
+  password_hash TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_login TIMESTAMP
 );
 
--- Create indexes for better performance
+-- Contact form submissions
+CREATE TABLE IF NOT EXISTS contact_submissions (
+  id SERIAL PRIMARY KEY,
+  form_data TEXT NOT NULL,
+  visitor_email TEXT,
+  visitor_ip TEXT,
+  submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  read BOOLEAN DEFAULT FALSE,
+  responded_at TIMESTAMP,
+  notes TEXT,
+  archived BOOLEAN DEFAULT FALSE
+);
+
+-- Indexes
 CREATE INDEX IF NOT EXISTS idx_content_blocks_content ON content_blocks(content_type, content_id);
 CREATE INDEX IF NOT EXISTS idx_articles_slug ON articles(slug);
 CREATE INDEX IF NOT EXISTS idx_articles_published ON articles(published, published_at);
 CREATE INDEX IF NOT EXISTS idx_pages_slug ON pages(slug);
 CREATE INDEX IF NOT EXISTS idx_pages_published ON pages(published);
-
--- Insert default homepage (page id = 1)
-INSERT OR IGNORE INTO pages (
-  id,
-  title,
-  slug,
-  published,
-  meta_title,
-  meta_description,
-  created_at,
-  updated_at
-) VALUES (
-  1,
-  'Page d''accueil',
-  'homepage',
-  1,
-  'Page d''accueil',
-  'Bienvenue sur notre site',
-  datetime('now'),
-  datetime('now')
-);
-
--- Backfill default social_links for existing settings rows (column is defined in 001_initial.sql)
-UPDATE settings 
-SET social_links = '[
-  {"platform": "instagram", "url": "https://instagram.com", "icon": "instagram"},
-  {"platform": "facebook", "url": "https://facebook.com", "icon": "facebook"},
-  {"platform": "linkedin", "url": "https://linkedin.com", "icon": "linkedin"}
-]'
-WHERE social_links IS NULL OR social_links = '[]';
-
--- Set default to 0 (disallow indexing) for existing settings
-UPDATE settings 
-SET allow_search_indexing = 0 
-WHERE allow_search_indexing IS NULL;
-
--- Add contact email field to settings table
-
-ALTER TABLE settings 
-ADD COLUMN contact_email TEXT;
-
--- Add contact submissions table for storing contact form submissions
-
-CREATE TABLE IF NOT EXISTS contact_submissions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  form_data TEXT NOT NULL,      -- JSON with all form fields
-  visitor_email TEXT,           -- Extracted email for easy querying
-  visitor_ip TEXT,              -- IP address for spam detection
-  submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  read BOOLEAN DEFAULT 0,       -- Admin has read/reviewed
-  responded_at DATETIME,        -- When admin responded
-  notes TEXT,                   -- Admin notes
-  archived BOOLEAN DEFAULT 0    -- Soft delete
-);
-
--- Index for common queries
 CREATE INDEX IF NOT EXISTS idx_contact_submitted_at ON contact_submissions(submitted_at DESC);
 CREATE INDEX IF NOT EXISTS idx_contact_read ON contact_submissions(read);
 CREATE INDEX IF NOT EXISTS idx_contact_archived ON contact_submissions(archived);
+
+-- Insert default homepage (page id = 1)
+INSERT INTO pages (id, title, slug, published, meta_title, meta_description)
+VALUES (1, 'Page d''accueil', 'homepage', TRUE, 'Page d''accueil', 'Bienvenue sur notre site')
+ON CONFLICT DO NOTHING;

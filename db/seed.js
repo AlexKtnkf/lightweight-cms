@@ -44,7 +44,7 @@ const SETTINGS = {
 const HOMEPAGE_PAGE = {
   title: 'Adeline Hage | Diététique',
   slug: 'homepage',
-  published: 1,
+  published: true,
   meta_title: 'Adeline Hage | Diététique',
   meta_description: 'Retrouvez la paix avec votre corps et votre assiette. Méthode scientifique et bienveillante.',
 };
@@ -183,7 +183,7 @@ async function seedSettings() {
     await db.run(
       `UPDATE settings SET
         site_title = ?, site_tagline = ?, header_menu_links = ?,
-        footer_menu_links = ?, footer_text = ?, social_links = ?, updated_at = datetime('now')
+        footer_menu_links = ?, footer_text = ?, social_links = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = 1`,
       [
         SETTINGS.site_title,
@@ -198,7 +198,7 @@ async function seedSettings() {
   } else {
     await db.run(
       `INSERT INTO settings (id, site_title, site_tagline, logo_media_id, header_menu_links, footer_menu_links, footer_text, social_links, updated_at)
-       VALUES (1, ?, ?, NULL, ?, ?, ?, ?, datetime('now'))`,
+       VALUES (1, ?, ?, NULL, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
       [SETTINGS.site_title, SETTINGS.site_tagline || null, headerLinks, footerLinks, SETTINGS.footer_text || null, socialLinks]
     );
     logger.info('✓ Settings created');
@@ -213,7 +213,7 @@ async function seedHomepagePage() {
   
   if (existing) {
     await db.run(
-      `UPDATE pages SET title = ?, slug = ?, published = ?, meta_title = ?, meta_description = ?, updated_at = datetime('now') WHERE id = ?`,
+      `UPDATE pages SET title = ?, slug = ?, published = ?, meta_title = ?, meta_description = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
       [
         HOMEPAGE_PAGE.title,
         HOMEPAGE_PAGE.slug,
@@ -227,7 +227,7 @@ async function seedHomepagePage() {
   } else {
     await db.run(
       `INSERT INTO pages (id, title, slug, published, meta_title, meta_description, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+       VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
       [
         HOMEPAGE_ID,
         HOMEPAGE_PAGE.title,
@@ -251,7 +251,7 @@ async function seedBlocks() {
   for (const block of BLOCKS) {
     await db.run(
       `INSERT INTO content_blocks (content_type, content_id, block_type, block_order, block_data, created_at)
-       VALUES (?, ?, ?, ?, ?, datetime('now'))`,
+       VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
       [CONTENT_TYPE, HOMEPAGE_ID, block.block_type, block.block_order, JSON.stringify(block.block_data)]
     );
   }
@@ -284,7 +284,7 @@ async function seedLogo() {
     // Insert logo into media table (SVG is scalable, so width/height are null)
     const result = await db.run(
       `INSERT INTO media (filename, original_filename, path, mime_type, file_size, width, height, thumbnail_path, webp_path, alt_text, uploaded_at)
-       VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, ?, datetime('now'))`,
+       VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, ?, CURRENT_TIMESTAMP)`,
       [
         LOGO_FILENAME,
         LOGO_ORIGINAL_FILENAME,
@@ -310,14 +310,14 @@ async function updateSettingsLogo(logoId) {
   
   if (existing) {
     await db.run(
-      "UPDATE settings SET logo_media_id = ?, updated_at = datetime('now') WHERE id = ?",
+      "UPDATE settings SET logo_media_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
       [logoId, existing.id]
     );
     logger.info(`Settings updated with logo_media_id=${logoId}`);
   } else {
     await db.run(
       `INSERT INTO settings (id, site_title, logo_media_id, updated_at)
-       VALUES (1, 'My Site', ?, datetime('now'))`,
+       VALUES (1, 'My Site', ?, CURRENT_TIMESTAMP)`,
       [logoId]
     );
     logger.info(`Settings created with logo_media_id=${logoId}`);
