@@ -140,13 +140,13 @@ app.get('/admin/logout', adminController.logout);
 if (process.env.NODE_ENV === 'production') {
   // Production: serve built static files
   app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
-  // Fallback to index.html for client-side routing (skip API routes)
-  app.get('/admin/*', (req, res, next) => {
+  // Fallback to index.html for client-side routing (matches /admin and /admin/*)
+  app.get(['/admin', '/admin/*'], (req, res, next) => {
     // Skip API routes and static assets
     if (req.path.startsWith('/admin/api') || req.path.match(/\.(js|css|png|jpg|svg|ico|woff|woff2|ttf|eot)$/)) {
       return next();
     }
-    // Serve index.html for all other admin routes (including /admin/login)
+    // Serve index.html for all admin routes (including /admin, /admin/login, etc.)
     res.sendFile(path.join(__dirname, 'public/admin/index.html'));
   });
   
