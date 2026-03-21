@@ -6,7 +6,7 @@
     {
       "name": "web",
       "buildCommand": "npm install",
-      "startCommand": "npm run start",
+      "startCommand": "npm run start:railway",
       "env": [
         "DATABASE_URL",
         "DB_PATH",
