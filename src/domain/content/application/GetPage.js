@@ -9,7 +9,7 @@ class GetPage {
   async execute(id) {
     const pageData = await this.pageRepository.findById(id);
     if (!pageData) {
-      const error = new Error('Page not found');
+      const error = new Error('Page introuvable');
       error.status = 404;
       throw error;
     }

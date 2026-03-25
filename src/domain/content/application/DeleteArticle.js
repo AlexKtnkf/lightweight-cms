@@ -7,7 +7,7 @@ class DeleteArticle {
   async execute(id) {
     const article = await this.articleRepository.findById(id);
     if (!article) {
-      const error = new Error('Article not found');
+      const error = new Error('Article introuvable');
       error.status = 404;
       throw error;
     }

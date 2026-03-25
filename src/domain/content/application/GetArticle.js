@@ -9,7 +9,7 @@ class GetArticle {
   async execute(id) {
     const articleData = await this.articleRepository.findById(id);
     if (!articleData) {
-      const error = new Error('Article not found');
+      const error = new Error('Article introuvable');
       error.status = 404;
       throw error;
     }

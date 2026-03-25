@@ -12,7 +12,7 @@ class GetPageBySlug {
       : await this.pageRepository.findBySlug(slug);
     
     if (!pageData) {
-      const error = new Error('Page not found');
+      const error = new Error('Page introuvable');
       error.status = 404;
       throw error;
     }

@@ -10,7 +10,7 @@ class CreateUser {
     // Check if user exists
     const existing = await this.userRepository.findByUsername(username);
     if (existing) {
-      const error = new Error('Username already exists');
+      const error = new Error('Le nom d\'utilisateur existe déjà');
       error.status = 400;
       throw error;
     }

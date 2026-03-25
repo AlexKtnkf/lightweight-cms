@@ -9,7 +9,7 @@ class UploadMedia {
 
   async execute(file) {
     if (!file) {
-      const error = new Error('No file provided');
+      const error = new Error('Aucun fichier téléchargé');
       error.status = 400;
       throw error;
     }

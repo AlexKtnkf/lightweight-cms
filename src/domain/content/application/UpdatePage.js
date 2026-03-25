@@ -12,7 +12,7 @@ class UpdatePage {
     // Load existing page
     const existing = await this.pageRepository.findById(id);
     if (!existing) {
-      const error = new Error('Page not found');
+      const error = new Error('Page introuvable');
       error.status = 404;
       throw error;
     }

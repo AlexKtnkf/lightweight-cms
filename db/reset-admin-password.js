@@ -92,31 +92,31 @@ async function readPasswordFromStdin() {
 
 function validatePassword(password) {
   if (!password || password.length < 12) {
-    throw new Error('Password must be at least 12 characters long');
+    throw new Error('Le mot de passe doit faire au moins 12 caractères');
   }
 }
 
 async function main() {
-  const username = parseArg('username') || parseArg('user') || await ask('Admin username: ');
+  const username = parseArg('username') || parseArg('user') || await ask('Nom d\'utilisateur admin : ');
   const stdinMode = hasFlag('stdin');
 
   if (!username) {
-    throw new Error('Username is required');
+    throw new Error('Le nom d\'utilisateur est requis');
   }
 
   const user = await userRepository.findByUsername(username);
   if (!user) {
-    throw new Error(`User not found: ${username}`);
+    throw new Error(`Utilisateur introuvable : ${username}`);
   }
 
   let newPassword;
   if (stdinMode) {
     newPassword = await readPasswordFromStdin();
   } else {
-    newPassword = await askHidden('New password: ');
-    const confirmPassword = await askHidden('Confirm password: ');
+    newPassword = await askHidden('Nouveau mot de passe : ');
+    const confirmPassword = await askHidden('Confirmez le mot de passe : ');
     if (newPassword !== confirmPassword) {
-      throw new Error('Passwords do not match');
+      throw new Error('Les mots de passe ne correspondent pas');
     }
   }
 
@@ -126,7 +126,7 @@ async function main() {
   const passwordHash = await bcrypt.hash(newPassword, saltRounds);
   await userRepository.updatePassword(user.id, passwordHash);
 
-  logger.info(`✓ Password updated for admin user "${username}"`);
+  logger.info(`✓ Mot de passe mis à jour pour l'utilisateur admin "${username}"`);
 }
 
 main()

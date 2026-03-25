@@ -14,7 +14,7 @@ class ChangePassword {
     // Verify old password
     const isValid = await bcrypt.compare(oldPassword, user.password_hash);
     if (!isValid) {
-      const error = new Error('Current password is incorrect');
+      const error = new Error('Le mot de passe actuel est incorrect');
       error.status = 400;
       throw error;
     }

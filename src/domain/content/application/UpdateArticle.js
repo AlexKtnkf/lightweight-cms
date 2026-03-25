@@ -11,7 +11,7 @@ class UpdateArticle {
     // Load existing article
     const existing = await this.articleRepository.findById(id);
     if (!existing) {
-      const error = new Error('Article not found');
+      const error = new Error('Article introuvable');
       error.status = 404;
       throw error;
     }

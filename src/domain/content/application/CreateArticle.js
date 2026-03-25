@@ -15,7 +15,7 @@ class CreateArticle {
     // Check if slug exists
     const existing = await this.articleRepository.findBySlugAdmin(slug);
     if (existing) {
-      const error = new Error('An article with this slug already exists');
+      const error = new Error('Un article existe déjà avec ce slug');
       error.status = 400;
       throw error;
     }

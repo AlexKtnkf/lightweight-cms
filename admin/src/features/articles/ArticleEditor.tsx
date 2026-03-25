@@ -2,21 +2,21 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { Article } from '../../domain/content/types';
+import type { Article, Block } from '../../domain/content/types';
 import { articlesApi } from '../../shared/api/articles';
-import { BlockEditor } from '../blocks/BlockEditor';
+import { RichTextBlock } from '../blocks/components/RichTextBlock';
 import { Loading } from '../../shared/components/Loading';
 
 const articleSchema = z.object({
   title: z.string().min(1, 'Le titre est requis'),
-  slug: z.string().min(1, 'Le slug est requis'),
+  slug: z.string().optional(),
   published: z.boolean(),
   published_at: z.string().optional(),
   meta_title: z.string().optional(),
   meta_description: z.string().optional(),
-  blocks: z.array(z.any()),
+  content: z.string().optional(),
 });
 
 type ArticleForm = z.infer<typeof articleSchema>;
@@ -47,9 +47,16 @@ export function ArticleEditor() {
       title: '',
       slug: '',
       published: false,
-      blocks: [],
+      content: '',
     },
   });
+
+  // Helper to extract content from blocks array or create default block
+  const getContentFromArticle = (article: Article): string => {
+    if (!article.blocks || article.blocks.length === 0) return '';
+    const textBlock = article.blocks.find((b: Block) => b.block_type === 'rich_text');
+    return textBlock?.block_data?.richText || '';
+  };
 
   // Reset form when article loads (only if article changed)
   useEffect(() => {
@@ -63,12 +70,11 @@ export function ArticleEditor() {
           : '',
         meta_title: article.meta_title || '',
         meta_description: article.meta_description || '',
-        blocks: article.blocks || [],
+        content: getContentFromArticle(article),
       });
     }
-    // form is stable from useForm, no need to include in deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [article?.id]); // Only depend on article ID, not the whole article object
+  }, [article?.id]);
 
   if (isLoading) {
     return <Loading />;
@@ -90,10 +96,22 @@ export function ArticleEditor() {
 
       <form
         onSubmit={form.handleSubmit((data) => {
+          // Convert content string back to blocks array for backend
+          const blocks: Block[] = [
+            {
+              block_type: 'rich_text',
+              block_data: { richText: data.content || '' },
+            },
+          ];
+
           const submitData = {
-            ...data,
+            title: data.title,
+            slug: data.slug,
+            published: data.published,
             published_at: data.published_at ? new Date(data.published_at).toISOString() : undefined,
-            blocks: data.blocks || [],
+            meta_title: data.meta_title,
+            meta_description: data.meta_description,
+            blocks,
           };
           mutation.mutate(submitData);
         })}
@@ -114,7 +132,7 @@ export function ArticleEditor() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Slug *
+            Slug
           </label>
           <input
             {...form.register('slug')}
@@ -170,15 +188,9 @@ export function ArticleEditor() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Blocs ({form.watch('blocks')?.length || 0})
-          </label>
-          <BlockEditor
-            blocks={form.watch('blocks') || []}
-            onChange={(blocks) => {
-              // Create a new array reference to ensure React Hook Form detects the change
-              form.setValue('blocks', [...blocks], { shouldDirty: true, shouldValidate: true });
-            }}
+          <RichTextBlock
+            block={{ block_type: 'rich_text', block_data: { richText: form.watch('content') || '' } }}
+            onChange={(data) => form.setValue('content', data.richText, { shouldDirty: true })}
           />
         </div>
 

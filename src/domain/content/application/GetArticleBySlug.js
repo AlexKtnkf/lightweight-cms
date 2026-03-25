@@ -12,7 +12,7 @@ class GetArticleBySlug {
       : await this.articleRepository.findBySlug(slug);
     
     if (!articleData) {
-      const error = new Error('Article not found');
+      const error = new Error('Article introuvable');
       error.status = 404;
       throw error;
     }

@@ -11,7 +11,7 @@ import { Loading } from '../../shared/components/Loading';
 
 const pageSchema = z.object({
   title: z.string().min(1, 'Le titre est requis'),
-  slug: z.string().min(1, 'Le slug est requis'),
+  slug: z.string().optional(),
   published: z.boolean(),
   meta_title: z.string().optional(),
   meta_description: z.string().optional(),
@@ -110,7 +110,7 @@ export function PageEditor() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Slug *
+            Slug
           </label>
           <input
             {...form.register('slug')}

@@ -10,7 +10,7 @@ class LoginUser {
     const user = await this.userRepository.findByUsername(username);
     
     if (!user) {
-      const error = new Error('Invalid username or password');
+      const error = new Error('Mot de passe ou nom d\'utilisateur invalide');
       error.status = 401;
       throw error;
     }
@@ -18,7 +18,7 @@ class LoginUser {
     const isValid = await bcrypt.compare(password, user.password_hash);
     
     if (!isValid) {
-      const error = new Error('Invalid username or password');
+      const error = new Error('Mot de passe ou nom d\'utilisateur invalide');
       error.status = 401;
       throw error;
     }

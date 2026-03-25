@@ -17,7 +17,7 @@ class CreatePage {
     if (!pageData.id) {
       const existing = await this.pageRepository.findBySlugAdmin(slug);
       if (existing) {
-        const error = new Error('A page with this slug already exists');
+        const error = new Error('Une page existe déjà avec ce slug');
         error.status = 400;
         throw error;
       }

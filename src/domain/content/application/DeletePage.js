@@ -8,7 +8,7 @@ class DeletePage {
   async execute(id) {
     // Prevent deleting homepage (id = 1)
     if (id === 1) {
-      const error = new Error('Cannot delete homepage (page ID 1)');
+      const error = new Error('Impossible de supprimer la page d\'accueil (ID 1)');
       error.status = 400;
       throw error;
     }
@@ -16,7 +16,7 @@ class DeletePage {
     // Get page before deletion to get slug for static file cleanup
     const page = await this.pageRepository.findById(id);
     if (!page) {
-      const error = new Error('Page not found');
+      const error = new Error('Page introuvable');
       error.status = 404;
       throw error;
     }

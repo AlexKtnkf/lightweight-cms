@@ -57,13 +57,13 @@ class EmailService {
    */
   async sendContactFormEmail(formData, recipientEmail, retries = 3) {
     if (!this.isReady()) {
-      const error = new Error('Email service not configured');
+      const error = new Error('Service de messagerie non configuré');
       error.code = 'EMAIL_NOT_CONFIGURED';
       throw error;
     }
 
     if (!recipientEmail) {
-      const error = new Error('No recipient email specified');
+      const error = new Error('Aucun destinataire spécifié');
       error.code = 'NO_RECIPIENT';
       throw error;
     }
@@ -84,10 +84,10 @@ class EmailService {
     for (let attempt = 0; attempt < retries; attempt++) {
       try {
         const result = await this.transporter.sendMail(mailOptions);
-        logger.info(`Contact form email sent successfully (attempt ${attempt + 1}): ${result.messageId}`);
+        logger.info(`Email de formulaire de contact envoyé avec succès (tentative ${attempt + 1}): ${result.messageId}`);
         return result;
       } catch (error) {
-        logger.warn(`Email sending failed (attempt ${attempt + 1}/${retries}): ${error.message}`);
+        logger.warn(`Échec de l'envoi de l'email (tentative ${attempt + 1}/${retries}): ${error.message}`);
 
         // Don't retry on permanent errors
         if (this.isPermanentError(error)) {
@@ -112,7 +112,7 @@ class EmailService {
    */
   async sendConfirmationEmail(visitorEmail, visitorName) {
     if (!this.isReady()) {
-      logger.warn('Confirmation email not sent - email service not configured');
+      logger.warn('Email de confirmation non envoyé - service de messagerie non configuré');
       return null;
     }
 
@@ -122,18 +122,18 @@ class EmailService {
       subject: 'Votre message a bien été reçu',
       html: `
         <h2>Merci ${visitorName || 'de votre message'}</h2>
-        <p>Nous avons bien reçu votre message et nous vous recontacterons au plus tôt.</p>
+        <p>J'ai bien reçu votre message et je vous recontacterai au plus tôt.</p>
         <p>Cordialement</p>
       `,
-      text: `Merci de votre message. Nous vous recontacterons au plus tôt.`,
+      text: `Merci de votre message. Je vous recontacterai au plus tôt.`,
     };
 
     try {
       const result = await this.transporter.sendMail(mailOptions);
-      logger.info(`Confirmation email sent to ${visitorEmail}`);
+      logger.info(`Email de confirmation envoyé à ${visitorEmail}`);
       return result;
     } catch (error) {
-      logger.warn(`Failed to send confirmation email to ${visitorEmail}: ${error.message}`);
+      logger.warn(`Échec de l'envoi de l'email de confirmation à ${visitorEmail}: ${error.message}`);
       // Don't throw - confirmation email failure shouldn't block main submission
       return null;
     }
