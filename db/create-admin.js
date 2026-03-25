@@ -19,7 +19,17 @@ async function createAdmin() {
         await db.run(sql, [username, passwordHash]);
         logger.info(`✓ Utilisateur admin "${username}" créé avec succès`);
       } catch (error) {
-        if (error.message.includes('UNIQUE constraint')) {
+        const isRailwayNetworkError = 
+          error.code === 'ENOTFOUND' && 
+          error.message?.includes('postgres.railway.internal');
+        
+        if (isRailwayNetworkError) {
+          logger.error('\n❌ Railway Networking Error');
+          logger.error('You cannot connect to Railway\'s internal Postgres from outside the Railway environment.');
+          logger.error('\n✓ Solution: Use Railway shell instead:');
+          logger.error('   railway shell');
+          logger.error('   npm run create-admin\n');
+        } else if (error.message.includes('UNIQUE constraint')) {
           logger.error('✗ Un utilisateur avec ce nom existe déjà');
         } else {
           logger.error('✗ Erreur:', error.message);

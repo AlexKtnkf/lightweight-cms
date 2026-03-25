@@ -111,7 +111,51 @@ npm run seed
 npm run create-admin
 ```
 
-### 5. Health check
+**Note:** Railway's Postgres uses an internal hostname (`postgres.railway.internal`) that is only accessible from within Railway's infrastructure. If you run `railway run` from your local machine, it will fail with `ENOTFOUND postgres.railway.internal`. Always use `railway shell` instead for CLI commands that need database access.
+
+### 5. Reset admin password on Railway
+
+**Option A: Using `railway shell` (CLI)**
+
+```bash
+railway shell
+npm run reset-admin-password
+```
+
+**Option B: Using the API endpoint (if `railway shell` doesn't work)**
+
+If `railway shell` keeps exiting, use the HTTP API endpoint to reset admin password:
+
+```bash
+# Set your Railway app URL and password
+APP_URL="https://your-app.railway.app"
+USERNAME="your-admin-username"
+NEW_PASSWORD="your-new-secure-password-12chars+"
+SETUP_TOKEN="your-setup-token-from-env"
+
+# Reset password
+curl -X POST "$APP_URL/api/admin/auth/reset-password" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "'$USERNAME'",
+    "newPassword": "'$NEW_PASSWORD'",
+    "setupToken": "'$SETUP_TOKEN'"
+  }'
+```
+
+Alternatively, to create initial admin if none exists:
+
+```bash
+curl -X POST "$APP_URL/api/admin/auth/setup-admin" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "secure-password-12chars+",
+    "setupToken": "'$SETUP_TOKEN'"
+  }'
+```
+
+### 6. Health check
 
 The app exposes `GET /health` returning `{"status":"ok","db":true}`, configured in [railway.json](railway.json).
 

@@ -45,6 +45,7 @@ const PagesController = require('../src/presentation/api/admin/pagesController')
 const ArticlesController = require('../src/presentation/api/admin/articlesController');
 const MediaController = require('../src/presentation/api/admin/mediaController');
 const SettingsController = require('../src/presentation/api/admin/settingsController');
+const AuthController = require('../src/presentation/api/admin/authController');
 
 // Instantiate use cases - Pages
 const createPage = new CreatePage(pageRepository, blockRepository, staticGenerator);
@@ -122,5 +123,11 @@ router.delete('/media/:id', (req, res, next) => mediaController.delete(req, res,
 router.get('/settings', (req, res, next) => settingsController.get(req, res, next));
 router.put('/settings', (req, res, next) => settingsController.update(req, res, next));
 router.post('/regenerate', (req, res, next) => settingsController.regenerate(req, res, next));
+
+// Auth API routes - password reset and setup
+// POST /api/admin/auth/reset-password - reset existing user password (requires auth or setup token)
+router.post('/auth/reset-password', (req, res, next) => authController.resetPassword(req, res, next));
+// POST /api/admin/auth/setup-admin - create initial admin (setup token required)
+router.post('/auth/setup-admin', (req, res, next) => authController.setupAdmin(req, res, next));
 
 module.exports = router;

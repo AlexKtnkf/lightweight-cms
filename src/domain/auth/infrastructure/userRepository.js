@@ -13,6 +13,12 @@ class UserRepository {
     return db.get(sql, [username]);
   }
 
+  // Find all users
+  async findAll() {
+    const sql = `SELECT id, username, created_at, last_login FROM users ORDER BY created_at ASC`;
+    return db.all(sql, []);
+  }
+
   // Create user
   async create(userData) {
     const sql = `INSERT INTO users (username, password_hash, created_at)

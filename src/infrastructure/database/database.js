@@ -5,15 +5,31 @@ const { Client } = require('pg');
 
 class Database {
   constructor() {
-    const connectionString = process.env.DATABASE_URL
-      || 'postgres://cms:cms_dev_password@localhost:5432/lightweight_cms';
+    // Try DATABASE_URL first, fall back to localhost for development
+    let connectionString = process.env.DATABASE_URL;
+    
+    if (!connectionString) {
+      connectionString = 'postgres://cms:cms_dev_password@localhost:5432/lightweight_cms';
+    }
+
     this.client = new Client({ connectionString });
-    this.ready = this.client.connect()
-      .then(() => logger.info('Connected to Postgres database'))
-      .catch(err => {
-        logger.error('Postgres connection error:', err);
+    this.ready = this.initializeConnection(connectionString);
+  }
+
+  async initializeConnection(connectionString) {
+    try {
+      await this.client.connect();
+      logger.info('Connected to Postgres database');
+    } catch (err) {
+      // If using Railway internal hostname, try to extract public URL or provide helpful error
+      if (err.code === 'ENOTFOUND' && connectionString.includes('postgres.railway.internal')) {
+        logger.error('Cannot connect to Railway internal hostname from outside Railway infrastructure.');
+        logger.error('Use "railway shell" to run commands inside Railway, or ensure DATABASE_URL points to public gateway URL.');
         throw err;
-      });
+      }
+      logger.error('Postgres connection error:', err);
+      throw err;
+    }
   }
 
   // Convert ? placeholders to $1, $2, ... for pg driver

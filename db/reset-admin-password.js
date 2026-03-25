@@ -131,7 +131,19 @@ async function main() {
 
 main()
   .catch(async error => {
-    logger.error(`✗ ${error.message}`);
+    const isRailwayNetworkError = 
+      error.code === 'ENOTFOUND' && 
+      error.message?.includes('postgres.railway.internal');
+    
+    if (isRailwayNetworkError) {
+      logger.error('\n❌ Railway Networking Error');
+      logger.error('You cannot connect to Railway\'s internal Postgres from outside the Railway environment.');
+      logger.error('\n✓ Solution: Use Railway shell instead:');
+      logger.error('   railway shell');
+      logger.error('   npm run reset-admin-password\n');
+    } else {
+      logger.error(`✗ ${error.message}`);
+    }
     process.exitCode = 1;
   })
   .finally(async () => {
