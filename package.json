@@ -9,7 +9,7 @@
     "build": "npm run build:admin",
     "postinstall": "npm run build:admin",
     "build:admin": "cd admin && npm install --include=dev && npm run build",
-    "start": "npm run migrate && NODE_ENV=production node server.js",
+    "start": "npm run migrate && node -e \"process.env.NODE_ENV='production'; require('./server')\"",
     "migrate": "node db/migrate.js",
     "seed": "node db/seed.js",
     "setup": "npm run migrate && npm run seed",
