@@ -24,42 +24,17 @@ async function runMigrations() {
     const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8');
 
     try {
-      // Split SQL file into individual statements
-      const statements = sql
-        .split('\n')
-        .map(line => {
-          const commentIndex = line.indexOf('--');
-          if (commentIndex >= 0) return line.substring(0, commentIndex);
-          return line;
-        })
-        .join('\n')
-        .split(';')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
-
-      for (const statement of statements) {
-        if (!statement.trim()) continue;
-
-        try {
-          await db.run(statement);
-        } catch (stmtErr) {
-          const msg = String(stmtErr && stmtErr.message ? stmtErr.message : stmtErr).toLowerCase();
-          const ignorable =
-            msg.includes('already exists') ||
-            msg.includes('duplicate key value');
-
-          if (ignorable) {
-            logger.warn(`Skipping already-applied statement in ${file}: ${statement.slice(0, 80)}...`);
-            continue;
-          }
-
-          throw stmtErr;
-        }
-      }
-
+      await db.raw('BEGIN');
+      await db.raw(sql);
       await db.run('INSERT INTO schema_migrations (name) VALUES (?)', [file]);
+      await db.raw('COMMIT');
       logger.info(`✓ Migration ${file} completed`);
     } catch (error) {
+      try {
+        await db.raw('ROLLBACK');
+      } catch (rollbackError) {
+        logger.error(`Rollback failed for migration ${file}:`, rollbackError);
+      }
       logger.error(`✗ Migration ${file} failed:`, error);
       throw error;
     }

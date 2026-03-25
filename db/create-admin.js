@@ -15,7 +15,7 @@ async function createAdmin() {
       const passwordHash = await bcrypt.hash(password, saltRounds);
 
       try {
-        const sql = `INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, CURRENT_TIMESTAMP)`;
+        const sql = `INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, CURRENT_TIMESTAMP) RETURNING id`;
         await db.run(sql, [username, passwordHash]);
         logger.info(`✓ Utilisateur admin "${username}" créé avec succès`);
       } catch (error) {
@@ -29,7 +29,7 @@ async function createAdmin() {
           logger.error('\n✓ Solution: Use Railway shell instead:');
           logger.error('   railway shell');
           logger.error('   npm run create-admin\n');
-        } else if (error.message.includes('UNIQUE constraint')) {
+        } else if (error.code === '23505') {
           logger.error('✗ Un utilisateur avec ce nom existe déjà');
         } else {
           logger.error('✗ Erreur:', error.message);

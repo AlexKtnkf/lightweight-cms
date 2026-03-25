@@ -284,7 +284,8 @@ async function seedLogo() {
     // Insert logo into media table (SVG is scalable, so width/height are null)
     const result = await db.run(
       `INSERT INTO media (filename, original_filename, path, mime_type, file_size, width, height, thumbnail_path, webp_path, alt_text, uploaded_at)
-       VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, ?, CURRENT_TIMESTAMP)`,
+       VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, ?, CURRENT_TIMESTAMP)
+       RETURNING id`,
       [
         LOGO_FILENAME,
         LOGO_ORIGINAL_FILENAME,

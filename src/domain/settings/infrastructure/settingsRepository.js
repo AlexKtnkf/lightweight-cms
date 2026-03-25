@@ -13,15 +13,10 @@ class SettingsRepository {
         { platform: 'facebook', url: 'https://facebook.com', icon: 'facebook' },
         { platform: 'linkedin', url: 'https://linkedin.com', icon: 'linkedin' }
       ]);
-      // Try to create with social_links column, fallback if column doesn't exist
-      try {
-        const createSql = `INSERT INTO settings (id, site_title, social_links, updated_at) VALUES (1, 'My Site', ?, CURRENT_TIMESTAMP)`;
-        await db.run(createSql, [defaultSocialLinks]);
-      } catch (err) {
-        // If social_links column doesn't exist, create without it
-        const createSql = `INSERT INTO settings (id, site_title, updated_at) VALUES (1, 'My Site', CURRENT_TIMESTAMP)`;
-        await db.run(createSql);
-      }
+      const createSql = `INSERT INTO settings (id, site_title, header_menu_links, footer_menu_links, social_links, allow_search_indexing, updated_at)
+                         VALUES (1, 'My Site', '[]', '[]', ?, TRUE, CURRENT_TIMESTAMP)
+                         ON CONFLICT (id) DO NOTHING`;
+      await db.run(createSql, [defaultSocialLinks]);
       settings = await db.get(sql);
     }
     
@@ -78,7 +73,7 @@ class SettingsRepository {
       settingsData.footer_menu_links ? JSON.stringify(settingsData.footer_menu_links) : '[]',
       settingsData.footer_text || null,
       settingsData.social_links ? JSON.stringify(settingsData.social_links) : defaultSocialLinks,
-      settingsData.allow_search_indexing !== undefined ? (settingsData.allow_search_indexing ? 1 : 0) : 1,
+      settingsData.allow_search_indexing !== undefined ? Boolean(settingsData.allow_search_indexing) : true,
       settingsData.contact_email || null
     ]);
     return this.get();

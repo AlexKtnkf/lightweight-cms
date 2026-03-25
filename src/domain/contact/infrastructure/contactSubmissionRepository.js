@@ -15,6 +15,7 @@ class ContactSubmissionRepository {
       INSERT INTO contact_submissions 
         (form_data, visitor_email, visitor_ip, submitted_at)
       VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+      RETURNING id
     `;
 
     const result = await db.run(sql, [

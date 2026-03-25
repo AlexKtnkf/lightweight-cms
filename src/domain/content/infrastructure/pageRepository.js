@@ -42,9 +42,11 @@ class PageRepository {
     // Allow setting specific ID for homepage (id = 1)
     const sql = pageData.id 
       ? `INSERT INTO pages (id, title, slug, published, image_media_id, meta_title, meta_description, og_title, og_description, og_image_id, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+         RETURNING id`
       : `INSERT INTO pages (title, slug, published, image_media_id, meta_title, meta_description, og_title, og_description, og_image_id, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+         RETURNING id`;
     
     const params = pageData.id
       ? [

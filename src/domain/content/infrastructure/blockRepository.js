@@ -18,7 +18,8 @@ class BlockRepository {
   // Create a block
   async create(blockData) {
     const sql = `INSERT INTO content_blocks (content_type, content_id, block_type, block_order, block_data, created_at)
-                 VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`;
+                 VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                 RETURNING id`;
     const result = await db.run(sql, [
       blockData.content_type,
       blockData.content_id,

@@ -22,7 +22,8 @@ class UserRepository {
   // Create user
   async create(userData) {
     const sql = `INSERT INTO users (username, password_hash, created_at)
-                 VALUES (?, ?, CURRENT_TIMESTAMP)`;
+                 VALUES (?, ?, CURRENT_TIMESTAMP)
+                 RETURNING id`;
     const result = await db.run(sql, [
       userData.username,
       userData.password_hash

@@ -154,10 +154,16 @@ if (process.env.NODE_ENV === 'production') {
   startServer();
 } else {
   // Development: use Vite middleware to serve React app with HMR
-  const { createServer: createViteServer } = require('vite');
+  const vitePackagePath = require.resolve('vite/package.json', {
+    paths: [path.join(__dirname, 'admin')]
+  });
+  const { createServer: createViteServer } = require(path.dirname(vitePackagePath));
+  const adminBuildDir = path.join(__dirname, 'public/admin');
+  const adminAssetPattern = /\.(js|css|png|jpg|svg|ico|woff|woff2|ttf|eot)$/;
   
   // Store Vite server reference for placeholder middleware
   let viteServerInstance = null;
+  let useStaticAdminFallback = false;
   
   // Register placeholder middleware BEFORE 404 handler
   // This ensures admin routes (including module requests) are handled correctly
@@ -174,6 +180,21 @@ if (process.env.NODE_ENV === 'production') {
     // If Vite is ready, delegate to it
     if (viteServerInstance) {
       return viteServerInstance.middlewares(req, res, next);
+    }
+
+    if (useStaticAdminFallback) {
+      if (req.path.startsWith('/admin/api')) {
+        return next();
+      }
+
+      if (adminAssetPattern.test(req.path)) {
+        const relativeAssetPath = req.path.replace(/^\/admin\/?/, '');
+        return res.sendFile(path.join(adminBuildDir, relativeAssetPath), (err) => {
+          if (err) next();
+        });
+      }
+
+      return res.sendFile(path.join(adminBuildDir, 'index.html'));
     }
     
     // Wait for Vite to be ready (should be very quick)
@@ -201,6 +222,7 @@ if (process.env.NODE_ENV === 'production') {
         appType: 'spa',
         root: path.join(__dirname, 'admin'),
         base: '/admin/',
+        configLoader: 'runner',
         mode: 'development', // Force development mode for better error messages
         define: {
           'process.env.NODE_ENV': '"development"',
@@ -215,7 +237,12 @@ if (process.env.NODE_ENV === 'production') {
       logger.info('Vite dev server initialized');
     } catch (err) {
       logger.error('Failed to start Vite dev server:', err.message);
-      logger.warn('Admin panel will not be available, but backend API continues to work');
+      if (require('fs').existsSync(path.join(adminBuildDir, 'index.html'))) {
+        useStaticAdminFallback = true;
+        logger.warn('Serving static admin build as a fallback because Vite failed to start');
+      } else {
+        logger.warn('Admin panel will not be available, but backend API continues to work');
+      }
     } finally {
       // Start server regardless of Vite success (backend API should work)
       startServer();

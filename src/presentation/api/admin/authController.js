@@ -123,14 +123,16 @@ class AuthController {
       const passwordHash = await bcrypt.hash(password, saltRounds);
 
       // Create user
-      const sql = `INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, CURRENT_TIMESTAMP) RETURNING id`;
-      const result = await userRepository.db.run(sql, [username, passwordHash]);
+      const user = await userRepository.create({
+        username,
+        password_hash: passwordHash
+      });
 
       logger.info(`Initial admin user created: ${username}`);
       res.status(201).json({ 
         success: true, 
         message: `Admin user "${username}" created successfully`,
-        userId: result.lastID
+        userId: user.id
       });
 
     } catch (error) {

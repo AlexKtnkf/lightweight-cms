@@ -53,17 +53,14 @@ class Database {
     const converted = this.convertPlaceholders(sql, params);
     const res = await this.client.query(converted.sql, converted.params);
 
-    let lastID = (res.rows[0] && (res.rows[0].id || res.rows[0].lastval)) || null;
-    if (!lastID && /^\s*insert\b/i.test(converted.sql)) {
-      try {
-        const idRes = await this.client.query('SELECT LASTVAL() AS id');
-        lastID = idRes.rows[0] ? idRes.rows[0].id : null;
-      } catch (e) {
-        lastID = null;
-      }
-    }
+    const lastID = res.rows[0]?.id || null;
 
     return { lastID, changes: res.rowCount };
+  }
+
+  async raw(sql) {
+    await this.ready;
+    return this.client.query(sql);
   }
 
   async get(sql, params = []) {

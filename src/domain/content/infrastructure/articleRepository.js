@@ -46,7 +46,8 @@ class ArticleRepository {
   // Create
   async create(articleData) {
     const sql = `INSERT INTO articles (title, slug, published_at, published, meta_title, meta_description, og_title, og_description, og_image_id, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                 RETURNING id`;
     const result = await db.run(sql, [
       articleData.title,
       articleData.slug,
