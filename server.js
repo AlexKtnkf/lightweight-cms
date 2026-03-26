@@ -98,7 +98,15 @@ if (process.env.NODE_ENV !== 'production') {
     }
   }));
 }
-app.use(express.static(path.join(__dirname, 'public')));
+const publicStatic = express.static(path.join(__dirname, 'public'));
+app.use((req, res, next) => {
+  // Keep the admin SPA out of the generic public static middleware so
+  // `/admin` and `/admin/*` are always served by the same admin pipeline.
+  if (req.path.startsWith('/admin')) {
+    return next();
+  }
+  return publicStatic(req, res, next);
+});
 app.use('/static', express.static(path.join(__dirname, 'public/static')));
 app.use('/uploads', express.static(uploadsRoot));
 

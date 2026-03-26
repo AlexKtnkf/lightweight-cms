@@ -6,7 +6,7 @@ import { mediaApi } from '../../shared/api/media';
 import type { Settings } from '../../domain/settings/types';
 import type { Media } from '../../domain/media/types';
 import { Loading } from '../../shared/components/Loading';
-import { renderInstagramSlide, type SlideVariant } from './instagramSlideRenderer';
+import { renderInstagramSlide, type SlideColorTheme, type SlideVariant } from './instagramSlideRenderer';
 
 const templateOptions: Array<{
   id: SlideVariant;
@@ -20,13 +20,36 @@ const templateOptions: Array<{
   },
   {
     id: 'text-with-image',
-    title: 'Texte + petite image',
+    title: 'Texte + petite image verticale',
+    accent: 'bg-stone-100',
+  },
+  {
+    id: 'text-with-horizontal-image',
+    title: 'Texte + petite image horizontale',
     accent: 'bg-stone-100',
   },
   {
     id: 'image-with-text',
     title: 'Image + petit texte',
     accent: 'bg-stone-100',
+  },
+];
+
+const colorThemeOptions: Array<{
+  id: SlideColorTheme;
+  previewClass: string;
+}> = [
+  {
+    id: 'dedicated',
+    previewClass: 'bg-[linear-gradient(135deg,#fdfaf5_0%,#fdfaf5_45%,#e8bdc3_100%)]',
+  },
+  {
+    id: 'frontend',
+    previewClass: 'bg-[linear-gradient(135deg,#eef5f1_0%,#8fc4c1_35%,#d4a373_100%)]',
+  },
+  {
+    id: 'plain-rose',
+    previewClass: 'bg-[#E34262]',
   },
 ];
 
@@ -42,9 +65,10 @@ function slugifyFilename(value: string) {
 
 export function InstagramSlideGenerator() {
   const [variant, setVariant] = useState<SlideVariant>('text-only');
-  const [title, setTitle] = useState('Il y a encore quelques années');
+  const [colorTheme, setColorTheme] = useState<SlideColorTheme>('dedicated');
+  const [title, setTitle] = useState('Férié');
   const [body, setBody] = useState(
-    '- Je réfléchissais à chaque bouchée pour savoir si je n’allais pas la regretter\n- J’utilisais des applications pour compter les calories avalées et dépensées\n- Je pensais que je devais compenser ce que je mangeais'
+    '- Paris est triste ce matin, férié ne lui réussit pas bien\n- Pardon pour le thé mon amour, infusé jusqu\'à non-retour\n- C\'est même pas qu\'on ne s\'aime plus, c\'est rien que la beauté qui se vautre\n - C\'est même pas qu\'on ne s\'aime plus, c\'est même plus qu\'on en aime d\'autres'
   );
   const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
@@ -56,6 +80,7 @@ export function InstagramSlideGenerator() {
   const deferredTitle = useDeferredValue(title);
   const deferredBody = useDeferredValue(body);
   const deferredVariant = useDeferredValue(variant);
+  const deferredColorTheme = useDeferredValue(colorTheme);
   const deferredImageId = useDeferredValue(selectedImageId);
 
   const { data: settings, isLoading: settingsLoading } = useQuery<Settings>({
@@ -115,6 +140,7 @@ export function InstagramSlideGenerator() {
       try {
         const nextPreviewUrl = await renderInstagramSlide({
           variant: deferredVariant,
+          colorTheme: deferredColorTheme,
           title: deferredTitle,
           body: deferredBody,
           imageUrl,
@@ -142,10 +168,9 @@ export function InstagramSlideGenerator() {
     return () => {
       cancelled = true;
     };
-  }, [deferredVariant, deferredTitle, deferredBody, imageUrl, logoUrl, settings?.site_title]);
+  }, [deferredVariant, deferredColorTheme, deferredTitle, deferredBody, imageUrl, logoUrl, settings?.site_title]);
 
   const requiresImage = variant !== 'text-only';
-  const selectedTemplate = templateOptions.find((option) => option.id === variant) ?? templateOptions[0];
 
   const downloadSlide = () => {
     if (!previewUrl) {
@@ -168,9 +193,6 @@ export function InstagramSlideGenerator() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Slides Instagram</h1>
-            <p className="mt-2 text-sm text-gray-600">
-              Trois gabarits simples, un aperçu en direct et un export PNG en un clic.
-            </p>
           </div>
 
           <button
@@ -187,10 +209,10 @@ export function InstagramSlideGenerator() {
       <div className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
         <section className="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">1. Choisir la composition</h2>
+            <h2 className="text-xl font-semibold text-gray-900">Composition</h2>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {templateOptions.map((option) => {
               const isSelected = option.id === variant;
 
@@ -205,48 +227,16 @@ export function InstagramSlideGenerator() {
                       : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 >
-                  <div className={`mb-4 h-20 rounded border border-gray-200 ${option.accent} p-3`}>
-                    <div className="h-full rounded border border-gray-200 bg-white p-3">
-                      {option.id === 'text-only' && (
-                        <div className="space-y-2">
-                          <div className="h-3 w-2/3 rounded-full bg-stone-300" />
-                          <div className="space-y-1.5">
-                            <div className="h-2.5 w-full rounded-full bg-stone-200" />
-                            <div className="h-2.5 w-5/6 rounded-full bg-stone-200" />
-                            <div className="h-2.5 w-4/6 rounded-full bg-stone-200" />
-                          </div>
-                        </div>
-                      )}
-                      {option.id === 'text-with-image' && (
-                        <div className="flex h-full gap-3">
-                          <div className="flex-1 space-y-2">
-                            <div className="h-3 w-4/5 rounded-full bg-stone-300" />
-                            <div className="h-2.5 w-full rounded-full bg-stone-200" />
-                            <div className="h-2.5 w-11/12 rounded-full bg-stone-200" />
-                            <div className="h-2.5 w-3/4 rounded-full bg-stone-200" />
-                          </div>
-                          <div className="w-16 rounded-[12px] bg-[#bcd7d4]" />
-                        </div>
-                      )}
-                      {option.id === 'image-with-text' && (
-                        <div className="relative h-full rounded bg-[#d7e3e1]">
-                          <div className="absolute bottom-2 left-2 right-8 rounded border border-gray-200 bg-white p-2">
-                            <div className="h-2.5 w-4/5 rounded-full bg-stone-300" />
-                            <div className="mt-1.5 h-2 w-full rounded-full bg-stone-200" />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+              
                   <h3 className="text-base font-semibold text-gray-900">{option.title}</h3>
                 </button>
               );
             })}
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid ">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Titre principal</label>
+              <label className="text-sm font-medium text-gray-700">Titre</label>
               <input
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
@@ -255,14 +245,34 @@ export function InstagramSlideGenerator() {
               />
             </div>
 
-            <div className="rounded border border-gray-200 bg-gray-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Template actif</p>
-              <h3 className="mt-2 text-base font-semibold text-gray-900">{selectedTemplate.title}</h3>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-gray-700">Couleurs de fond</label>
+            <div className="grid gap-3 md:grid-cols-3">
+              {colorThemeOptions.map((option) => {
+                const isSelected = option.id === colorTheme;
+
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setColorTheme(option.id)}
+                    className={`rounded-lg border p-3 text-left transition ${
+                      isSelected
+                        ? 'border-blue-600 bg-blue-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className={`mb-3 h-14 rounded border border-gray-200 ${option.previewClass}`} />
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Texte du slide</label>
+            <label className="text-sm font-medium text-gray-700">Texte</label>
             <textarea
               value={body}
               onChange={(event) => setBody(event.target.value)}
@@ -270,16 +280,12 @@ export function InstagramSlideGenerator() {
               className="w-full rounded border border-gray-300 px-3 py-3 text-sm leading-7 text-gray-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               placeholder="- Première idée clé\n- Deuxième idée clé\n- Troisième idée clé"
             />
-            <p className="text-xs leading-5 text-gray-500">
-              Utilisez une ligne par idée. Si une ligne commence par <span className="font-semibold">-</span> ou
-              <span className="font-semibold"> •</span>, elle sera rendue comme un point de liste.
-            </p>
           </div>
 {requiresImage && (
 <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h3 className="text-base font-semibold text-gray-900">Image associée</h3>
+                <h3 className="text-base font-semibold text-gray-900">Image</h3>
               </div>
 
               <button
@@ -328,7 +334,7 @@ export function InstagramSlideGenerator() {
           <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">2. Aperçu</h2>
+                <h2 className="text-xl font-semibold text-gray-900">Aperçu</h2>
                 <p className="mt-2 text-sm text-gray-600">
                   Format 1080 × 1350, optimisé pour les publications Instagram en portrait.
                 </p>

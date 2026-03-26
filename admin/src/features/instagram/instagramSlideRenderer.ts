@@ -1,7 +1,9 @@
-export type SlideVariant = 'text-only' | 'text-with-image' | 'image-with-text';
+export type SlideVariant = 'text-only' | 'text-with-image' | 'text-with-horizontal-image' | 'image-with-text';
+export type SlideColorTheme = 'dedicated' | 'frontend' | 'plain-rose';
 
 export interface SlideRenderOptions {
   variant: SlideVariant;
+  colorTheme: SlideColorTheme;
   title: string;
   body: string;
   imageUrl?: string | null;
@@ -10,18 +12,76 @@ export interface SlideRenderOptions {
 
 const WIDTH = 1080;
 const HEIGHT = 1350;
+const STANDARD_CARD_X = 126;
+const STANDARD_CARD_Y = 198;
+const STANDARD_CARD_W = WIDTH - 252;
+const STANDARD_CARD_H = 838;
+const STACKED_IMAGE_H = 712;
 
 const palette = {
-  background: '#FDFAF5',
   paper: '#FFFDFC',
   text: '#2A2520',
   muted: '#7A7068',
-  primaryLight: '#C8DEDB',
-  blush: '#E7B3BA',
-  beige: '#EFE7DC',
-  border: '#E6DDD3',
   shadow: 'rgba(42, 37, 32, 0.05)',
   bullet: '#B88B67',
+};
+
+const backgroundThemes: Record<SlideColorTheme, {
+  background: string;
+  topLeft: string;
+  rightDefault: string;
+  rightAlt: string;
+  bottomLeft: string;
+  frame: string;
+  cardBorder: string;
+  cardShadow: string;
+  imageBorder: string;
+  imagePlaceholder: string;
+  opacity: number;
+  showShapes: boolean;
+}> = {
+  dedicated: {
+    background: '#FDFAF5',
+    topLeft: '#C8DEDB',
+    rightDefault: '#E8BDC3',
+    rightAlt: '#E7B3BA',
+    bottomLeft: '#EFE7DC',
+    frame: '#E6DDD3',
+    cardBorder: 'rgba(126, 108, 95, 0.12)',
+    cardShadow: 'rgba(42, 37, 32, 0.05)',
+    imageBorder: 'rgba(126, 108, 95, 0.14)',
+    imagePlaceholder: 'rgba(200, 222, 219, 0.35)',
+    opacity: 0.5,
+    showShapes: true,
+  },
+  frontend: {
+    background: '#EEF5F1',
+    topLeft: '#8FC4C1',
+    rightDefault: '#D4A373',
+    rightAlt: '#9AAA88',
+    bottomLeft: '#EACCA6',
+    frame: '#D6E4DF',
+    cardBorder: 'rgba(92, 129, 123, 0.18)',
+    cardShadow: 'rgba(80, 110, 104, 0.05)',
+    imageBorder: 'rgba(92, 129, 123, 0.2)',
+    imagePlaceholder: 'rgba(143, 196, 193, 0.24)',
+    opacity: 0.58,
+    showShapes: true,
+  },
+  'plain-rose': {
+    background: '#E34262',
+    topLeft: '#E34262',
+    rightDefault: '#E34262',
+    rightAlt: '#E34262',
+    bottomLeft: '#E34262',
+    frame: 'rgba(255,255,255,0.42)',
+    cardBorder: 'rgba(255, 255, 255, 0.22)',
+    cardShadow: 'rgba(119, 22, 44, 0.12)',
+    imageBorder: 'rgba(255, 255, 255, 0.26)',
+    imagePlaceholder: 'rgba(255, 255, 255, 0.14)',
+    opacity: 0,
+    showShapes: false,
+  },
 };
 
 type BodyBlock =
@@ -84,21 +144,27 @@ function strokeRoundedRect(
   ctx.stroke();
 }
 
-function drawBackground(ctx: CanvasRenderingContext2D, variant: SlideVariant) {
-  ctx.fillStyle = palette.background;
+function drawBackground(ctx: CanvasRenderingContext2D, variant: SlideVariant, colorTheme: SlideColorTheme) {
+  const theme = backgroundThemes[colorTheme];
+
+  ctx.fillStyle = theme.background;
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-  ctx.save();
-  ctx.globalAlpha = 0.5;
+  if (!theme.showShapes) {
+    return;
+  }
 
-  ctx.fillStyle = palette.primaryLight;
+  ctx.save();
+  ctx.globalAlpha = theme.opacity;
+
+  ctx.fillStyle = theme.topLeft;
   ctx.beginPath();
   ctx.arc(38, 190, 228, Math.PI * 0.2, Math.PI * 1.55);
-  ctx.lineTo(24, 182);
+  ctx.quadraticCurveTo(26, 116, 79, 182);
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = variant === 'image-with-text' ? palette.blush : '#E8BDC3';
+  ctx.fillStyle = variant === 'image-with-text' ? theme.rightAlt : theme.rightDefault;
   ctx.beginPath();
   ctx.moveTo(962, 520);
   ctx.bezierCurveTo(1096, 504, 1110, 622, 1038, 690);
@@ -107,7 +173,7 @@ function drawBackground(ctx: CanvasRenderingContext2D, variant: SlideVariant) {
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = palette.beige;
+  ctx.fillStyle = theme.bottomLeft;
   ctx.beginPath();
   ctx.moveTo(0, 1036);
   ctx.bezierCurveTo(110, 942, 246, 998, 268, 1124);
@@ -119,19 +185,28 @@ function drawBackground(ctx: CanvasRenderingContext2D, variant: SlideVariant) {
   ctx.restore();
 }
 
-function drawFrame(ctx: CanvasRenderingContext2D) {
-  strokeRoundedRect(ctx, 36, 36, WIDTH - 72, HEIGHT - 72, 30, palette.border, 2);
+function drawFrame(ctx: CanvasRenderingContext2D, colorTheme: SlideColorTheme) {
+  strokeRoundedRect(ctx, 36, 36, WIDTH - 72, HEIGHT - 72, 30, backgroundThemes[colorTheme].frame, 2);
 }
 
-function drawPaperCard(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+function drawPaperCard(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  colorTheme: SlideColorTheme
+) {
+  const theme = backgroundThemes[colorTheme];
+
   ctx.save();
-  ctx.shadowColor = palette.shadow;
+  ctx.shadowColor = theme.cardShadow;
   ctx.shadowBlur = 18;
   ctx.shadowOffsetY = 8;
   drawRoundedRect(ctx, x, y, w, h, 18, palette.paper);
   ctx.restore();
 
-  strokeRoundedRect(ctx, x, y, w, h, 18, 'rgba(42, 37, 32, 0.06)', 1.5);
+  strokeRoundedRect(ctx, x, y, w, h, 18, theme.cardBorder, 1.5);
 }
 
 function parseBody(body: string): BodyBlock[] {
@@ -222,18 +297,26 @@ function fitBody(
     }, 0);
 
     if (totalHeight <= maxHeight) {
-      return { fontSize, lineHeight, groupedLines };
+      return { fontSize, lineHeight, groupedLines, totalHeight };
     }
   }
 
   ctx.font = `400 ${minFontSize}px "Segoe UI", Arial, sans-serif`;
+  const groupedLines = blocks.map((block) => ({
+    type: block.type,
+    lines: wrapText(ctx, block.text, block.type === 'bullet' ? maxWidth - 54 : maxWidth),
+  }));
+
+  const totalHeight = groupedLines.reduce((acc, group, index) => {
+    const spacing = index < groupedLines.length - 1 ? Math.round(minFontSize * 0.48) : 0;
+    return acc + (group.lines.length * Math.round(minFontSize * 1.48)) + spacing;
+  }, 0);
+
   return {
     fontSize: minFontSize,
     lineHeight: Math.round(minFontSize * 1.48),
-    groupedLines: blocks.map((block) => ({
-      type: block.type,
-      lines: wrapText(ctx, block.text, block.type === 'bullet' ? maxWidth - 54 : maxWidth),
-    })),
+    groupedLines,
+    totalHeight,
   };
 }
 
@@ -289,16 +372,19 @@ function drawContainedImage(
   y: number,
   w: number,
   h: number,
-  radius: number
+  radius: number,
+  colorTheme: SlideColorTheme
 ) {
+  const theme = backgroundThemes[colorTheme];
+
   if (!image) {
-    drawRoundedRect(ctx, x, y, w, h, radius, 'rgba(200, 222, 219, 0.45)');
-    strokeRoundedRect(ctx, x, y, w, h, radius, 'rgba(42, 37, 32, 0.08)', 1.5);
+    drawRoundedRect(ctx, x, y, w, h, radius, theme.imagePlaceholder);
+    strokeRoundedRect(ctx, x, y, w, h, radius, theme.imageBorder, 1.5);
     ctx.fillStyle = palette.muted;
     ctx.font = '500 24px "Segoe UI", Arial, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Ajoutez une image', x + (w / 2), y + (h / 2));
+    ctx.fillText('Ajouter une image', x + (w / 2), y + (h / 2));
     return;
   }
 
@@ -327,17 +413,17 @@ function drawContainedImage(
   ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
   ctx.restore();
 
-  strokeRoundedRect(ctx, x, y, w, h, radius, 'rgba(42, 37, 32, 0.08)', 1.5);
+  strokeRoundedRect(ctx, x, y, w, h, radius, theme.imageBorder, 1.5);
 }
 
-function drawLogo(ctx: CanvasRenderingContext2D, logo: CanvasImageSource | null) {
+function drawLogo(ctx: CanvasRenderingContext2D, logo: CanvasImageSource | null, colorTheme: SlideColorTheme) {
   const width = 148;
   const height = 100;
   const x = WIDTH - width - 82;
   const y = HEIGHT - height - 78;
 
   if (!logo) {
-    ctx.fillStyle = palette.bullet;
+    ctx.fillStyle = colorTheme === 'plain-rose' ? '#FFF5F7' : palette.bullet;
     ctx.font = '700 40px "Segoe UI", Arial, sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'alphabetic';
@@ -355,101 +441,184 @@ function drawLogo(ctx: CanvasRenderingContext2D, logo: CanvasImageSource | null)
   ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
 }
 
-function drawTextOnlySlide(ctx: CanvasRenderingContext2D, title: string, blocks: BodyBlock[]) {
-  const cardX = 154;
-  const cardY = 226;
-  const cardW = WIDTH - 308;
-  const cardH = 804;
+function drawCenteredTitle(
+  ctx: CanvasRenderingContext2D,
+  title: string,
+  centerX: number,
+  startY: number,
+  maxWidth: number,
+  maxLines: number,
+  initialFontSize: number,
+  minFontSize: number,
+  lineHeightMultiplier: number,
+  spacingAfter: number
+) {
+  const safeTitle = normalizeText(title).trim();
+  let cursorY = startY;
 
-  drawPaperCard(ctx, cardX, cardY, cardW, cardH);
+  if (!safeTitle) {
+    return cursorY;
+  }
 
-  const titleLayout = fitTitle(ctx, title, cardW - 148, 3, 52, 38);
+  const titleLayout = fitTitle(ctx, safeTitle, maxWidth, maxLines, initialFontSize, minFontSize);
   ctx.fillStyle = palette.text;
   ctx.font = `700 ${titleLayout.fontSize}px "Segoe UI", Arial, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
 
-  let cursorY = cardY + 76;
   for (const line of titleLayout.lines) {
-    ctx.fillText(line, cardX + (cardW / 2), cursorY);
-    cursorY += titleLayout.fontSize * 1.18;
+    ctx.fillText(line, centerX, cursorY);
+    cursorY += titleLayout.fontSize * lineHeightMultiplier;
   }
 
-  cursorY += 32;
+  return cursorY + spacingAfter;
+}
 
-  const bodyLayout = fitBody(ctx, blocks, cardW - 148, cardH - (cursorY - cardY) - 88, 33, 26);
-  drawTextGroup(ctx, cardX + 74, cursorY, cardW - 148, bodyLayout, palette.muted, 'left');
+function drawTextOnlySlide(
+  ctx: CanvasRenderingContext2D,
+  title: string,
+  blocks: BodyBlock[],
+  colorTheme: SlideColorTheme
+) {
+  const cardX = STANDARD_CARD_X;
+  const cardY = STANDARD_CARD_Y;
+  const cardW = STANDARD_CARD_W;
+  const cardH = STANDARD_CARD_H;
+
+  drawPaperCard(ctx, cardX, cardY, cardW, cardH, colorTheme);
+
+  const hasTitle = normalizeText(title).trim().length > 0;
+  const cursorY = drawCenteredTitle(
+    ctx,
+    title,
+    cardX + (cardW / 2),
+    cardY + 76,
+    cardW - 148,
+    3,
+    52,
+    38,
+    1.18,
+    hasTitle ? 32 : 0
+  );
+
+  const bodyMaxHeight = cardH - (cursorY - cardY) - 88;
+  const bodyLayout = fitBody(ctx, blocks, cardW - 148, bodyMaxHeight, 37, 26);
+  const balancedCursorY = cursorY + Math.max(0, Math.min(42, (bodyMaxHeight - bodyLayout.totalHeight) / 2));
+  drawTextGroup(ctx, cardX + 74, balancedCursorY, cardW - 148, bodyLayout, palette.muted, 'left');
 }
 
 function drawTextWithImageSlide(
   ctx: CanvasRenderingContext2D,
   title: string,
   blocks: BodyBlock[],
-  image: CanvasImageSource | null
+  image: CanvasImageSource | null,
+  colorTheme: SlideColorTheme
 ) {
-  const cardX = 126;
-  const cardY = 198;
-  const cardW = WIDTH - 252;
-  const cardH = 838;
+  const cardX = STANDARD_CARD_X;
+  const cardY = STANDARD_CARD_Y;
+  const cardW = STANDARD_CARD_W;
+  const cardH = STANDARD_CARD_H;
 
-  drawPaperCard(ctx, cardX, cardY, cardW, cardH);
+  drawPaperCard(ctx, cardX, cardY, cardW, cardH, colorTheme);
 
-  const titleLayout = fitTitle(ctx, title, 448, 3, 48, 36);
-  ctx.fillStyle = palette.text;
-  ctx.font = `700 ${titleLayout.fontSize}px "Segoe UI", Arial, sans-serif`;
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
+  const hasTitle = normalizeText(title).trim().length > 0;
+  const cursorY = drawCenteredTitle(
+    ctx,
+    title,
+    cardX + 70 + 220,
+    cardY + 72,
+    448,
+    3,
+    48,
+    36,
+    1.15,
+    hasTitle ? 28 : 0
+  );
 
-  let cursorY = cardY + 72;
-  for (const line of titleLayout.lines) {
-    ctx.fillText(line, cardX + 70, cursorY);
-    cursorY += titleLayout.fontSize * 1.15;
-  }
+  const bodyMaxHeight = cardH - (cursorY - cardY) - 92;
+  const bodyLayout = fitBody(ctx, blocks, 440, bodyMaxHeight, 40, 23);
+  const balancedCursorY = cursorY + Math.max(0, Math.min(120, (bodyMaxHeight - bodyLayout.totalHeight) / 2));
+  drawTextGroup(ctx, cardX + 70, balancedCursorY, 440, bodyLayout, palette.muted, 'left');
 
-  cursorY += 28;
+  drawContainedImage(ctx, image, cardX + cardW - 282, cardY + 118, 212, 396, 16, colorTheme);
+}
 
-  const bodyLayout = fitBody(ctx, blocks, 440, 392, 29, 23);
-  drawTextGroup(ctx, cardX + 70, cursorY, 440, bodyLayout, palette.muted, 'left');
+function drawTextWithHorizontalImageSlide(
+  ctx: CanvasRenderingContext2D,
+  title: string,
+  blocks: BodyBlock[],
+  image: CanvasImageSource | null,
+  colorTheme: SlideColorTheme
+) {
+  const cardX = STANDARD_CARD_X;
+  const cardY = STANDARD_CARD_Y;
+  const cardW = STANDARD_CARD_W;
+  const cardH = STANDARD_CARD_H;
 
-  drawContainedImage(ctx, image, cardX + cardW - 282, cardY + 118, 212, 396, 16);
+  drawPaperCard(ctx, cardX, cardY, cardW, cardH, colorTheme);
+
+  const hasTitle = normalizeText(title).trim().length > 0;
+  const cursorY = drawCenteredTitle(
+    ctx,
+    title,
+    cardX + (cardW / 2),
+    cardY + 68,
+    cardW - 120,
+    3,
+    48,
+    36,
+    1.15,
+    hasTitle ? 26 : 0
+  );
+
+  const imageY = cardY + cardH - 286;
+  const textHeightBudget = imageY - cursorY - 44;
+  const bodyLayout = fitBody(ctx, blocks, cardW - 120, textHeightBudget, 36, 22);
+  const balancedCursorY = cursorY + Math.max(0, Math.min(72, (textHeightBudget - bodyLayout.totalHeight) / 2));
+  drawTextGroup(ctx, cardX + 60, balancedCursorY, cardW - 120, bodyLayout, palette.muted, 'left');
+
+  drawContainedImage(ctx, image, cardX + 60, imageY, cardW - 120, 192, 16, colorTheme);
 }
 
 function drawImageWithTextSlide(
   ctx: CanvasRenderingContext2D,
   title: string,
   blocks: BodyBlock[],
-  image: CanvasImageSource | null
+  image: CanvasImageSource | null,
+  colorTheme: SlideColorTheme
 ) {
-  const imageX = 126;
-  const imageY = 168;
-  const imageW = WIDTH - 252;
-  const imageH = 742;
+  const imageX = STANDARD_CARD_X;
+  const imageY = STANDARD_CARD_Y;
+  const imageW = STANDARD_CARD_W;
+  const imageH = STACKED_IMAGE_H;
 
-  drawContainedImage(ctx, image, imageX, imageY, imageW, imageH, 18);
+  drawContainedImage(ctx, image, imageX, imageY, imageW, imageH, 18, colorTheme);
 
   const plaqueX = 148;
-  const plaqueY = 808;
+  const plaqueY = 792;
   const plaqueW = 544;
   const plaqueH = 246;
-  drawPaperCard(ctx, plaqueX, plaqueY, plaqueW, plaqueH);
+  drawPaperCard(ctx, plaqueX, plaqueY, plaqueW, plaqueH, colorTheme);
 
-  const titleLayout = fitTitle(ctx, title, plaqueW - 88, 2, 42, 30);
-  ctx.fillStyle = palette.text;
-  ctx.font = `700 ${titleLayout.fontSize}px "Segoe UI", Arial, sans-serif`;
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
-
-  let cursorY = plaqueY + 40;
-  for (const line of titleLayout.lines) {
-    ctx.fillText(line, plaqueX + 44, cursorY);
-    cursorY += titleLayout.fontSize * 1.14;
-  }
-
-  cursorY += 16;
+  const hasTitle = normalizeText(title).trim().length > 0;
+  const cursorY = drawCenteredTitle(
+    ctx,
+    title,
+    plaqueX + (plaqueW / 2),
+    plaqueY + 40,
+    plaqueW - 88,
+    2,
+    42,
+    30,
+    1.14,
+    hasTitle ? 16 : 0
+  );
 
   const textBlocks = blocks.length > 2 ? blocks.slice(0, 2) : blocks;
-  const bodyLayout = fitBody(ctx, textBlocks, plaqueW - 88, 96, 23, 19);
-  drawTextGroup(ctx, plaqueX + 44, cursorY, plaqueW - 88, bodyLayout, palette.muted, 'left');
+  const bodyMaxHeight = 96;
+  const bodyLayout = fitBody(ctx, textBlocks, plaqueW - 88, bodyMaxHeight, 26, 19);
+  const balancedCursorY = cursorY + Math.max(0, Math.min(16, (bodyMaxHeight - bodyLayout.totalHeight) / 2));
+  drawTextGroup(ctx, plaqueX + 44, balancedCursorY, plaqueW - 88, bodyLayout, palette.muted, 'left');
 }
 
 export async function renderInstagramSlide(options: SlideRenderOptions) {
@@ -467,21 +636,23 @@ export async function renderInstagramSlide(options: SlideRenderOptions) {
     loadImage(options.logoUrl),
   ]);
 
-  drawBackground(ctx, options.variant);
-  drawFrame(ctx);
+  drawBackground(ctx, options.variant, options.colorTheme);
+  drawFrame(ctx, options.colorTheme);
 
-  const safeTitle = normalizeText(options.title).trim() || 'Votre message ici';
+  const safeTitle = normalizeText(options.title).trim();
   const blocks = parseBody(options.body);
 
   if (options.variant === 'text-only') {
-    drawTextOnlySlide(ctx, safeTitle, blocks);
+    drawTextOnlySlide(ctx, safeTitle, blocks, options.colorTheme);
   } else if (options.variant === 'text-with-image') {
-    drawTextWithImageSlide(ctx, safeTitle, blocks, contentImage);
+    drawTextWithImageSlide(ctx, safeTitle, blocks, contentImage, options.colorTheme);
+  } else if (options.variant === 'text-with-horizontal-image') {
+    drawTextWithHorizontalImageSlide(ctx, safeTitle, blocks, contentImage, options.colorTheme);
   } else {
-    drawImageWithTextSlide(ctx, safeTitle, blocks, contentImage);
+    drawImageWithTextSlide(ctx, safeTitle, blocks, contentImage, options.colorTheme);
   }
 
-  drawLogo(ctx, logoImage);
+  drawLogo(ctx, logoImage, options.colorTheme);
 
   return canvas.toDataURL('image/png');
 }
