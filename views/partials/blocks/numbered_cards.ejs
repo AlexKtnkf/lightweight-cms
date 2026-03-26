@@ -7,7 +7,9 @@
 <section class="l-section" id="<%= block.id ? 'block-' + block.id : 'numbered-cards' %>">
   <div class="l-container">
     <% if (block.block_data.section_title) { %>
-    <h2 class="c-headline__title" style="text-align: center; margin-bottom: 3rem;"><%= block.block_data.section_title %></h2>
+    <div class="c-section-intro c-section-intro--center">
+      <h2 class="c-headline__title section-title centered"><%= block.block_data.section_title %></h2>
+    </div>
     <% } %>
     <div class="c-num-grid">
     <% block.block_data.cards.forEach((card, index) => { %>

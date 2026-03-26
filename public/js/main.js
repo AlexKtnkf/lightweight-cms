@@ -73,16 +73,18 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   });
 });
 
-// Navbar scroll shadow: adds .scrolled class after 60px scroll (legacy .navbar)
+// Navbar scroll shadow: supports both legacy .navbar and current .c-nav
 document.addEventListener('DOMContentLoaded', function() {
-  const navbar = document.querySelector('.navbar');
-  if (navbar) {
+  const navbars = document.querySelectorAll('.navbar, .c-nav');
+  if (navbars.length > 0) {
     function updateNavbar() {
-      if (window.pageYOffset > 60) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
-      }
+      navbars.forEach((navbar) => {
+        if (window.pageYOffset > 40) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      });
     }
     window.addEventListener('scroll', updateNavbar, { passive: true });
     updateNavbar();

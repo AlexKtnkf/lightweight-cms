@@ -8,7 +8,9 @@
   <div class="l-container">
     <div class="c-contact">
     <% if (block.block_data.title) { %>
-    <h2 class="c-headline__title" style="text-align: center;"><%= block.block_data.title %></h2>
+    <div class="c-section-intro c-section-intro--center">
+      <h2 class="c-headline__title section-title centered"><%= block.block_data.title %></h2>
+    </div>
     <% } %>
     <% if (block.block_data.description) { %>
     <p class="c-contact__description"><%= block.block_data.description %></p>
