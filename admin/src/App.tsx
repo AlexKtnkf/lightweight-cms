@@ -10,6 +10,7 @@ import { SettingsEditor } from './features/settings/SettingsEditor';
 import { Dashboard } from './features/dashboard/Dashboard';
 import { Login } from './features/auth/Login';
 import { ProtectedRoute } from './features/auth/ProtectedRoute';
+import { InstagramSlideGenerator } from './features/instagram/InstagramSlideGenerator';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,6 +66,9 @@ function AdminApp() {
               </Link>
               <Link to="/media" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
                 Images
+              </Link>
+              <Link to="/instagram-slides" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
+                Insta studio
               </Link>
               <Link to="/settings" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
                 Paramètres
@@ -127,6 +131,13 @@ function AdminApp() {
                 Images
               </Link>
               <Link
+                to="/instagram-slides"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 block px-3 py-2 rounded-md text-base"
+              >
+                Insta studio
+              </Link>
+              <Link
                 to="/settings"
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 block px-3 py-2 rounded-md text-base"
@@ -153,6 +164,7 @@ function AdminApp() {
           <Route path="/articles/new" element={<ArticleEditor />} />
           <Route path="/articles/:id" element={<ArticleEditor />} />
           <Route path="/media" element={<ImagesList />} />
+          <Route path="/instagram-slides" element={<InstagramSlideGenerator />} />
           <Route path="/settings" element={<SettingsEditor />} />
         </Routes>
       </main>

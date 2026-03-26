@@ -4,7 +4,6 @@ export interface SlideRenderOptions {
   variant: SlideVariant;
   title: string;
   body: string;
-  siteTitle?: string;
   imageUrl?: string | null;
   logoUrl?: string | null;
 }
@@ -17,19 +16,21 @@ const palette = {
   paper: '#FFFDFC',
   text: '#2A2520',
   muted: '#7A7068',
-  primary: '#5B9B97',
   primaryLight: '#C8DEDB',
-  sage: '#9AAA88',
-  accent: '#D4A373',
-  accentSoft: '#EACCA6',
   blush: '#E7B3BA',
+  beige: '#EFE7DC',
   border: '#E6DDD3',
-  shadow: 'rgba(42, 37, 32, 0.08)',
+  shadow: 'rgba(42, 37, 32, 0.05)',
+  bullet: '#B88B67',
 };
 
 type BodyBlock =
   | { type: 'bullet'; text: string }
   | { type: 'paragraph'; text: string };
+
+function normalizeText(value: string) {
+  return value.normalize('NFC');
+}
 
 function loadImage(url?: string | null): Promise<HTMLImageElement | null> {
   if (!url) {
@@ -88,76 +89,53 @@ function drawBackground(ctx: CanvasRenderingContext2D, variant: SlideVariant) {
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
   ctx.save();
-  ctx.globalAlpha = 0.92;
+  ctx.globalAlpha = 0.5;
 
   ctx.fillStyle = palette.primaryLight;
   ctx.beginPath();
-  ctx.arc(30, 180, 290, Math.PI * 0.2, Math.PI * 1.55);
-  ctx.lineTo(30, 180);
+  ctx.arc(38, 190, 228, Math.PI * 0.2, Math.PI * 1.55);
+  ctx.lineTo(24, 182);
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = variant === 'image-with-text' ? palette.blush : '#E95D74';
+  ctx.fillStyle = variant === 'image-with-text' ? palette.blush : '#E8BDC3';
   ctx.beginPath();
-  ctx.moveTo(930, 460);
-  ctx.bezierCurveTo(1120, 420, 1125, 610, 1020, 695);
-  ctx.bezierCurveTo(960, 745, 900, 725, 850, 765);
-  ctx.lineTo(850, 480);
+  ctx.moveTo(962, 520);
+  ctx.bezierCurveTo(1096, 504, 1110, 622, 1038, 690);
+  ctx.bezierCurveTo(986, 736, 936, 722, 884, 748);
+  ctx.lineTo(884, 538);
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = '#EFE7DC';
+  ctx.fillStyle = palette.beige;
   ctx.beginPath();
-  ctx.moveTo(0, 990);
-  ctx.bezierCurveTo(120, 865, 290, 955, 310, 1120);
-  ctx.bezierCurveTo(322, 1210, 255, 1285, 160, 1298);
-  ctx.bezierCurveTo(70, 1310, 28, 1250, 0, 1220);
+  ctx.moveTo(0, 1036);
+  ctx.bezierCurveTo(110, 942, 246, 998, 268, 1124);
+  ctx.bezierCurveTo(280, 1196, 236, 1252, 162, 1262);
+  ctx.bezierCurveTo(86, 1272, 28, 1228, 0, 1194);
   ctx.closePath();
-  ctx.fill();
-
-  ctx.fillStyle = palette.accentSoft;
-  ctx.globalAlpha = 0.35;
-  ctx.beginPath();
-  ctx.arc(880, 1085, 110, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();
 }
 
 function drawFrame(ctx: CanvasRenderingContext2D) {
-  strokeRoundedRect(ctx, 32, 32, WIDTH - 64, HEIGHT - 64, 42, palette.border, 2);
-  strokeRoundedRect(ctx, 58, 58, WIDTH - 116, HEIGHT - 116, 32, 'rgba(212, 163, 115, 0.22)', 1.5);
-
-  ctx.strokeStyle = 'rgba(91, 155, 151, 0.22)';
-  ctx.lineWidth = 5;
-  ctx.lineCap = 'round';
-
-  ctx.beginPath();
-  ctx.moveTo(92, 118);
-  ctx.lineTo(188, 118);
-  ctx.moveTo(92, 118);
-  ctx.lineTo(92, 206);
-  ctx.moveTo(WIDTH - 92, HEIGHT - 118);
-  ctx.lineTo(WIDTH - 188, HEIGHT - 118);
-  ctx.moveTo(WIDTH - 92, HEIGHT - 118);
-  ctx.lineTo(WIDTH - 92, HEIGHT - 206);
-  ctx.stroke();
+  strokeRoundedRect(ctx, 36, 36, WIDTH - 72, HEIGHT - 72, 30, palette.border, 2);
 }
 
 function drawPaperCard(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
   ctx.save();
   ctx.shadowColor = palette.shadow;
-  ctx.shadowBlur = 42;
-  ctx.shadowOffsetY = 16;
-  drawRoundedRect(ctx, x, y, w, h, 38, palette.paper);
+  ctx.shadowBlur = 18;
+  ctx.shadowOffsetY = 8;
+  drawRoundedRect(ctx, x, y, w, h, 18, palette.paper);
   ctx.restore();
 
-  strokeRoundedRect(ctx, x, y, w, h, 38, 'rgba(42, 37, 32, 0.05)', 1.5);
-  strokeRoundedRect(ctx, x + 18, y + 18, w - 36, h - 36, 28, 'rgba(91, 155, 151, 0.10)', 1.5);
+  strokeRoundedRect(ctx, x, y, w, h, 18, 'rgba(42, 37, 32, 0.06)', 1.5);
 }
 
 function parseBody(body: string): BodyBlock[] {
-  const lines = body
+  const lines = normalizeText(body)
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean);
@@ -208,14 +186,14 @@ function fitTitle(
   minFontSize: number
 ) {
   for (let fontSize = initialFontSize; fontSize >= minFontSize; fontSize -= 2) {
-    ctx.font = `700 ${fontSize}px "Segoe UI", "Helvetica Neue", Arial, sans-serif`;
+    ctx.font = `700 ${fontSize}px "Segoe UI", Arial, sans-serif`;
     const lines = wrapText(ctx, title, maxWidth);
     if (lines.length <= maxLines) {
       return { fontSize, lines };
     }
   }
 
-  ctx.font = `700 ${minFontSize}px "Segoe UI", "Helvetica Neue", Arial, sans-serif`;
+  ctx.font = `700 ${minFontSize}px "Segoe UI", Arial, sans-serif`;
   return {
     fontSize: minFontSize,
     lines: wrapText(ctx, title, maxWidth).slice(0, maxLines),
@@ -228,11 +206,10 @@ function fitBody(
   maxWidth: number,
   maxHeight: number,
   initialFontSize: number,
-  minFontSize: number,
-  align: CanvasTextAlign
+  minFontSize: number
 ) {
   for (let fontSize = initialFontSize; fontSize >= minFontSize; fontSize -= 2) {
-    ctx.font = `400 ${fontSize}px "Segoe UI", "Helvetica Neue", Arial, sans-serif`;
+    ctx.font = `400 ${fontSize}px "Segoe UI", Arial, sans-serif`;
     const lineHeight = Math.round(fontSize * 1.48);
     const groupedLines = blocks.map((block) => ({
       type: block.type,
@@ -240,16 +217,16 @@ function fitBody(
     }));
 
     const totalHeight = groupedLines.reduce((acc, group, index) => {
-      const spacing = index < groupedLines.length - 1 ? Math.round(fontSize * 0.58) : 0;
+      const spacing = index < groupedLines.length - 1 ? Math.round(fontSize * 0.48) : 0;
       return acc + (group.lines.length * lineHeight) + spacing;
     }, 0);
 
     if (totalHeight <= maxHeight) {
-      return { fontSize, lineHeight, groupedLines, align };
+      return { fontSize, lineHeight, groupedLines };
     }
   }
 
-  ctx.font = `400 ${minFontSize}px "Segoe UI", "Helvetica Neue", Arial, sans-serif`;
+  ctx.font = `400 ${minFontSize}px "Segoe UI", Arial, sans-serif`;
   return {
     fontSize: minFontSize,
     lineHeight: Math.round(minFontSize * 1.48),
@@ -257,7 +234,6 @@ function fitBody(
       type: block.type,
       lines: wrapText(ctx, block.text, block.type === 'bullet' ? maxWidth - 54 : maxWidth),
     })),
-    align,
   };
 }
 
@@ -267,12 +243,13 @@ function drawTextGroup(
   y: number,
   maxWidth: number,
   blocks: ReturnType<typeof fitBody>,
-  color: string
+  color: string,
+  align: CanvasTextAlign
 ) {
   ctx.fillStyle = color;
-  ctx.textAlign = blocks.align;
+  ctx.textAlign = align;
   ctx.textBaseline = 'top';
-  ctx.font = `400 ${blocks.fontSize}px "Segoe UI", "Helvetica Neue", Arial, sans-serif`;
+  ctx.font = `400 ${blocks.fontSize}px "Segoe UI", Arial, sans-serif`;
 
   let cursorY = y;
   for (let groupIndex = 0; groupIndex < blocks.groupedLines.length; groupIndex += 1) {
@@ -282,27 +259,25 @@ function drawTextGroup(
       const line = group.lines[lineIndex];
 
       if (group.type === 'bullet' && lineIndex === 0) {
-        ctx.fillStyle = palette.accent;
+        ctx.fillStyle = palette.bullet;
         ctx.beginPath();
-        const bulletX = x + 12;
+        const bulletX = x + 10;
         const bulletY = cursorY + blocks.lineHeight * 0.52;
-        ctx.arc(bulletX, bulletY, 7, 0, Math.PI * 2);
+        ctx.arc(bulletX, bulletY, 6, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = color;
       }
 
-      if (blocks.align === 'center') {
-        ctx.fillText(line, x + (maxWidth / 2), cursorY);
-      } else {
-        const textX = group.type === 'bullet' ? x + 34 : x;
-        ctx.fillText(line, textX, cursorY);
-      }
+      const textX = align === 'center'
+        ? x + (maxWidth / 2)
+        : (group.type === 'bullet' ? x + 32 : x);
 
+      ctx.fillText(line, textX, cursorY);
       cursorY += blocks.lineHeight;
     }
 
     if (groupIndex < blocks.groupedLines.length - 1) {
-      cursorY += Math.round(blocks.fontSize * 0.58);
+      cursorY += Math.round(blocks.fontSize * 0.48);
     }
   }
 }
@@ -317,17 +292,13 @@ function drawContainedImage(
   radius: number
 ) {
   if (!image) {
-    drawRoundedRect(ctx, x, y, w, h, radius, 'rgba(91, 155, 151, 0.12)');
-    ctx.strokeStyle = 'rgba(91, 155, 151, 0.22)';
-    ctx.lineWidth = 2;
-    roundedRect(ctx, x, y, w, h, radius);
-    ctx.stroke();
-
+    drawRoundedRect(ctx, x, y, w, h, radius, 'rgba(200, 222, 219, 0.45)');
+    strokeRoundedRect(ctx, x, y, w, h, radius, 'rgba(42, 37, 32, 0.08)', 1.5);
     ctx.fillStyle = palette.muted;
-    ctx.font = '500 28px "Segoe UI", Arial, sans-serif';
+    ctx.font = '500 24px "Segoe UI", Arial, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Ajoutez une image', x + w / 2, y + h / 2);
+    ctx.fillText('Ajoutez une image', x + (w / 2), y + (h / 2));
     return;
   }
 
@@ -360,14 +331,14 @@ function drawContainedImage(
 }
 
 function drawLogo(ctx: CanvasRenderingContext2D, logo: CanvasImageSource | null) {
-  const width = 172;
-  const height = 120;
-  const x = WIDTH - width - 96;
-  const y = HEIGHT - height - 86;
+  const width = 148;
+  const height = 100;
+  const x = WIDTH - width - 82;
+  const y = HEIGHT - height - 78;
 
   if (!logo) {
-    ctx.fillStyle = palette.accent;
-    ctx.font = '700 44px "Segoe UI", Arial, sans-serif';
+    ctx.fillStyle = palette.bullet;
+    ctx.font = '700 40px "Segoe UI", Arial, sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'alphabetic';
     ctx.fillText('OB', x + width, y + height);
@@ -384,137 +355,101 @@ function drawLogo(ctx: CanvasRenderingContext2D, logo: CanvasImageSource | null)
   ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
 }
 
-function drawFooterTag(ctx: CanvasRenderingContext2D, label: string) {
-  ctx.fillStyle = 'rgba(122, 112, 104, 0.75)';
-  ctx.font = '500 24px "Segoe UI", Arial, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(label, WIDTH / 2, HEIGHT - 66);
-}
-
-function drawTextOnlySlide(ctx: CanvasRenderingContext2D, title: string, blocks: BodyBlock[], siteTitle?: string) {
-  const cardX = 132;
-  const cardY = 196;
-  const cardW = WIDTH - 264;
-  const cardH = 872;
+function drawTextOnlySlide(ctx: CanvasRenderingContext2D, title: string, blocks: BodyBlock[]) {
+  const cardX = 154;
+  const cardY = 226;
+  const cardW = WIDTH - 308;
+  const cardH = 804;
 
   drawPaperCard(ctx, cardX, cardY, cardW, cardH);
 
-  const titleLayout = fitTitle(ctx, title, cardW - 180, 3, 60, 42);
+  const titleLayout = fitTitle(ctx, title, cardW - 148, 3, 52, 38);
   ctx.fillStyle = palette.text;
-  ctx.font = `700 ${titleLayout.fontSize}px "Segoe UI", "Helvetica Neue", Arial, sans-serif`;
+  ctx.font = `700 ${titleLayout.fontSize}px "Segoe UI", Arial, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
 
-  let cursorY = cardY + 96;
+  let cursorY = cardY + 76;
   for (const line of titleLayout.lines) {
-    ctx.fillText(line, cardX + cardW / 2, cursorY);
+    ctx.fillText(line, cardX + (cardW / 2), cursorY);
     cursorY += titleLayout.fontSize * 1.18;
   }
 
-  cursorY += 48;
+  cursorY += 32;
 
-  const bodyLayout = fitBody(ctx, blocks, cardW - 180, cardH - (cursorY - cardY) - 118, 38, 28, 'left');
-  drawTextGroup(ctx, cardX + 90, cursorY, cardW - 180, bodyLayout, palette.muted);
-
-  drawFooterTag(ctx, siteTitle || 'Slide Instagram');
+  const bodyLayout = fitBody(ctx, blocks, cardW - 148, cardH - (cursorY - cardY) - 88, 33, 26);
+  drawTextGroup(ctx, cardX + 74, cursorY, cardW - 148, bodyLayout, palette.muted, 'left');
 }
 
 function drawTextWithImageSlide(
   ctx: CanvasRenderingContext2D,
   title: string,
   blocks: BodyBlock[],
-  image: CanvasImageSource | null,
-  siteTitle?: string
+  image: CanvasImageSource | null
 ) {
-  const cardX = 102;
-  const cardY = 170;
-  const cardW = WIDTH - 204;
-  const cardH = 900;
+  const cardX = 126;
+  const cardY = 198;
+  const cardW = WIDTH - 252;
+  const cardH = 838;
 
   drawPaperCard(ctx, cardX, cardY, cardW, cardH);
 
-  const titleLayout = fitTitle(ctx, title, 520, 3, 54, 40);
+  const titleLayout = fitTitle(ctx, title, 448, 3, 48, 36);
   ctx.fillStyle = palette.text;
-  ctx.font = `700 ${titleLayout.fontSize}px "Segoe UI", "Helvetica Neue", Arial, sans-serif`;
+  ctx.font = `700 ${titleLayout.fontSize}px "Segoe UI", Arial, sans-serif`;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
 
-  let cursorY = cardY + 86;
+  let cursorY = cardY + 72;
   for (const line of titleLayout.lines) {
-    ctx.fillText(line, cardX + 84, cursorY);
+    ctx.fillText(line, cardX + 70, cursorY);
     cursorY += titleLayout.fontSize * 1.15;
   }
 
-  cursorY += 40;
+  cursorY += 28;
 
-  const bodyLayout = fitBody(ctx, blocks, 500, 430, 34, 26, 'left');
-  drawTextGroup(ctx, cardX + 84, cursorY, 500, bodyLayout, palette.muted);
+  const bodyLayout = fitBody(ctx, blocks, 440, 392, 29, 23);
+  drawTextGroup(ctx, cardX + 70, cursorY, 440, bodyLayout, palette.muted, 'left');
 
-  ctx.fillStyle = palette.primary;
-  ctx.font = '600 22px "Segoe UI", Arial, sans-serif';
-  ctx.textTransform = 'uppercase';
-  ctx.fillText(siteTitle || 'Instagram', cardX + 84, cardY + cardH - 84);
-
-  drawContainedImage(ctx, image, cardX + cardW - 354, cardY + 132, 250, 500, 34);
-
-  drawRoundedRect(ctx, cardX + cardW - 402, cardY + 712, 292, 138, 34, 'rgba(91, 155, 151, 0.10)');
-  strokeRoundedRect(ctx, cardX + cardW - 402, cardY + 712, 292, 138, 34, 'rgba(91, 155, 151, 0.18)', 1.5);
-  ctx.fillStyle = palette.text;
-  ctx.font = '700 34px "Segoe UI", Arial, sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText('Visuel', cardX + cardW - 360, cardY + 756);
-  ctx.fillStyle = palette.muted;
-  ctx.font = '400 24px "Segoe UI", Arial, sans-serif';
-  ctx.fillText('Ajoutez un portrait, une recette', cardX + cardW - 360, cardY + 804);
-  ctx.fillText('ou un détail inspirant.', cardX + cardW - 360, cardY + 838);
+  drawContainedImage(ctx, image, cardX + cardW - 282, cardY + 118, 212, 396, 16);
 }
 
 function drawImageWithTextSlide(
   ctx: CanvasRenderingContext2D,
   title: string,
   blocks: BodyBlock[],
-  image: CanvasImageSource | null,
-  siteTitle?: string
+  image: CanvasImageSource | null
 ) {
-  const imageX = 108;
-  const imageY = 138;
-  const imageW = WIDTH - 216;
-  const imageH = 824;
+  const imageX = 126;
+  const imageY = 168;
+  const imageW = WIDTH - 252;
+  const imageH = 742;
 
-  drawContainedImage(ctx, image, imageX, imageY, imageW, imageH, 42);
+  drawContainedImage(ctx, image, imageX, imageY, imageW, imageH, 18);
 
-  const plaqueX = 132;
-  const plaqueY = 816;
-  const plaqueW = 620;
-  const plaqueH = 312;
+  const plaqueX = 148;
+  const plaqueY = 808;
+  const plaqueW = 544;
+  const plaqueH = 246;
   drawPaperCard(ctx, plaqueX, plaqueY, plaqueW, plaqueH);
 
-  const titleLayout = fitTitle(ctx, title, plaqueW - 116, 2, 50, 34);
+  const titleLayout = fitTitle(ctx, title, plaqueW - 88, 2, 42, 30);
   ctx.fillStyle = palette.text;
-  ctx.font = `700 ${titleLayout.fontSize}px "Segoe UI", "Helvetica Neue", Arial, sans-serif`;
+  ctx.font = `700 ${titleLayout.fontSize}px "Segoe UI", Arial, sans-serif`;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
 
-  let cursorY = plaqueY + 54;
+  let cursorY = plaqueY + 40;
   for (const line of titleLayout.lines) {
-    ctx.fillText(line, plaqueX + 58, cursorY);
+    ctx.fillText(line, plaqueX + 44, cursorY);
     cursorY += titleLayout.fontSize * 1.14;
   }
 
-  cursorY += 24;
+  cursorY += 16;
 
   const textBlocks = blocks.length > 2 ? blocks.slice(0, 2) : blocks;
-  const bodyLayout = fitBody(ctx, textBlocks, plaqueW - 116, 126, 28, 22, 'left');
-  drawTextGroup(ctx, plaqueX + 58, cursorY, plaqueW - 116, bodyLayout, palette.muted);
-
-  drawRoundedRect(ctx, imageX + imageW - 210, imageY + 48, 136, 54, 18, 'rgba(255, 253, 252, 0.92)');
-  strokeRoundedRect(ctx, imageX + imageW - 210, imageY + 48, 136, 54, 18, 'rgba(212, 163, 115, 0.24)', 1.5);
-  ctx.fillStyle = palette.primaryDark ?? palette.primary;
-  ctx.font = '600 22px "Segoe UI", Arial, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(siteTitle || 'Instagram', imageX + imageW - 142, imageY + 76);
+  const bodyLayout = fitBody(ctx, textBlocks, plaqueW - 88, 96, 23, 19);
+  drawTextGroup(ctx, plaqueX + 44, cursorY, plaqueW - 88, bodyLayout, palette.muted, 'left');
 }
 
 export async function renderInstagramSlide(options: SlideRenderOptions) {
@@ -535,15 +470,15 @@ export async function renderInstagramSlide(options: SlideRenderOptions) {
   drawBackground(ctx, options.variant);
   drawFrame(ctx);
 
-  const safeTitle = options.title.trim() || 'Votre message ici';
+  const safeTitle = normalizeText(options.title).trim() || 'Votre message ici';
   const blocks = parseBody(options.body);
 
   if (options.variant === 'text-only') {
-    drawTextOnlySlide(ctx, safeTitle, blocks, options.siteTitle);
+    drawTextOnlySlide(ctx, safeTitle, blocks);
   } else if (options.variant === 'text-with-image') {
-    drawTextWithImageSlide(ctx, safeTitle, blocks, contentImage, options.siteTitle);
+    drawTextWithImageSlide(ctx, safeTitle, blocks, contentImage);
   } else {
-    drawImageWithTextSlide(ctx, safeTitle, blocks, contentImage, options.siteTitle);
+    drawImageWithTextSlide(ctx, safeTitle, blocks, contentImage);
   }
 
   drawLogo(ctx, logoImage);
