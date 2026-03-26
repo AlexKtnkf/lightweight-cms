@@ -45,13 +45,19 @@ const colorThemeOptions: Array<{
   },
   {
     id: 'frontend',
-    previewClass: 'bg-[linear-gradient(135deg,#eef5f1_0%,#8fc4c1_35%,#d4a373_100%)]',
+    previewClass: 'bg-[linear-gradient(135deg,#f7f1e9_0%,#dcebe5_42%,#e0bc96_100%)]',
   },
   {
     id: 'plain-rose',
     previewClass: 'bg-[#E34262]',
   },
 ];
+
+const logoColors: Record<SlideColorTheme, string> = {
+  dedicated: '#D87A8E',
+  frontend: '#3D7370',
+  'plain-rose': '#FFF5F7',
+};
 
 function slugifyFilename(value: string) {
   return value
@@ -68,14 +74,14 @@ export function InstagramSlideGenerator() {
   const [colorTheme, setColorTheme] = useState<SlideColorTheme>('dedicated');
   const [title, setTitle] = useState('Férié');
   const [body, setBody] = useState(
-    '- Paris est triste ce matin, férié ne lui réussit pas bien\n- Pardon pour le thé mon amour, infusé jusqu\'à non-retour\n- C\'est même pas qu\'on ne s\'aime plus, c\'est rien que la beauté qui se vautre\n - C\'est même pas qu\'on ne s\'aime plus, c\'est même plus qu\'on en aime d\'autres'
+    '- Paris est vide ce matin, férié ne lui réussit pas bien\n- Pardon pour le thé mon amour, infusé jusqu\'à non-retour\n- C\'est même pas qu\'on ne s\'aime plus, c\'est rien que la beauté qui se vautre\n - C\'est même pas qu\'on ne s\'aime plus, c\'est même plus qu\'on en aime d\'autres'
   );
   const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [rendering, setRendering] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
-  const [defaultLogoUrl, setDefaultLogoUrl] = useState<string | null>(null);
+  const [themeLogoUrl, setThemeLogoUrl] = useState<string | null>(null);
 
   const deferredTitle = useDeferredValue(title);
   const deferredBody = useDeferredValue(body);
@@ -98,36 +104,48 @@ export function InstagramSlideGenerator() {
   useEffect(() => {
     let active = true;
 
-    async function loadDefaultLogo() {
+    async function loadThemeLogo() {
+      const sourceUrl = settings?.logo_media_id ? `/api/media/${settings.logo_media_id}` : '/media/logo.svg';
+
       try {
-        const response = await fetch('/media/logo.svg');
-        const svg = await response.text();
+        const response = await fetch(sourceUrl);
+        const contentType = response.headers.get('content-type') ?? '';
         if (!active) {
           return;
         }
 
-        const tintedSvg = svg.replace(/currentColor/g, '#D87A8E');
-        setDefaultLogoUrl(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(tintedSvg)}`);
+        const isSvg = contentType.includes('image/svg+xml') || sourceUrl.endsWith('.svg');
+        if (isSvg) {
+          const asset = await response.text();
+          if (!active) {
+            return;
+          }
+          const tintedSvg = asset.replace(/currentColor/g, logoColors[colorTheme]);
+          setThemeLogoUrl(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(tintedSvg)}`);
+          return;
+        }
+
+        setThemeLogoUrl(sourceUrl);
       } catch {
         if (active) {
-          setDefaultLogoUrl('/media/logo.svg');
+          setThemeLogoUrl(settings?.logo_media_id ? `/api/media/${settings.logo_media_id}` : '/media/logo.svg');
         }
       }
     }
 
-    loadDefaultLogo();
+    loadThemeLogo();
 
     return () => {
       active = false;
     };
-  }, []);
+  }, [colorTheme, settings?.logo_media_id]);
 
   const selectedImage = useMemo(
     () => media?.find((item) => item.id === deferredImageId) ?? null,
     [media, deferredImageId]
   );
 
-  const logoUrl = settings?.logo_media_id ? `/api/media/${settings.logo_media_id}` : defaultLogoUrl;
+  const logoUrl = themeLogoUrl;
   const imageUrl = selectedImage ? `/api/media/${selectedImage.id}` : null;
 
   useEffect(() => {

@@ -33,6 +33,7 @@ const backgroundThemes: Record<SlideColorTheme, {
   rightAlt: string;
   bottomLeft: string;
   frame: string;
+  logo: string;
   cardBorder: string;
   cardShadow: string;
   imageBorder: string;
@@ -47,6 +48,7 @@ const backgroundThemes: Record<SlideColorTheme, {
     rightAlt: '#E7B3BA',
     bottomLeft: '#EFE7DC',
     frame: '#E6DDD3',
+    logo: '#D87A8E',
     cardBorder: 'rgba(126, 108, 95, 0.12)',
     cardShadow: 'rgba(42, 37, 32, 0.05)',
     imageBorder: 'rgba(126, 108, 95, 0.14)',
@@ -55,17 +57,18 @@ const backgroundThemes: Record<SlideColorTheme, {
     showShapes: true,
   },
   frontend: {
-    background: '#EEF5F1',
-    topLeft: '#8FC4C1',
-    rightDefault: '#D4A373',
-    rightAlt: '#9AAA88',
-    bottomLeft: '#EACCA6',
-    frame: '#D6E4DF',
-    cardBorder: 'rgba(92, 129, 123, 0.18)',
-    cardShadow: 'rgba(80, 110, 104, 0.05)',
-    imageBorder: 'rgba(92, 129, 123, 0.2)',
-    imagePlaceholder: 'rgba(143, 196, 193, 0.24)',
-    opacity: 0.58,
+    background: '#F7F1E9',
+    topLeft: '#DCEBE5',
+    rightDefault: '#E0BC96',
+    rightAlt: '#BFD2C2',
+    bottomLeft: '#EFE2D2',
+    frame: 'rgba(61, 115, 112, 0.12)',
+    logo: '#3D7370',
+    cardBorder: 'rgba(61, 115, 112, 0.14)',
+    cardShadow: 'rgba(42, 37, 32, 0.07)',
+    imageBorder: 'rgba(61, 115, 112, 0.16)',
+    imagePlaceholder: 'rgba(220, 235, 229, 0.72)',
+    opacity: 0.46,
     showShapes: true,
   },
   'plain-rose': {
@@ -75,6 +78,7 @@ const backgroundThemes: Record<SlideColorTheme, {
     rightAlt: '#E34262',
     bottomLeft: '#E34262',
     frame: 'rgba(255,255,255,0.42)',
+    logo: '#FFF5F7',
     cardBorder: 'rgba(255, 255, 255, 0.22)',
     cardShadow: 'rgba(119, 22, 44, 0.12)',
     imageBorder: 'rgba(255, 255, 255, 0.26)',
@@ -421,9 +425,10 @@ function drawLogo(ctx: CanvasRenderingContext2D, logo: CanvasImageSource | null,
   const height = 100;
   const x = WIDTH - width - 82;
   const y = HEIGHT - height - 78;
+  const logoColor = backgroundThemes[colorTheme].logo;
 
   if (!logo) {
-    ctx.fillStyle = colorTheme === 'plain-rose' ? '#FFF5F7' : palette.bullet;
+    ctx.fillStyle = logoColor;
     ctx.font = '700 40px "Segoe UI", Arial, sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'alphabetic';
