@@ -189,9 +189,12 @@ router.post(
   ],
   async (req, res, next) => {
     try {
-      // Verify Turnstile token if provided
-      if (req.body.turnstileToken) {
-        const isTurnstileValid = await verifyTurnstile(req.body.turnstileToken);
+      // Enforce Turnstile when server-side verification is configured
+      const turnstileToken = typeof req.body.turnstileToken === 'string'
+        ? req.body.turnstileToken.trim()
+        : '';
+      if (process.env.TURNSTILE_SECRET_KEY) {
+        const isTurnstileValid = await verifyTurnstile(turnstileToken);
         if (!isTurnstileValid) {
           return res.status(400).json({
             success: false,
@@ -308,7 +311,7 @@ router.post(
  */
 router.get('/email/verify', async (req, res) => {
   // Only allow in development or with auth
-  if (process.env.NODE_ENV === 'production' && !req.user) {
+  if (process.env.NODE_ENV === 'production' && !(req.session && req.session.userId)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 

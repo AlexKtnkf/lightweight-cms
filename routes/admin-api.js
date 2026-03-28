@@ -46,7 +46,7 @@ const PagesController = require('../src/presentation/api/admin/pagesController')
 const ArticlesController = require('../src/presentation/api/admin/articlesController');
 const MediaController = require('../src/presentation/api/admin/mediaController');
 const SettingsController = require('../src/presentation/api/admin/settingsController');
-const AuthController = require('../src/presentation/api/admin/authController');
+const authController = require('../src/presentation/api/admin/authController');
 
 // Instantiate use cases - Pages
 const createPage = new CreatePage(pageRepository, blockRepository, staticGenerator);
@@ -97,7 +97,11 @@ const robotsGenerator = new RobotsGenerator();
 // Instantiate controller - Settings
 const settingsController = new SettingsController(getSettings, updateSettings, staticGenerator, robotsGenerator, backupService);
 
-// All routes require authentication
+// Setup and token-based recovery must stay reachable before session auth
+router.post('/auth/reset-password', (req, res, next) => authController.resetPassword(req, res, next));
+router.post('/auth/setup-admin', (req, res, next) => authController.setupAdmin(req, res, next));
+
+// All remaining admin routes require authentication
 router.use(requireAuth);
 
 // Pages API routes
@@ -125,11 +129,5 @@ router.get('/settings', (req, res, next) => settingsController.get(req, res, nex
 router.put('/settings', (req, res, next) => settingsController.update(req, res, next));
 router.post('/regenerate', (req, res, next) => settingsController.regenerate(req, res, next));
 router.post('/backup', (req, res, next) => settingsController.backup(req, res, next));
-
-// Auth API routes - password reset and setup
-// POST /api/admin/auth/reset-password - reset existing user password (requires auth or setup token)
-router.post('/auth/reset-password', (req, res, next) => authController.resetPassword(req, res, next));
-// POST /api/admin/auth/setup-admin - create initial admin (setup token required)
-router.post('/auth/setup-admin', (req, res, next) => authController.setupAdmin(req, res, next));
 
 module.exports = router;

@@ -42,6 +42,38 @@ class StaticGenerator {
     }
   }
 
+  getTurnstileSiteKey() {
+    return process.env.TURNSTILE_SITE_KEY || null;
+  }
+
+  async pruneStaleStaticFiles(publishedPages) {
+    await this.ensureStaticDir();
+
+    const expectedFiles = new Set(
+      publishedPages
+        .filter((page) => page.id !== 1 && page.slug)
+        .map((page) => `${page.slug}.html`)
+    );
+    expectedFiles.add('index.html');
+
+    const files = await fs.readdir(this.staticDir);
+    const staleFiles = files.filter(
+      (file) => file.endsWith('.html') && !expectedFiles.has(file)
+    );
+
+    await Promise.all(
+      staleFiles.map((file) =>
+        fs.unlink(path.join(this.staticDir, file)).then(() => {
+          logger.info(`Deleted stale static file: ${file}`);
+        }).catch((error) => {
+          if (error.code !== 'ENOENT') {
+            logger.error(`Error deleting stale static file ${file}:`, error);
+          }
+        })
+      )
+    );
+  }
+
   /**
    * Generate static HTML for a single page
    */
@@ -81,6 +113,7 @@ class StaticGenerator {
         page: fullPage,
         pages: pages, // For navigation
         settings: settings,
+        turnstileSiteKey: this.getTurnstileSiteKey(),
         baseUrl: baseUrl,
         jsonLd: [pageSchema, breadcrumbs],
         gaId: process.env.GA_ID || ''
@@ -107,7 +140,7 @@ class StaticGenerator {
    * Generate static HTML for all published pages
    */
   async generateAllPages() {
-    const pages = await this.pageRepository.findAllAdmin(1000, 0);
+    const pages = await this.pageRepository.findAllAdmin(1000, 0, true);
     const publishedPages = pages.filter(p => p.published);
     
     logger.info(`Generating ${publishedPages.length} static page(s)...`);
@@ -127,6 +160,10 @@ class StaticGenerator {
     logger.info('Generating all static content...');
     await this.generateHomepage();
     await this.generateAllPages();
+    await this.pruneStaleStaticFiles([
+      { id: 1, slug: 'homepage', published: true },
+      ...(await this.pageRepository.findAllAdmin(1000, 0, true)).filter((page) => page.published)
+    ]);
     logger.info('All static content generated');
   }
 
@@ -200,6 +237,7 @@ class StaticGenerator {
         pages: pages, // For navigation
         settings: settings,
         logoSvg: logoSvg,
+        turnstileSiteKey: this.getTurnstileSiteKey(),
         baseUrl: baseUrl,
         jsonLd: [orgSchema, websiteSchema],
         gaId: process.env.GA_ID || ''
@@ -214,6 +252,7 @@ class StaticGenerator {
       
       // Set file permissions (readable by web server)
       await fs.chmod(staticPath, 0o644);
+      await this.deletePage('homepage');
       
       logger.info('Generated static file: index.html (homepage)');
     } catch (error) {

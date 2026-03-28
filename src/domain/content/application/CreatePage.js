@@ -51,9 +51,11 @@ class CreatePage {
       savedPage.blocks = this.blockRepository.parseBlocks(blocks);
     }
 
-    // Generate static file if published
-    if (savedPage.published) {
-      await this.staticGenerator.generatePage(savedPage.slug.toString());
+    // Keep the static copy in sync immediately after creation
+    if (savedPage.id === 1) {
+      await this.staticGenerator.generateHomepage();
+    } else if (savedPage.published) {
+      await this.staticGenerator.generatePage(savedPage.toJSON());
     }
 
     return savedPage.toJSON();

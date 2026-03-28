@@ -30,6 +30,8 @@ class UpdatePage {
     // Persist
     const savedPageData = await this.pageRepository.update(id, page.toJSON());
     const savedPage = Page.fromJSON(savedPageData);
+    const previousSlug = existing.slug;
+    const currentSlug = savedPage.slug?.toString();
 
     // Update blocks
     if (pageData.blocks !== undefined) {
@@ -48,9 +50,21 @@ class UpdatePage {
       savedPage.blocks = this.blockRepository.parseBlocks(blocks);
     }
 
-    // Regenerate static file if published
-    if (savedPage.published) {
-      await this.staticGenerator.generatePage(savedPage.slug.toString());
+    // Keep the static copy aligned with slug and publish-state changes
+    if (savedPage.id === 1) {
+      await this.staticGenerator.generateHomepage();
+    } else {
+      if (savedPage.published) {
+        await this.staticGenerator.generatePage(savedPage.toJSON());
+        if (previousSlug && previousSlug !== currentSlug) {
+          await this.staticGenerator.deletePage(previousSlug);
+        }
+      } else if (currentSlug) {
+        if (previousSlug && previousSlug !== currentSlug) {
+          await this.staticGenerator.deletePage(previousSlug);
+        }
+        await this.staticGenerator.deletePage(currentSlug);
+      }
     }
 
     return savedPage.toJSON();
