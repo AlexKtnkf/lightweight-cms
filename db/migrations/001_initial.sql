@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS settings (
   id SERIAL PRIMARY KEY,
   site_title TEXT NOT NULL DEFAULT 'My Site',
   site_tagline TEXT,
-  allow_search_indexing BOOLEAN DEFAULT TRUE,
+  allow_search_indexing BOOLEAN DEFAULT FALSE,
   logo_media_id INTEGER,
   header_menu_links TEXT DEFAULT '[]',
   footer_menu_links TEXT DEFAULT '[]',
