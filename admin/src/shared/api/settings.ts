@@ -10,4 +10,7 @@ export const settingsApi = {
 
   regenerate: (): Promise<{ success: boolean; message: string }> =>
     api.post('/admin/regenerate').then(r => r.data),
+
+  backup: (): Promise<{ success: boolean; message: string; filename: string; path: string }> =>
+    api.post('/admin/backup').then(r => r.data),
 };

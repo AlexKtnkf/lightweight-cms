@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS articles (
 );
 
 -- Unified blocks table (used by articles, pages, and homepage)
+-- Complex blocks keep their nested items inside block_data JSON (e.g. FAQ items)
 CREATE TABLE IF NOT EXISTS content_blocks (
   id SERIAL PRIMARY KEY,
   content_type TEXT NOT NULL,

@@ -68,7 +68,7 @@ function AdminApp() {
                 Images
               </Link>
               <Link to="/instagram-slides" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
-                Insta studio
+                InstaStudio
               </Link>
               <Link to="/settings" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
                 Paramètres
@@ -135,7 +135,7 @@ function AdminApp() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 block px-3 py-2 rounded-md text-base"
               >
-                Insta studio
+                InstaStudio
               </Link>
               <Link
                 to="/settings"

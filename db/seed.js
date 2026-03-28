@@ -129,33 +129,26 @@ const BLOCKS = [
     },
   },
   {
-    block_type: 'accroche',
+    block_type: 'question_reponse',
     block_order: 7,
     block_data: {
-      title: 'Questions fréquentes',
-      content: '',
+      section_title: 'Questions fréquentes',
       section_id: 'faq',
-    },
-  },
-  {
-    block_type: 'question_reponse',
-    block_order: 8,
-    block_data: {
-      question: 'Proposez-vous des consultations à distance ?',
-      reponse: 'Oui, je consulte en visioconférence pour les patients francophones du monde entier.',
-    },
-  },
-  {
-    block_type: 'question_reponse',
-    block_order: 9,
-    block_data: {
-      question: 'Est-ce adapté pour une perte de poids ?',
-      reponse: 'Mon approche vise le "poids de forme" : celui où votre corps est en santé sans effort mental épuisant.',
+      items: [
+        {
+          question: 'Proposez-vous des consultations à distance ?',
+          reponse: 'Oui, je consulte en visioconférence pour les patients francophones du monde entier.',
+        },
+        {
+          question: 'Est-ce adapté pour une perte de poids ?',
+          reponse: 'Mon approche vise le "poids de forme" : celui où votre corps est en santé sans effort mental épuisant.',
+        },
+      ],
     },
   },
   {
     block_type: 'contact_form',
-    block_order: 10,
+    block_order: 8,
     block_data: {
       title: 'Entrons en contact',
       fields: [

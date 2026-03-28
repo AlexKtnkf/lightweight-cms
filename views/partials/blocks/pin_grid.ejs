@@ -1,8 +1,3 @@
-<!--
-  Block: Pin Grid (Instagram-style gallery)
-  Purpose: Horizontal scroll on mobile, 3-column grid on desktop (matches c-pin-grid)
-  Expected Data: block.block_data = { section_title, pins: [{ image_media_id, label }] }
--->
 <% if (block.block_data.pins && block.block_data.pins.length > 0) { %>
 <section class="l-section" id="<%= block.id ? 'block-' + block.id : 'pin-grid' %>">
   <div class="l-container">

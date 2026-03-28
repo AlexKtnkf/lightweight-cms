@@ -1,8 +1,3 @@
-<!--
-  Block: Accroche (Headline)
-  Purpose: Centered headline with title and optional content (matches c-headline)
-  Expected Data: block.block_data = { image_media_id, title, content, section_id }
--->
 <section class="l-section" id="<%= block.block_data.section_id || (block.id ? 'block-' + block.id : 'accroche') %>" aria-labelledby="headline-<%= block.id || 'default' %>-title">
   <div class="l-container">
     <div class="c-headline">

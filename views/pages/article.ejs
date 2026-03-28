@@ -42,15 +42,29 @@
   
   <%- include('../partials/navbar') %>
 
-  <main id="main-content" class="container article">
-    <article>
-      <h1><%= article.title %></h1>
-      <time><%= new Date(article.published_at || article.created_at).toLocaleDateString('fr-FR') %></time>
-      
+  <main id="main-content" class="c-article-page">
+    <section class="l-section c-article-hero">
+      <div class="l-container">
+        <a href="/blog" class="c-article-back">← Retour au blog</a>
+
+        <article class="c-article-head">
+          <div class="c-article-head__meta">
+            <time datetime="<%= article.published_at || article.created_at %>">
+              <%= new Date(article.published_at || article.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+            </time>
+          </div>
+          <h1 class="c-article-head__title"><%= article.title %></h1>
+          <% if (article.meta_description) { %>
+          <p class="c-article-head__lede"><%= article.meta_description %></p>
+          <% } %>
+        </article>
+      </div>
+    </section>
+
+    <section class="c-article-shell">
       <% if (article.blocks && article.blocks.length > 0) { %>
         <% article.blocks.forEach(block => { %>
           <% 
-          // Use try-catch to handle missing block types gracefully
           try {
             const blockPartial = '../partials/blocks/' + block.block_type;
           %>
@@ -60,14 +74,14 @@
           <% } %>
         <% }); %>
       <% } %>
-    </article>
-  </main>
+    </section>
 
-  <nav aria-label="Navigation de l'article">
-    <div class="container">
-      <a href="/blog">← Retour au blog</a>
-    </div>
-  </nav>
+    <nav aria-label="Navigation de l'article" class="l-section c-article-nav">
+      <div class="l-container">
+        <a href="/blog" class="c-article-back">← Retour au blog</a>
+      </div>
+    </nav>
+  </main>
 
   <%- include('../partials/footer', { settings }) %>
 

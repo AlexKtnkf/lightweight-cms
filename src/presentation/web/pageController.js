@@ -29,6 +29,45 @@ const feedGenerator = new FeedGenerator(articleRepository, settingsRepository);
 
 const JSONLD = require('../../../utils/jsonLd');
 
+function stripHtml(html = '') {
+  return html
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function truncateText(text = '', maxLength = 220) {
+  if (text.length <= maxLength) {
+    return text;
+  }
+
+  const candidate = text.slice(0, maxLength + 1);
+  const lastSpace = candidate.lastIndexOf(' ');
+  const cutoff = lastSpace > Math.floor(maxLength * 0.6) ? lastSpace : maxLength;
+  return `${candidate.slice(0, cutoff).trim()}…`;
+}
+
+async function buildBlogArticlePreview(article) {
+  const fallbackExcerpt = (article.meta_description || '').trim();
+  if (fallbackExcerpt) {
+    return {
+      ...article,
+      excerpt: fallbackExcerpt,
+    };
+  }
+
+  const blocks = blockRepository.parseBlocks(
+    await blockRepository.findByContent('article', article.id)
+  );
+  const richText = blocks.find(block => block.block_type === 'rich_text')?.block_data?.richText || '';
+
+  return {
+    ...article,
+    excerpt: truncateText(stripHtml(richText)),
+  };
+}
+
 class PageController {
   async index(req, res, next) {
     try {
@@ -76,6 +115,7 @@ class PageController {
       const limit = parseInt(req.query.limit) || 10;
       const offset = parseInt(req.query.offset) || 0;
       const articles = await listPublishedArticles.execute({ limit, offset });
+      const articlePreviews = await Promise.all(articles.map(buildBlogArticlePreview));
       const settings = await getSettings.execute();
       const pages = await pageRepository.findAll();
       const baseUrl = `${req.protocol}://${req.get('host')}`;
@@ -88,7 +128,7 @@ class PageController {
       ]);
       
       res.render('pages/blog', { 
-        articles,
+        articles: articlePreviews,
         settings,
         pages,
         baseUrl,

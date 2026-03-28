@@ -1,8 +1,3 @@
-<!--
-  Block: Numbered Cards
-  Purpose: Grid of numbered steps/cards (matches c-num-grid / c-num-card)
-  Expected Data: block.block_data = { section_title, cards: [{ number, title, description }] }
--->
 <% if (block.block_data.cards && block.block_data.cards.length > 0) { %>
 <section class="l-section" id="<%= block.id ? 'block-' + block.id : 'numbered-cards' %>">
   <div class="l-container">

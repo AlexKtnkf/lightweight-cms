@@ -123,6 +123,10 @@ function SocialLinksSection() {
 
 export function SettingsEditor() {
   const [isLogoPickerOpen, setIsLogoPickerOpen] = useState(false);
+  const [regenerateMessage, setRegenerateMessage] = useState<string | null>(null);
+  const [regenerateError, setRegenerateError] = useState<string | null>(null);
+  const [backupMessage, setBackupMessage] = useState<string | null>(null);
+  const [backupError, setBackupError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: settings, isLoading, error } = useQuery<Settings>({
@@ -136,6 +140,34 @@ export function SettingsEditor() {
     onSuccess: (updated) => {
       queryClient.setQueryData(['settings'], updated);
       alert('Paramètres enregistrés ! Le site est en cours de régénération...');
+    },
+  });
+
+  const backupMutation = useMutation({
+    mutationFn: () => settingsApi.backup(),
+    onSuccess: (result) => {
+      setRegenerateMessage(null);
+      setRegenerateError(null);
+      setBackupError(null);
+      setBackupMessage(`${result.message} (${result.filename})`);
+    },
+    onError: (error: any) => {
+      setBackupMessage(null);
+      setBackupError(error?.response?.data?.error || error?.message || 'Erreur lors de la sauvegarde');
+    },
+  });
+
+  const regenerateMutation = useMutation({
+    mutationFn: () => settingsApi.regenerate(),
+    onSuccess: (result) => {
+      setBackupMessage(null);
+      setBackupError(null);
+      setRegenerateError(null);
+      setRegenerateMessage(result.message);
+    },
+    onError: (error: any) => {
+      setRegenerateMessage(null);
+      setRegenerateError(error?.response?.data?.error || error?.message || 'Erreur lors de la régénération');
     },
   });
 
@@ -252,6 +284,70 @@ export function SettingsEditor() {
             <p className="text-xs text-gray-500 mb-2">Les messages du formulaire de contact seront envoyés à cet email</p>
             <input {...register('contact_email')} type="email" className="w-full px-3 py-2 border rounded-md" placeholder="admin@example.com" />
             {errors.contact_email && <p className="text-red-500 text-xs mt-1">{errors.contact_email.message}</p>}
+          </div>
+
+          <div className="border-t border-gray-200 pt-6 space-y-4">
+            <div className="space-y-1">
+              <h3 className="text-sm font-medium text-gray-900">Maintenance</h3>
+            </div>
+
+            <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h4 className="text-sm font-medium text-gray-900">Régénération statique</h4>
+                <p className="text-xs text-gray-500 mt-1">
+                  Relance la génération des pages statiques du site.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => regenerateMutation.mutate()}
+                disabled={regenerateMutation.isPending}
+                className="px-4 py-2 rounded-md bg-orange-600 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
+              >
+                {regenerateMutation.isPending ? 'Régénération...' : 'Régénérer le site'}
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h4 className="text-sm font-medium text-gray-900">Sauvegarde de la base</h4>
+                <p className="text-xs text-gray-500 mt-1">
+                  Génère un fichier de sauvegarde de la base de données.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => backupMutation.mutate()}
+                disabled={backupMutation.isPending}
+                className="px-4 py-2 border rounded-md bg-white text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+              >
+                {backupMutation.isPending ? 'Sauvegarde...' : 'Générer une sauvegarde du site'}
+              </button>
+            </div>
+
+            {regenerateMessage && (
+              <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+                {regenerateMessage}
+              </div>
+            )}
+
+            {regenerateError && (
+              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+                {regenerateError}
+              </div>
+            )}
+
+            {backupMessage && (
+              <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+                {backupMessage}
+              </div>
+            )}
+
+            {backupError && (
+              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+                {backupError}
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end pt-4 border-t">

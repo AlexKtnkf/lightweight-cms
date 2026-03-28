@@ -1,5 +1,23 @@
 const sanitize = require('./sanitize');
 
+function sanitizeFaqItems(blockData) {
+  if (Array.isArray(blockData.items) && blockData.items.length > 0) {
+    return blockData.items.map(item => ({
+      question: item.question || '',
+      reponse: sanitize(item.reponse || '')
+    }));
+  }
+
+  if (blockData.question || blockData.reponse) {
+    return [{
+      question: blockData.question || '',
+      reponse: sanitize(blockData.reponse || '')
+    }];
+  }
+
+  return [];
+}
+
 /**
  * Sanitize block data based on block type
  */
@@ -31,15 +49,18 @@ function sanitizeBlockData(blockType, blockData) {
     
     case 'question_reponse':
       return {
-        question: blockData.question || '',
-        reponse: sanitize(blockData.reponse || '')
+        section_title: blockData.section_title || '',
+        intro: sanitize(blockData.intro || ''),
+        section_id: blockData.section_id || '',
+        items: sanitizeFaqItems(blockData)
       };
     
     case 'accroche':
       return {
         title: blockData.title || '',
         content: sanitize(blockData.content || ''),
-        image_media_id: blockData.image_media_id || null
+        image_media_id: blockData.image_media_id || null,
+        section_id: blockData.section_id || ''
       };
     
     case 'pin_grid':

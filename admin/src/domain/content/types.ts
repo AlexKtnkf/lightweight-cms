@@ -35,6 +35,7 @@ export type BlockType =
   | 'rich_text' 
   | 'hero' 
   | 'encart_principal' 
+  | 'accroche'
   | 'question_reponse'
   | 'pin_grid'
   | 'numbered_cards'

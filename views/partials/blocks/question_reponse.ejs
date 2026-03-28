@@ -1,19 +1,39 @@
-<!--
-  Block: Question-Réponse (FAQ item)
-  Purpose: Single FAQ item as <details> (matches c-faq). Multiple blocks create a FAQ section.
-  Expected Data: block.block_data = { question, reponse }
--->
-<section class="l-section" id="<%= block.id ? 'faq-section-' + block.id : '' %>">
+<%
+  const faqItems = Array.isArray(block.block_data.items) && block.block_data.items.length > 0
+    ? block.block_data.items
+    : (block.block_data.question || block.block_data.reponse)
+      ? [{ question: block.block_data.question, reponse: block.block_data.reponse }]
+      : [];
+  const faqSectionId = block.block_data.section_id || (block.id ? 'faq-section-' + block.id : 'faq');
+%>
+<% if (faqItems.length > 0) { %>
+<section class="l-section" id="<%= faqSectionId %>">
   <div class="l-container">
-    <% if (block.block_data.question || block.block_data.reponse) { %>
-    <details class="c-faq" id="<%= block.id ? 'faq-' + block.id : '' %>">
-      <% if (block.block_data.question) { %>
-      <summary><%= block.block_data.question %></summary>
+    <% if (block.block_data.section_title || block.block_data.intro) { %>
+    <div class="c-section-intro c-section-intro--center c-faq-group__intro">
+      <% if (block.block_data.section_title) { %>
+      <h2 class="c-headline__title section-title centered"><%= block.block_data.section_title %></h2>
       <% } %>
-      <% if (block.block_data.reponse) { %>
-      <div class="c-faq__answer"><%- block.block_data.reponse %></div>
+      <% if (block.block_data.intro) { %>
+      <div class="c-headline__content"><%- block.block_data.intro %></div>
       <% } %>
-    </details>
+    </div>
     <% } %>
+
+    <div class="c-faq-group">
+    <% faqItems.forEach((item, index) => { %>
+      <% if (item.question || item.reponse) { %>
+      <details class="c-faq" id="<%= block.id ? 'faq-' + block.id + '-' + (index + 1) : '' %>">
+        <% if (item.question) { %>
+        <summary><%= item.question %></summary>
+        <% } %>
+        <% if (item.reponse) { %>
+        <div class="c-faq__answer"><%- item.reponse %></div>
+        <% } %>
+      </details>
+      <% } %>
+    <% }); %>
+    </div>
   </div>
 </section>
+<% } %>

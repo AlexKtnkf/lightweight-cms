@@ -1,9 +1,10 @@
 class SettingsController {
-  constructor(getSettings, updateSettings, staticGenerator = null, robotsGenerator = null) {
+  constructor(getSettings, updateSettings, staticGenerator = null, robotsGenerator = null, backupService = null) {
     this.getSettings = getSettings;
     this.updateSettings = updateSettings;
     this.staticGenerator = staticGenerator;
     this.robotsGenerator = robotsGenerator;
+    this.backupService = backupService;
   }
 
   async get(req, res, next) {
@@ -45,6 +46,24 @@ class SettingsController {
       }
       await this.staticGenerator.generateAll();
       res.json({ success: true, message: 'Site régénéré avec succès' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async backup(req, res, next) {
+    try {
+      if (!this.backupService || typeof this.backupService.createBackup !== 'function') {
+        return res.status(500).json({ error: 'Service de sauvegarde non configuré' });
+      }
+
+      const result = await this.backupService.createBackup();
+      res.json({
+        success: true,
+        message: 'Sauvegarde générée avec succès',
+        filename: result.filename,
+        path: result.path,
+      });
     } catch (error) {
       next(error);
     }

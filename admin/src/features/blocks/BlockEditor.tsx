@@ -2,6 +2,7 @@ import type { Block, BlockType } from '../../domain/content/types';
 import { RichTextBlock } from './components/RichTextBlock';
 import { HeroBlock } from './components/HeroBlock';
 import { EncartPrincipalBlock } from './components/EncartPrincipalBlock';
+import { AccrocheBlock } from './components/AccrocheBlock';
 import { PinGridBlock } from './components/PinGridBlock';
 import { NumberedCardsBlock } from './components/NumberedCardsBlock';
 import { QuestionReponseBlock } from './components/QuestionReponseBlock';
@@ -56,6 +57,8 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
         return <HeroBlock {...commonProps} />;
       case 'encart_principal':
         return <EncartPrincipalBlock {...commonProps} />;
+      case 'accroche':
+        return <AccrocheBlock {...commonProps} />;
       case 'pin_grid':
         return <PinGridBlock {...commonProps} />;
       case 'numbered_cards':
@@ -94,7 +97,8 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                 <option value="rich_text">Texte enrichi</option>
                 <option value="hero">Hero</option>
                 <option value="encart_principal">Encart principal</option>
-                <option value="question_reponse">Question/Réponse</option>
+                <option value="accroche">Accroche</option>
+                <option value="question_reponse">FAQ</option>
                 <option value="pin_grid">Pin Grid</option>
                 <option value="numbered_cards">Cartes numérotées</option>
                 <option value="contact_form">Formulaire de contact</option>
@@ -155,6 +159,13 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
           </button>
           <button
             type="button"
+            onClick={() => addBlock('accroche')}
+            className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
+          >
+            + Accroche
+          </button>
+          <button
+            type="button"
             onClick={() => addBlock('pin_grid')}
             className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
           >
@@ -172,7 +183,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
             onClick={() => addBlock('question_reponse')}
             className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
           >
-            + Q&A
+            + FAQ
           </button>
           <button
             type="button"
@@ -209,6 +220,13 @@ function getDefaultBlockData(type: BlockType): Record<string, any> {
         lien: '',
         url: '',
       };
+    case 'accroche':
+      return {
+        title: '',
+        content: '',
+        section_id: '',
+        image_media_id: null,
+      };
     case 'pin_grid':
       return {
         section_title: '',
@@ -222,8 +240,15 @@ function getDefaultBlockData(type: BlockType): Record<string, any> {
       };
     case 'question_reponse':
       return {
-        question: '',
-        reponse: '',
+        section_title: '',
+        intro: '',
+        section_id: '',
+        items: [
+          {
+            question: '',
+            reponse: '',
+          },
+        ],
       };
     case 'lead_magnet':
       return {

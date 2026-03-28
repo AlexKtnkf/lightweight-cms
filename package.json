@@ -12,6 +12,8 @@
     "start": "npm run migrate && node -e \"process.env.NODE_ENV='production'; require('./server')\"",
     "migrate": "node db/migrate.js",
     "seed": "node db/seed.js",
+    "backup:db": "node db/backup-db.js",
+    "restore:db": "node db/restore-backup.js",
     "setup": "npm run migrate && npm run seed",
     "create-admin": "node db/create-admin.js",
     "reset-admin-password": "node db/reset-admin-password.js",
