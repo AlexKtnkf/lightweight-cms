@@ -4,18 +4,19 @@ const rateLimit = require('express-rate-limit');
 // Security headers middleware
 const cspDirectives = {
   defaultSrc: ["'self'"],
-  scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdn.quilljs.com", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
+  scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdn.quilljs.com", "https://www.googletagmanager.com", "https://www.google-analytics.com", "https://challenges.cloudflare.com"],
   styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdn.quilljs.com", "https://fonts.googleapis.com"],
   imgSrc: ["'self'", "data:", "https:"],
   fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com"],
+  frameSrc: ["'self'", "https://challenges.cloudflare.com"],
 };
 
 // In production, restrict connectSrc. In development, allow WebSocket connections for Vite HMR
 if (process.env.NODE_ENV === 'production') {
-  cspDirectives.connectSrc = ["'self'"];
+  cspDirectives.connectSrc = ["'self'", "https://challenges.cloudflare.com"];
 } else {
   // Development: allow WebSocket connections for Vite HMR (ws://localhost:*)
-  cspDirectives.connectSrc = ["'self'", "ws://localhost:*", "ws://127.0.0.1:*"];
+  cspDirectives.connectSrc = ["'self'", "https://challenges.cloudflare.com", "ws://localhost:*", "ws://127.0.0.1:*"];
 }
 
 const securityHeaders = helmet({
