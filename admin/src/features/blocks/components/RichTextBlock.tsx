@@ -15,6 +15,7 @@ export function RichTextBlock({ block, onChange }: RichTextBlockProps) {
       value={value}
       onChange={(content) => onChange({ richText: content })}
       height={300}
+      enableImages
     />
   );
 }

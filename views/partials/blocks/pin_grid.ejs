@@ -10,7 +10,7 @@
     <% block.block_data.pins.forEach((pin) => { %>
     <figure class="c-pin-grid__item">
       <% if (pin.image_media_id) { %>
-      <img src="/api/media/<%= pin.image_media_id %>" alt="<%= pin.label || 'Image' %>" loading="lazy">
+      <img src="/api/media/<%= pin.image_media_id %>?variant=pin" alt="<%= pin.label || 'Image' %>" loading="lazy">
       <% } %>
       <% if (pin.label) { %>
       <figcaption><%= pin.label %></figcaption>

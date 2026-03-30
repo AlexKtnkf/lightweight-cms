@@ -4,9 +4,14 @@ const pageController = require('../src/presentation/web/pageController');
 const path = require('path');
 const fs = require('fs').promises;
 const logger = require('../utils/logger');
+const shouldServeStaticFiles = process.env.NODE_ENV === 'production';
 
 // Homepage route - check for static file first, fallback to dynamic
 router.get('/', async (req, res, next) => {
+  if (!shouldServeStaticFiles) {
+    return pageController.index(req, res, next);
+  }
+
   const staticPath = path.join(__dirname, '../public/static', 'index.html');
   
   try {
@@ -41,6 +46,10 @@ router.get('/:slug', async (req, res, next) => {
   // Skip static file check for known dynamic routes
   if (['sitemap.xml', 'robots.txt', 'feed.xml'].includes(slug)) {
     return next();
+  }
+
+  if (!shouldServeStaticFiles) {
+    return pageController.page(req, res, next);
   }
   
   // Check if static file exists

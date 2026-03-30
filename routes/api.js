@@ -24,6 +24,7 @@ const ContactSubmissionRepository = require('../src/domain/contact/infrastructur
 const EmailService = require('../src/shared/services/emailService');
 const logger = require('../utils/logger');
 const { resolveMediaFilePath } = require('../src/shared/utils/uploadsPath');
+const { ensurePinVariant } = require('../utils/imageOptimizer');
 
 // Instantiate use cases
 const getPage = new GetPage(pageRepository, blockRepository);
@@ -168,11 +169,14 @@ router.get('/media/:id', async (req, res, next) => {
     const requestedVariant = typeof req.query.variant === 'string'
       ? req.query.variant.trim().toLowerCase()
       : '';
-    const candidatePath = requestedVariant === 'thumbnail'
-      ? media.thumbnail_path || media.path
-      : requestedVariant === 'webp'
-        ? media.webp_path || media.path
-        : media.path;
+    let candidatePath = media.path;
+    if (requestedVariant === 'thumbnail') {
+      candidatePath = media.thumbnail_path || media.path;
+    } else if (requestedVariant === 'webp') {
+      candidatePath = media.webp_path || media.path;
+    } else if (requestedVariant === 'pin') {
+      candidatePath = await ensurePinVariant(media.path);
+    }
     const filePath = resolveMediaFilePath(candidatePath);
     
     if (!fs.existsSync(filePath)) {

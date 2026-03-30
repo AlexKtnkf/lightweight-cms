@@ -7,7 +7,55 @@ const { uploadsRoot, resolveMediaFilePath } = require('../src/shared/utils/uploa
 
 const MAX_WIDTH = 1920;
 const THUMBNAIL_WIDTH = 300;
+const PIN_WIDTH = 720;
+const PIN_HEIGHT = 900;
 const UPLOADS_IMAGES_DIR = path.join(uploadsRoot, 'images');
+
+function getDerivedPaths(mediaPath) {
+  const absolutePath = resolveMediaFilePath(mediaPath);
+  const ext = path.extname(absolutePath);
+  const baseName = path.basename(absolutePath, ext);
+  const dir = path.dirname(absolutePath);
+  const normalizedPublicPath = String(mediaPath || '');
+  const publicBasePath = ext && normalizedPublicPath.endsWith(ext)
+    ? normalizedPublicPath.slice(0, -ext.length)
+    : normalizedPublicPath;
+
+  return {
+    absolutePath,
+    ext,
+    baseName,
+    dir,
+    pinAbsolutePath: path.join(dir, `${baseName}_pin${ext}`),
+    pinPublicPath: `${publicBasePath}_pin${ext}`,
+  };
+}
+
+async function generatePinVariant(sourcePath, targetPath) {
+  await sharp(sourcePath)
+    .resize(PIN_WIDTH, PIN_HEIGHT, {
+      fit: 'cover',
+      position: 'centre',
+      withoutEnlargement: false,
+    })
+    .toFile(targetPath);
+}
+
+async function ensurePinVariant(mediaPath) {
+  const { absolutePath, pinAbsolutePath, pinPublicPath } = getDerivedPaths(mediaPath);
+
+  try {
+    await fs.access(pinAbsolutePath);
+    return pinPublicPath;
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  await generatePinVariant(absolutePath, pinAbsolutePath);
+  return pinPublicPath;
+}
 
 /**
  * Ensure uploads directory exists
@@ -32,6 +80,7 @@ async function processImage(file) {
   const baseFilename = uuidv4();
   const originalPath = path.join(UPLOADS_IMAGES_DIR, `${baseFilename}${ext}`);
   const thumbnailPath = path.join(UPLOADS_IMAGES_DIR, `${baseFilename}_thumb${ext}`);
+  const pinPath = path.join(UPLOADS_IMAGES_DIR, `${baseFilename}_pin${ext}`);
   const webpPath = path.join(UPLOADS_IMAGES_DIR, `${baseFilename}.webp`);
   const thumbnailWebpPath = path.join(UPLOADS_IMAGES_DIR, `${baseFilename}_thumb.webp`);
 
@@ -67,6 +116,14 @@ async function processImage(file) {
       fit: 'inside'
     })
     .toFile(thumbnailPath);
+
+  await sharp(file.buffer)
+    .resize(PIN_WIDTH, PIN_HEIGHT, {
+      fit: 'cover',
+      position: 'centre',
+      withoutEnlargement: false
+    })
+    .toFile(pinPath);
 
   // Generate WebP versions
   await processedImage
@@ -105,6 +162,7 @@ async function deleteImage(mediaPath) {
     const filesToDelete = [
       basePath, // original
       path.join(dir, `${baseName}_thumb${ext}`), // thumbnail
+      path.join(dir, `${baseName}_pin${ext}`), // pin crop
       path.join(dir, `${baseName}.webp`), // webp
       path.join(dir, `${baseName}_thumb.webp`) // thumbnail webp
     ];
@@ -125,5 +183,6 @@ async function deleteImage(mediaPath) {
 module.exports = {
   processImage,
   deleteImage,
-  ensureUploadsDir
+  ensureUploadsDir,
+  ensurePinVariant
 };

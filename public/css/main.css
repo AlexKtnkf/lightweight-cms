@@ -2779,11 +2779,52 @@ main > .c-hero:first-child.l-full-page {
 }
 
 /* c-rich-text */
-.c-rich-text { max-width: 750px; margin: 0 auto; }
+.c-rich-text {
+  width: 100%;
+  max-width: 750px;
+  min-width: 0;
+  margin: 0 auto;
+}
 
 .c-rich-text > * + * { margin-top: 1.5rem; }
 
 .c-rich-text h2 { margin-top: 3rem; font-size: 2rem; font-family: var(--ref-font-serif); }
+
+.c-rich-text,
+.c-rich-text > *,
+.c-rich-text p,
+.c-rich-text li,
+.c-rich-text h1,
+.c-rich-text h2,
+.c-rich-text h3,
+.c-rich-text h4,
+.c-rich-text h5,
+.c-rich-text h6,
+.c-rich-text a,
+.c-rich-text blockquote,
+.c-rich-text pre,
+.c-rich-text code {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.c-rich-text img,
+.c-rich-text iframe,
+.c-rich-text video,
+.c-rich-text table {
+  max-width: 100%;
+}
+
+.c-rich-text img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(100%, 680px);
+  margin: 2rem auto;
+  border-radius: calc(var(--ref-radius-m) - 6px);
+}
 
 /* c-contact */
 .c-contact {
