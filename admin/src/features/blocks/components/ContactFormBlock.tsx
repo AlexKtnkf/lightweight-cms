@@ -12,7 +12,7 @@ export function ContactFormBlock({ block, onChange }: ContactFormBlockProps) {
   const addField = () => {
     onChange({
       ...data,
-      fields: [...fields, { label: '', type: 'text', required: false, placeholder: '' }],
+      fields: [...fields, { label: '', type: 'text', required: false, placeholder: '', options: [] }],
     });
   };
 
@@ -25,6 +25,37 @@ export function ContactFormBlock({ block, onChange }: ContactFormBlockProps) {
     updated[index] = { ...updated[index], ...fieldData };
     onChange({ ...data, fields: updated });
   };
+
+  const serializeOptions = (options: Array<{ label?: string; value?: string } | string>) =>
+    (options || [])
+      .map((option) => {
+        if (typeof option === 'string') {
+          return option;
+        }
+        const label = option.label || option.value || '';
+        const value = option.value || option.label || '';
+        return value && value !== label ? `${label}=${value}` : label;
+      })
+      .filter(Boolean)
+      .join('\n');
+
+  const parseOptions = (value: string) =>
+    value
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const separatorIndex = line.indexOf('=');
+        if (separatorIndex === -1) {
+          return { label: line, value: line };
+        }
+        const label = line.slice(0, separatorIndex).trim();
+        const optionValue = line.slice(separatorIndex + 1).trim();
+        return {
+          label: label || optionValue,
+          value: optionValue || label,
+        };
+      });
 
   return (
     <div className="space-y-4">
@@ -93,13 +124,17 @@ export function ContactFormBlock({ block, onChange }: ContactFormBlockProps) {
                 <label className="block text-xs text-gray-600 mb-1">Type</label>
                 <select
                   value={field.type || 'text'}
-                  onChange={(e) => updateField(index, { type: e.target.value })}
+                  onChange={(e) => updateField(index, {
+                    type: e.target.value,
+                    options: e.target.value === 'select' ? (field.options || []) : [],
+                  })}
                   className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
                 >
                   <option value="text">Texte</option>
                   <option value="email">Email</option>
                   <option value="tel">Téléphone</option>
                   <option value="textarea">Zone de texte</option>
+                  <option value="select">Liste déroulante</option>
                 </select>
               </div>
               <div>
@@ -112,6 +147,21 @@ export function ContactFormBlock({ block, onChange }: ContactFormBlockProps) {
                   className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
                 />
               </div>
+              {field.type === 'select' && (
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Options</label>
+                  <textarea
+                    value={serializeOptions(field.options || [])}
+                    onChange={(e) => updateField(index, { options: parseOptions(e.target.value) })}
+                    placeholder={`Option 1\nOption 2=valeur-2`}
+                    rows={4}
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Une ligne par option. Format facultatif : `Label=valeur`.
+                  </p>
+                </div>
+              )}
               <div className="flex items-center">
                 <input
                   type="checkbox"

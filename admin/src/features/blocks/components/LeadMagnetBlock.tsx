@@ -48,6 +48,18 @@ export function LeadMagnetBlock({ block, onChange }: LeadMagnetBlockProps) {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
+          Placeholder email
+        </label>
+        <input
+          type="text"
+          value={data.placeholder || ''}
+          onChange={(e) => onChange({ ...data, placeholder: e.target.value })}
+          placeholder="Votre email"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
           Texte du bouton
         </label>
         <input

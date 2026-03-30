@@ -14,7 +14,7 @@ router.get('/', async (req, res, next) => {
     if (stats.isFile()) {
       // Serve static homepage directly (fastest - no EJS rendering)
       res.set({
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Cache-Control': 'no-cache, max-age=0, must-revalidate',
         'Last-Modified': stats.mtime.toUTCString()
       });
       return res.sendFile(path.resolve(staticPath));
@@ -50,9 +50,8 @@ router.get('/:slug', async (req, res, next) => {
     const stats = await fs.stat(staticPath);
     if (stats.isFile()) {
       // Serve static file directly (fastest - no EJS rendering)
-      // Set cache headers for performance
       res.set({
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Cache-Control': 'no-cache, max-age=0, must-revalidate',
         'Last-Modified': stats.mtime.toUTCString()
       });
       return res.sendFile(path.resolve(staticPath));

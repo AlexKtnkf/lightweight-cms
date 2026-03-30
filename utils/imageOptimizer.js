@@ -3,13 +3,11 @@ const path = require('path');
 const fs = require('fs').promises;
 const { v4: uuidv4 } = require('uuid');
 const logger = require('./logger');
+const { uploadsRoot, resolveMediaFilePath } = require('../src/shared/utils/uploadsPath');
 
 const MAX_WIDTH = 1920;
 const THUMBNAIL_WIDTH = 300;
-const UPLOADS_ROOT = process.env.UPLOADS_DIR
-  ? path.resolve(process.env.UPLOADS_DIR)
-  : path.join(__dirname, '../public/uploads');
-const UPLOADS_IMAGES_DIR = path.join(UPLOADS_ROOT, 'images');
+const UPLOADS_IMAGES_DIR = path.join(uploadsRoot, 'images');
 
 /**
  * Ensure uploads directory exists
@@ -99,8 +97,7 @@ async function processImage(file) {
  */
 async function deleteImage(mediaPath) {
   try {
-    const relativePath = mediaPath.replace(/^\/+/, '');
-    const basePath = path.join(UPLOADS_ROOT, relativePath.replace(/^uploads\//, ''));
+    const basePath = resolveMediaFilePath(mediaPath);
     const ext = path.extname(basePath);
     const baseName = path.basename(basePath, ext);
     const dir = path.dirname(basePath);

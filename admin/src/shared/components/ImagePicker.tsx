@@ -160,7 +160,7 @@ export function ImagePicker({ onSelect, selectedId, mode = 'browse' }: ImagePick
               >
                 <div className="relative">
                   <img
-                    src={`/api/media/${item.id}`}
+                    src={`/api/media/${item.id}?variant=thumbnail`}
                     alt={item.alt_text || item.filename}
                     className="w-full h-32 object-cover"
                   />

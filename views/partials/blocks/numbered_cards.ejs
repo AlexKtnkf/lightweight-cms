@@ -1,5 +1,8 @@
 <% if (block.block_data.cards && block.block_data.cards.length > 0) { %>
-<section class="l-section" id="<%= block.id ? 'block-' + block.id : 'numbered-cards' %>">
+<%
+  const backgroundColor = block.block_data.background_color === 'light' ? 'light' : 'dark';
+%>
+<section class="l-section c-num-section c-num-section--<%= backgroundColor %>" id="<%= block.id ? 'block-' + block.id : 'numbered-cards' %>">
   <div class="l-container">
     <% if (block.block_data.section_title) { %>
     <div class="c-section-intro c-section-intro--center">

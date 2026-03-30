@@ -2572,6 +2572,34 @@ main > .c-hero:first-child.l-full-page {
 }
 
 /* c-num-grid / c-num-card */
+.c-num-section--dark {
+  background: linear-gradient(180deg, #2f4644 0%, #243735 100%);
+}
+
+.c-num-section--dark .section-title,
+.c-num-section--dark .c-headline__title,
+.c-num-section--dark .c-num-card p {
+  color: #f6efe8;
+}
+
+.c-num-section--dark .c-num-card {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(17, 24, 24, 0.18));
+  box-shadow: 0 16px 36px rgba(7, 10, 10, 0.22);
+}
+
+.c-num-section--dark .c-num-card::before {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), var(--color-accent));
+}
+
+.c-num-section--dark .c-num-card__number {
+  color: rgba(246, 239, 232, 0.82);
+}
+
+.c-num-section--dark .c-num-card__title {
+  color: #fff;
+}
+
 .c-num-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

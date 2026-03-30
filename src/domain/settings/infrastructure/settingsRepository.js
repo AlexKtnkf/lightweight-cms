@@ -57,15 +57,25 @@ class SettingsRepository {
       { platform: 'linkedin', url: 'https://linkedin.com', icon: 'linkedin' }
     ]);
     
-    const sql = `UPDATE settings 
-                 SET site_title = ?, site_tagline = ?, logo_media_id = ?,
-                     header_menu_links = ?, footer_menu_links = ?, footer_text = ?,
-                     social_links = ?,
-                     allow_search_indexing = ?,
-                     contact_email = ?,
-                     updated_at = CURRENT_TIMESTAMP
-                 WHERE id = 1`;
+    const sql = `INSERT INTO settings (
+                   id, site_title, site_tagline, logo_media_id,
+                   header_menu_links, footer_menu_links, footer_text,
+                   social_links, allow_search_indexing, contact_email, updated_at
+                 )
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                 ON CONFLICT (id) DO UPDATE
+                 SET site_title = EXCLUDED.site_title,
+                     site_tagline = EXCLUDED.site_tagline,
+                     logo_media_id = EXCLUDED.logo_media_id,
+                     header_menu_links = EXCLUDED.header_menu_links,
+                     footer_menu_links = EXCLUDED.footer_menu_links,
+                     footer_text = EXCLUDED.footer_text,
+                     social_links = EXCLUDED.social_links,
+                     allow_search_indexing = EXCLUDED.allow_search_indexing,
+                     contact_email = EXCLUDED.contact_email,
+                     updated_at = CURRENT_TIMESTAMP`;
     await db.run(sql, [
+      1,
       settingsData.site_title || 'AH',
       settingsData.site_tagline || null,
       settingsData.logo_media_id || null,

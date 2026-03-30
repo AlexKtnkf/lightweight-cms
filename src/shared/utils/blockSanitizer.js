@@ -39,12 +39,13 @@ function sanitizeBlockData(blockType, blockData) {
     
     case 'hero':
       return {
-        textePrincipal: blockData.textePrincipal || '',
-        sousTexte: blockData.sousTexte || '',
-        texteBoutonPrincipal: blockData.texteBoutonPrincipal || '',
-        urlBoutonPrincipal: blockData.urlBoutonPrincipal || '',
-        texteBoutonSecondaire: blockData.texteBoutonSecondaire || '',
-        urlBoutonSecondaire: blockData.urlBoutonSecondaire || ''
+        tagline: blockData.tagline || '',
+        textePrincipal: blockData.textePrincipal || blockData.title || '',
+        sousTexte: blockData.sousTexte || blockData.description || '',
+        texteBoutonPrincipal: blockData.texteBoutonPrincipal || blockData.button_primary_text || '',
+        urlBoutonPrincipal: blockData.urlBoutonPrincipal || blockData.button_primary_url || '',
+        texteBoutonSecondaire: blockData.texteBoutonSecondaire || blockData.button_secondary_text || '',
+        urlBoutonSecondaire: blockData.urlBoutonSecondaire || blockData.button_secondary_url || ''
       };
     
     case 'question_reponse':
@@ -75,7 +76,7 @@ function sanitizeBlockData(blockType, blockData) {
     case 'numbered_cards':
       return {
         section_title: blockData.section_title || '',
-        background_color: blockData.background_color || 'dark',
+        background_color: blockData.background_color === 'light' ? 'light' : 'dark',
         cards: Array.isArray(blockData.cards) ? blockData.cards.map(card => ({
           number: card.number || '',
           title: card.title || '',
@@ -87,7 +88,8 @@ function sanitizeBlockData(blockType, blockData) {
       return {
         icon: blockData.icon || '',
         title: blockData.title || '',
-        description: blockData.description || '',
+        description: sanitize(blockData.description || ''),
+        placeholder: blockData.placeholder || '',
         button_text: blockData.button_text || '',
         action_url: blockData.action_url || ''
       };
@@ -101,7 +103,21 @@ function sanitizeBlockData(blockType, blockData) {
           label: field.label || '',
           type: field.type || 'text',
           required: Boolean(field.required),
-          placeholder: field.placeholder || ''
+          placeholder: field.placeholder || '',
+          options: Array.isArray(field.options) ? field.options.map((option) => {
+            if (typeof option === 'string') {
+              return option;
+            }
+            return {
+              label: option?.label || '',
+              value: option?.value || option?.label || ''
+            };
+          }).filter((option) => {
+            if (typeof option === 'string') {
+              return option.trim().length > 0;
+            }
+            return option.label || option.value;
+          }) : []
         })) : []
       };
     

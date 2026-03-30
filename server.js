@@ -6,6 +6,7 @@ const { securityHeaders, generalLimiter } = require('./config/security');
 const errorHandler = require('./middleware/errorHandler');
 const db = require('./src/infrastructure/database/database');
 const logger = require('./utils/logger');
+const { uploadsRoot } = require('./src/shared/utils/uploadsPath');
 
 // Import routes
 const indexRoutes = require('./routes/index');
@@ -15,9 +16,6 @@ const adminApiRoutes = require('./routes/admin-api');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const uploadsRoot = process.env.UPLOADS_DIR
-  ? path.resolve(process.env.UPLOADS_DIR)
-  : path.join(__dirname, 'public/uploads');
 
 // Trust proxy when behind reverse proxy (nginx, Cloudflare, etc.)
 // Required for correct client IPs in rate limiting and logging

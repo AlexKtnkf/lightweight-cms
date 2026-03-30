@@ -7,6 +7,12 @@ interface HeroBlockProps {
 
 export function HeroBlock({ block, onChange }: HeroBlockProps) {
   const data = block.block_data || {};
+  const title = data.textePrincipal || data.title || '';
+  const description = data.sousTexte || data.description || '';
+  const primaryButtonText = data.texteBoutonPrincipal || data.button_primary_text || '';
+  const primaryButtonUrl = data.urlBoutonPrincipal || data.button_primary_url || '';
+  const secondaryButtonText = data.texteBoutonSecondaire || data.button_secondary_text || '';
+  const secondaryButtonUrl = data.urlBoutonSecondaire || data.button_secondary_url || '';
 
   return (
     <div className="space-y-4">
@@ -28,7 +34,7 @@ export function HeroBlock({ block, onChange }: HeroBlockProps) {
         </label>
         <input
           type="text"
-          value={data.textePrincipal || ''}
+          value={title}
           onChange={(e) => onChange({ ...data, textePrincipal: e.target.value })}
           placeholder="Titre principal"
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -39,7 +45,7 @@ export function HeroBlock({ block, onChange }: HeroBlockProps) {
           Description
         </label>
         <textarea
-          value={data.sousTexte || ''}
+          value={description}
           onChange={(e) => onChange({ ...data, sousTexte: e.target.value })}
           placeholder="Sous-titre ou description"
           rows={3}
@@ -52,7 +58,7 @@ export function HeroBlock({ block, onChange }: HeroBlockProps) {
         </label>
         <input
           type="text"
-          value={data.texteBoutonPrincipal || ''}
+          value={primaryButtonText}
           onChange={(e) => onChange({ ...data, texteBoutonPrincipal: e.target.value })}
           placeholder="ex. : Payez Moi"
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -64,7 +70,7 @@ export function HeroBlock({ block, onChange }: HeroBlockProps) {
         </label>
         <input
           type="text"
-          value={data.urlBoutonPrincipal || ''}
+          value={primaryButtonUrl}
           onChange={(e) => onChange({ ...data, urlBoutonPrincipal: e.target.value })}
           placeholder="https://..."
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -76,7 +82,7 @@ export function HeroBlock({ block, onChange }: HeroBlockProps) {
         </label>
         <input
           type="text"
-          value={data.texteBoutonSecondaire || ''}
+          value={secondaryButtonText}
           onChange={(e) => onChange({ ...data, texteBoutonSecondaire: e.target.value })}
           placeholder="ex. : Voir Le Programme"
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -88,7 +94,7 @@ export function HeroBlock({ block, onChange }: HeroBlockProps) {
         </label>
         <input
           type="text"
-          value={data.urlBoutonSecondaire || ''}
+          value={secondaryButtonUrl}
           onChange={(e) => onChange({ ...data, urlBoutonSecondaire: e.target.value })}
           placeholder="https://..."
           className="w-full px-3 py-2 border border-gray-300 rounded-md"

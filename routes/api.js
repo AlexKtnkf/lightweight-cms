@@ -23,6 +23,7 @@ const settingsRepository = require('../src/domain/settings/infrastructure/settin
 const ContactSubmissionRepository = require('../src/domain/contact/infrastructure/contactSubmissionRepository');
 const EmailService = require('../src/shared/services/emailService');
 const logger = require('../utils/logger');
+const { resolveMediaFilePath } = require('../src/shared/utils/uploadsPath');
 
 // Instantiate use cases
 const getPage = new GetPage(pageRepository, blockRepository);
@@ -163,7 +164,16 @@ router.get('/media/:id', async (req, res, next) => {
     if (!media) {
       return res.status(404).json({ error: 'Fichier introuvable' });
     }
-    const filePath = path.join(__dirname, '../public', media.path);
+
+    const requestedVariant = typeof req.query.variant === 'string'
+      ? req.query.variant.trim().toLowerCase()
+      : '';
+    const candidatePath = requestedVariant === 'thumbnail'
+      ? media.thumbnail_path || media.path
+      : requestedVariant === 'webp'
+        ? media.webp_path || media.path
+        : media.path;
+    const filePath = resolveMediaFilePath(candidatePath);
     
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ error: 'Fichier introuvable' });

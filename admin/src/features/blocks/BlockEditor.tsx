@@ -101,6 +101,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                 <option value="question_reponse">FAQ</option>
                 <option value="pin_grid">Pin Grid</option>
                 <option value="numbered_cards">Cartes numérotées</option>
+                <option value="lead_magnet">Lead Magnet</option>
                 <option value="contact_form">Formulaire de contact</option>
               </select>
             </div>
@@ -187,6 +188,13 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
           </button>
           <button
             type="button"
+            onClick={() => addBlock('lead_magnet')}
+            className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
+          >
+            + Lead Magnet
+          </button>
+          <button
+            type="button"
             onClick={() => addBlock('contact_form')}
             className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
           >
@@ -255,6 +263,7 @@ function getDefaultBlockData(type: BlockType): Record<string, any> {
         icon: '',
         title: '',
         description: '',
+        placeholder: '',
         button_text: '',
         action_url: '',
       };
