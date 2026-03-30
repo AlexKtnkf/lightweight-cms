@@ -38,6 +38,11 @@ const templateOptions: Array<{
     title: "Image + petit texte",
     accent: "bg-stone-100",
   },
+  {
+    id: "image-only",
+    title: "Image",
+    accent: "bg-stone-100",
+  },
 ];
 
 const colorThemeOptions: Array<{
@@ -237,6 +242,7 @@ export function InstagramSlideGenerator() {
   ]);
 
   const requiresImage = variant !== "text-only";
+  const requiresText = variant !== "image-only";
 
   const downloadSlide = () => {
     if (!previewUrl) {
@@ -278,7 +284,7 @@ export function InstagramSlideGenerator() {
             <h2 className="text-xl font-semibold text-gray-900">Composition</h2>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-5">
             {templateOptions.map((option) => {
               const isSelected = option.id === variant;
 
@@ -293,9 +299,9 @@ export function InstagramSlideGenerator() {
                       : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
                   }`}
                 >
-                  <h3 className="text-base font-semibold text-gray-900">
+                  <h5 className="text-sm font-semibold text-gray-900">
                     {option.title}
-                  </h3>
+                  </h5>
                 </button>
               );
             })}
@@ -329,59 +335,63 @@ export function InstagramSlideGenerator() {
             </div>
           </div>
 
-          <div className="grid ">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Titre</label>
-              <input
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                placeholder="Ex : Férié"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-4">
-              <label className="text-sm font-medium text-gray-700">Texte</label>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium uppercase tracking-[0.12em] text-gray-500">
-                  Alignement
-                </span>
-                <div className="inline-flex rounded-md border border-gray-300 bg-white p-1 shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => setBodyAlignment("normal")}
-                    className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                      bodyAlignment === "normal"
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    Normal
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setBodyAlignment("center")}
-                    className={`rounded px-3 py-1.5 text-xs font-medium transition ${
-                      bodyAlignment === "center"
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    Centré
-                  </button>
+          {requiresText && (
+            <>
+              <div className="grid ">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Titre</label>
+                  <input
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    placeholder="Ex : Férié"
+                  />
                 </div>
               </div>
-            </div>
-            <textarea
-              value={body}
-              onChange={(event) => setBody(event.target.value)}
-              rows={9}
-              className="w-full rounded border border-gray-300 px-3 py-3 text-sm leading-7 text-gray-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              placeholder="Ex : Paris est vide ce matin, férié ne lui réussit pas bien"
-            />
-          </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-sm font-medium text-gray-700">Texte</label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium uppercase tracking-[0.12em] text-gray-500">
+                      Alignement
+                    </span>
+                    <div className="inline-flex rounded-md border border-gray-300 bg-white p-1 shadow-sm">
+                      <button
+                        type="button"
+                        onClick={() => setBodyAlignment("normal")}
+                        className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                          bodyAlignment === "normal"
+                            ? "bg-blue-600 text-white"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        Normal
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBodyAlignment("center")}
+                        className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                          bodyAlignment === "center"
+                            ? "bg-blue-600 text-white"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        Centré
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <textarea
+                  value={body}
+                  onChange={(event) => setBody(event.target.value)}
+                  rows={9}
+                  className="w-full rounded border border-gray-300 px-3 py-3 text-sm leading-7 text-gray-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  placeholder="Ex : Paris est vide ce matin, férié ne lui réussit pas bien"
+                />
+              </div>
+            </>
+          )}
           {requiresImage && (
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

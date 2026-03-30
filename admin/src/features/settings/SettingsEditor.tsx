@@ -127,6 +127,8 @@ export function SettingsEditor() {
   const [regenerateError, setRegenerateError] = useState<string | null>(null);
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
   const [backupError, setBackupError] = useState<string | null>(null);
+  const [mediaBackupMessage, setMediaBackupMessage] = useState<string | null>(null);
+  const [mediaBackupError, setMediaBackupError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: settings, isLoading, error } = useQuery<Settings>({
@@ -145,11 +147,22 @@ export function SettingsEditor() {
 
   const backupMutation = useMutation({
     mutationFn: () => settingsApi.backup(),
-    onSuccess: (result) => {
+    onSuccess: ({ blob, filename }) => {
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(downloadUrl);
+
       setRegenerateMessage(null);
       setRegenerateError(null);
       setBackupError(null);
-      setBackupMessage(`${result.message} (${result.filename})`);
+      setMediaBackupMessage(null);
+      setMediaBackupError(null);
+      setBackupMessage(`Sauvegarde téléchargée (${filename})`);
     },
     onError: (error: any) => {
       setBackupMessage(null);
@@ -163,11 +176,38 @@ export function SettingsEditor() {
       setBackupMessage(null);
       setBackupError(null);
       setRegenerateError(null);
+      setMediaBackupMessage(null);
+      setMediaBackupError(null);
       setRegenerateMessage(result.message);
     },
     onError: (error: any) => {
       setRegenerateMessage(null);
       setRegenerateError(error?.response?.data?.error || error?.message || 'Erreur lors de la régénération');
+    },
+  });
+
+  const mediaBackupMutation = useMutation({
+    mutationFn: () => settingsApi.downloadMediaBackup(),
+    onSuccess: ({ blob, filename }) => {
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(downloadUrl);
+
+      setRegenerateMessage(null);
+      setRegenerateError(null);
+      setBackupMessage(null);
+      setBackupError(null);
+      setMediaBackupError(null);
+      setMediaBackupMessage(`Archive téléchargée (${filename})`);
+    },
+    onError: (error: any) => {
+      setMediaBackupMessage(null);
+      setMediaBackupError(error?.response?.data?.error || error?.message || 'Erreur lors du téléchargement des images');
     },
   });
 
@@ -321,7 +361,24 @@ export function SettingsEditor() {
                 disabled={backupMutation.isPending}
                 className="px-4 py-2 border rounded-md bg-white text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
               >
-                {backupMutation.isPending ? 'Sauvegarde...' : 'Générer une sauvegarde du site'}
+                {backupMutation.isPending ? 'Sauvegarde...' : 'Générer une sauvegarde de la base'}
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h4 className="text-sm font-medium text-gray-900">Images uploadées</h4>
+                <p className="text-xs text-gray-500 mt-1">
+                  Télécharge une archive ZIP contenant toutes les images originales envoyées dans le CMS.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => mediaBackupMutation.mutate()}
+                disabled={mediaBackupMutation.isPending}
+                className="px-4 py-2 border rounded-md bg-white text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+              >
+                {mediaBackupMutation.isPending ? 'Préparation du ZIP...' : 'Télécharger les images uploadées'}
               </button>
             </div>
 
@@ -346,6 +403,18 @@ export function SettingsEditor() {
             {backupError && (
               <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
                 {backupError}
+              </div>
+            )}
+
+            {mediaBackupMessage && (
+              <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+                {mediaBackupMessage}
+              </div>
+            )}
+
+            {mediaBackupError && (
+              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+                {mediaBackupError}
               </div>
             )}
           </div>

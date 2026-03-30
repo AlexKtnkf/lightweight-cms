@@ -1,10 +1,11 @@
 class SettingsController {
-  constructor(getSettings, updateSettings, staticGenerator = null, robotsGenerator = null, backupService = null) {
+  constructor(getSettings, updateSettings, staticGenerator = null, robotsGenerator = null, backupService = null, mediaBackupService = null) {
     this.getSettings = getSettings;
     this.updateSettings = updateSettings;
     this.staticGenerator = staticGenerator;
     this.robotsGenerator = robotsGenerator;
     this.backupService = backupService;
+    this.mediaBackupService = mediaBackupService;
   }
 
   async get(req, res, next) {
@@ -58,12 +59,20 @@ class SettingsController {
       }
 
       const result = await this.backupService.createBackup();
-      res.json({
-        success: true,
-        message: 'Sauvegarde générée avec succès',
-        filename: result.filename,
-        path: result.path,
-      });
+      return res.download(result.path, result.filename);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async downloadMediaBackup(req, res, next) {
+    try {
+      if (!this.mediaBackupService || typeof this.mediaBackupService.createMediaBackup !== 'function') {
+        return res.status(500).json({ error: 'Service de sauvegarde des images non configuré' });
+      }
+
+      const result = await this.mediaBackupService.createMediaBackup();
+      return res.download(result.path, result.filename);
     } catch (error) {
       next(error);
     }

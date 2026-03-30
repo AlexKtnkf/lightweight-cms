@@ -17,6 +17,7 @@ const staticGenerator = require('../src/infrastructure/static/staticGenerator');
 const RobotsGenerator = require('../src/shared/utils/robotsGenerator');
 const upload = require('../config/upload');
 const backupService = require('../db/backup-db');
+const mediaBackupService = require('../db/backup-media');
 
 // Use cases (application) - Pages
 const CreatePage = require('../src/domain/content/application/CreatePage');
@@ -95,7 +96,7 @@ const updateSettings = new UpdateSettings(settingsRepository);
 const robotsGenerator = new RobotsGenerator();
 
 // Instantiate controller - Settings
-const settingsController = new SettingsController(getSettings, updateSettings, staticGenerator, robotsGenerator, backupService);
+const settingsController = new SettingsController(getSettings, updateSettings, staticGenerator, robotsGenerator, backupService, mediaBackupService);
 
 // Setup and token-based recovery must stay reachable before session auth
 router.post('/auth/reset-password', (req, res, next) => authController.resetPassword(req, res, next));
@@ -129,5 +130,6 @@ router.get('/settings', (req, res, next) => settingsController.get(req, res, nex
 router.put('/settings', (req, res, next) => settingsController.update(req, res, next));
 router.post('/regenerate', (req, res, next) => settingsController.regenerate(req, res, next));
 router.post('/backup', (req, res, next) => settingsController.backup(req, res, next));
+router.get('/backup/media', (req, res, next) => settingsController.downloadMediaBackup(req, res, next));
 
 module.exports = router;

@@ -1,4 +1,4 @@
-export type SlideVariant = 'text-only' | 'text-with-image' | 'text-with-horizontal-image' | 'image-with-text';
+export type SlideVariant = 'text-only' | 'text-with-image' | 'text-with-horizontal-image' | 'image-with-text' | 'image-only';
 export type SlideColorTheme = 'dedicated' | 'frontend' | 'plain-rose' | 'plain-sage' | 'plain-violet' | 'tricolor-soft';
 export type SlideTextAlignment = 'normal' | 'center';
 
@@ -509,8 +509,7 @@ function drawTitleBlock(
   width: number,
   maxLines: number,
   maxFontSize: number,
-  minFontSize: number,
-  align: SlideTextAlignment
+  minFontSize: number
 ) {
   const safeTitle = normalizeText(title).trim();
   if (!safeTitle) {
@@ -522,13 +521,12 @@ function drawTitleBlock(
 
   ctx.fillStyle = palette.text;
   ctx.font = `700 ${layout.fontSize}px "Segoe UI", Arial, sans-serif`;
-  ctx.textAlign = align === 'center' ? 'center' : 'left';
+  ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
 
   let cursorY = y;
   for (const line of layout.lines) {
-    const textX = align === 'center' ? x + (width / 2) : x;
-    ctx.fillText(line, textX, cursorY);
+    ctx.fillText(line, x + (width / 2), cursorY);
     cursorY += lineHeight;
   }
 
@@ -629,8 +627,7 @@ function drawTextLayoutBlock(
       innerWidth,
       config.titleMaxLines,
       config.titleMaxFontSize,
-      config.titleMinFontSize,
-      alignment
+      config.titleMinFontSize
     );
     cursorY = titleDraw.bottomY + gap;
   }
@@ -754,6 +751,23 @@ function drawImageWithTextSlide(
   });
 }
 
+function drawImageOnlySlide(
+  ctx: CanvasRenderingContext2D,
+  image: CanvasImageSource | null,
+  colorTheme: SlideColorTheme
+) {
+  drawContainedImage(
+    ctx,
+    image,
+    STANDARD_CARD_X,
+    STANDARD_CARD_Y,
+    STANDARD_CARD_W,
+    STANDARD_CARD_H,
+    18,
+    colorTheme
+  );
+}
+
 export async function renderInstagramSlide(options: SlideRenderOptions) {
   const canvas = document.createElement('canvas');
   canvas.width = WIDTH;
@@ -782,6 +796,8 @@ export async function renderInstagramSlide(options: SlideRenderOptions) {
     drawTextWithImageSlide(ctx, safeTitle, blocks, contentImage, options.colorTheme, bodyAlignment);
   } else if (options.variant === 'text-with-horizontal-image') {
     drawTextWithHorizontalImageSlide(ctx, safeTitle, blocks, contentImage, options.colorTheme, bodyAlignment);
+  } else if (options.variant === 'image-only') {
+    drawImageOnlySlide(ctx, contentImage, options.colorTheme);
   } else {
     drawImageWithTextSlide(ctx, safeTitle, blocks, contentImage, options.colorTheme, bodyAlignment);
   }
