@@ -83,11 +83,11 @@ Optional (email, analytics, Turnstile):
 
 | Variable | Example |
 |---|---|
-| `SMTP_HOST` | `smtp.gmail.com` |
-| `SMTP_PORT` | `587` |
-| `SMTP_USER` | `you@gmail.com` |
-| `SMTP_PASS` | App-specific password |
+| `RESEND_API_KEY` | `re_xxxxxxxxx` |
 | `CONTACT_EMAIL_TO` | `admin@example.com` |
+| `CONTACT_EMAIL_FROM` | `noreply@adelinehage.com` |
+| `CONTACT_EMAIL_FROM_NAME` | `Adeline Hage` |
+| `SEND_CONFIRMATION_EMAIL` | `true` |
 | `UPLOADS_DIR` | `/data/uploads` (if using a Railway volume) |
 | `GA_ID` | `G-XXXXXXXXXX` |
 | `TURNSTILE_SITE_KEY` | Cloudflare dashboard |

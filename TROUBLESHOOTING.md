@@ -175,14 +175,16 @@ npm run setup
 
 ### "Email failed to send"
 
-1. Check SMTP credentials in `.env`:
-   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`
-   
-2. For Gmail, use an [App Password](https://support.google.com/accounts/answer/185833), not your regular password
+1. Check Resend configuration in `.env` / Railway:
+   - `RESEND_API_KEY`
+   - `CONTACT_EMAIL_FROM`
+   - `CONTACT_EMAIL_TO`
+
+2. Make sure the sender domain used by `CONTACT_EMAIL_FROM` is verified in Resend
 
 3. Test email sending:
    ```bash
-   # Check server logs for SMTP errors
+   # Check server logs for Resend API errors
    npm run dev  # Watch for "Email failed" messages
    ```
 

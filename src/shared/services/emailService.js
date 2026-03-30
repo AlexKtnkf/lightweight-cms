@@ -1,81 +1,65 @@
 /**
  * Email Service
- * Handles SMTP configuration and email sending with robust error handling
+ * Sends transactional emails through the Resend HTTPS API.
  */
 
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const logger = require('../../../utils/logger');
-const net = require('net');
 
 class EmailService {
   constructor() {
-    this.transporter = null;
+    this.client = null;
     this.isConfigured = false;
-    const port = parseInt(process.env.SMTP_PORT || '587');
-    const smtpDebug = process.env.SMTP_DEBUG === 'true';
-    const configuredHost = process.env.SMTP_HOST;
-    const isIpHost = configuredHost ? net.isIP(configuredHost) !== 0 : false;
-    const tlsServername = process.env.SMTP_TLS_SERVERNAME || (!isIpHost ? configuredHost : undefined);
     this.config = {
-      host: configuredHost,
-      port,
-      secure: port === 465, // true for 465, false for other ports
-      requireTLS: port === 587,
-      name: process.env.SMTP_CLIENT_NAME || process.env.SITE_HOST || 'localhost',
-      connectionTimeout: parseInt(process.env.SMTP_CONNECTION_TIMEOUT || '15000', 10),
-      greetingTimeout: parseInt(process.env.SMTP_GREETING_TIMEOUT || '10000', 10),
-      socketTimeout: parseInt(process.env.SMTP_SOCKET_TIMEOUT || '20000', 10),
-      logger: smtpDebug,
-      debug: smtpDebug,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      ...(tlsServername ? { tls: { servername: tlsServername } } : {}),
+      apiKey: process.env.RESEND_API_KEY ? process.env.RESEND_API_KEY.trim() : '',
+      fromAddress: process.env.CONTACT_EMAIL_FROM ? process.env.CONTACT_EMAIL_FROM.trim() : '',
+      fromName: process.env.CONTACT_EMAIL_FROM_NAME ? process.env.CONTACT_EMAIL_FROM_NAME.trim() : '',
     };
 
-    // Validate configuration
-    if (this.config.host && this.config.auth.user && this.config.auth.pass) {
-      this.initializeTransporter();
+    if (this.config.apiKey && this.config.fromAddress) {
+      this.initializeClient();
     } else {
-      logger.warn('Email service not fully configured. Check SMTP_HOST, SMTP_USER, SMTP_PASS env vars.');
+      const missing = [];
+      if (!this.config.apiKey) missing.push('RESEND_API_KEY');
+      if (!this.config.fromAddress) missing.push('CONTACT_EMAIL_FROM');
+      logger.warn(`Email service not fully configured. Missing: ${missing.join(', ')}`);
     }
   }
 
   /**
-   * Initialize the email transporter with error handling
+   * Initialize the Resend client.
    */
-  initializeTransporter() {
+  initializeClient() {
     try {
-      this.transporter = nodemailer.createTransport(this.config);
+      this.client = new Resend(this.config.apiKey);
       this.isConfigured = true;
-      logger.info(`Email service initialized (${this.config.host}:${this.config.port})`);
+      logger.info('Email service initialized (Resend)');
       setImmediate(() => {
         this.verifyConfiguration().then((result) => {
           if (result.success) {
-            logger.info(`SMTP verification succeeded (${this.config.host}:${this.config.port})`);
+            logger.info(`Resend verification succeeded for ${result.senderDomain || 'configured sender domain'}`);
           } else {
-            logger.warn(`SMTP verification failed (${this.config.host}:${this.config.port}): ${result.error}`);
+            logger.warn(`Resend verification failed: ${result.error}`);
           }
         }).catch((error) => {
-          logger.warn(`SMTP verification threw an unexpected error: ${error.message}`);
+          logger.warn(`Resend verification threw an unexpected error: ${error.message}`);
         });
       });
     } catch (error) {
-      logger.error('Failed to initialize email transporter:', error.message);
+      logger.error('Failed to initialize Resend client:', error.message);
       this.isConfigured = false;
     }
   }
 
   /**
-   * Check if email service is configured
+   * Check if the service is ready.
    */
   isReady() {
-    return this.isConfigured && this.transporter;
+    return this.isConfigured && this.client;
   }
 
   /**
-   * Send contact form submission email with retry logic
+   * Send contact form submission email with retry logic.
    * @param {Object} formData - { email, name, message, fields: [...] }
    * @param {string} recipientEmail - Admin email to send to
    * @param {number} retries - Number of retry attempts
@@ -96,35 +80,32 @@ class EmailService {
     const htmlContent = this.buildContactFormHtml(formData);
     const textContent = this.buildContactFormText(formData);
 
-    const mailOptions = {
-      from: `"${process.env.CONTACT_EMAIL_FROM_NAME || 'Contact Form'}" <${process.env.CONTACT_EMAIL_FROM || process.env.SMTP_USER}>`,
-      to: recipientEmail,
+    const payload = {
+      from: this.formatFromAddress('Contact Form'),
+      to: [recipientEmail],
       replyTo: formData.email || undefined,
       subject: `Nouveau message de contact${formData.name ? ` de ${formData.name}` : ''}`,
       html: htmlContent,
       text: textContent,
     };
 
-    // Retry logic with exponential backoff
     for (let attempt = 0; attempt < retries; attempt++) {
       try {
-        logger.info(`Sending admin notification email via ${this.config.host}:${this.config.port} to ${recipientEmail} (attempt ${attempt + 1}/${retries})`);
-        const result = await this.transporter.sendMail(mailOptions);
-        logger.info(`Email de formulaire de contact envoyé avec succès (tentative ${attempt + 1}): ${result.messageId}`);
+        logger.info(`Sending admin notification email via Resend to ${recipientEmail} (attempt ${attempt + 1}/${retries})`);
+        const result = await this.sendEmail(payload);
+        logger.info(`Email de formulaire de contact envoyé avec succès (tentative ${attempt + 1}): ${result.id}`);
         return result;
       } catch (error) {
         logger.warn(`Échec de l'envoi de l'email (tentative ${attempt + 1}/${retries}): ${error.message}`);
 
-        // Don't retry on permanent errors
         if (this.isPermanentError(error)) {
           error.retryable = false;
           throw error;
         }
 
-        // Wait before retrying (exponential backoff)
         if (attempt < retries - 1) {
           const delay = Math.min(1000 * Math.pow(2, attempt), 10000);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         } else {
           error.retryable = true;
           throw error;
@@ -134,7 +115,7 @@ class EmailService {
   }
 
   /**
-   * Send confirmation email to visitor (optional)
+   * Send confirmation email to visitor (optional).
    */
   async sendConfirmationEmail(visitorEmail, visitorName) {
     if (!this.isReady()) {
@@ -142,37 +123,36 @@ class EmailService {
       return null;
     }
 
-    const mailOptions = {
-      from: `"${process.env.CONTACT_EMAIL_FROM_NAME || process.env.SITE_TITLE || 'Contact'}" <${process.env.CONTACT_EMAIL_FROM || process.env.SMTP_USER}>`,
-      to: visitorEmail,
+    const payload = {
+      from: this.formatFromAddress(process.env.SITE_TITLE || 'Contact'),
+      to: [visitorEmail],
       subject: 'Votre message a bien été reçu',
       html: `
-        <h2>Merci ${visitorName || 'de votre message'}</h2>
+        <h2>Merci ${this.escapeHtml(visitorName || 'de votre message')}</h2>
         <p>J'ai bien reçu votre message et je vous recontacterai au plus tôt.</p>
         <p>Cordialement</p>
       `,
-      text: `Merci de votre message. Je vous recontacterai au plus tôt.`,
+      text: 'Merci de votre message. Je vous recontacterai au plus tôt.',
     };
 
     try {
-      logger.info(`Sending confirmation email via ${this.config.host}:${this.config.port} to ${visitorEmail}`);
-      const result = await this.transporter.sendMail(mailOptions);
-      logger.info(`Email de confirmation envoyé à ${visitorEmail}`);
+      logger.info(`Sending confirmation email via Resend to ${visitorEmail}`);
+      const result = await this.sendEmail(payload);
+      logger.info(`Email de confirmation envoyé à ${visitorEmail}: ${result.id}`);
       return result;
     } catch (error) {
       logger.warn(`Échec de l'envoi de l'email de confirmation à ${visitorEmail}: ${error.message}`);
-      // Don't throw - confirmation email failure shouldn't block main submission
       return null;
     }
   }
 
   /**
-   * Build HTML email content
+   * Build HTML email content.
    */
   buildContactFormHtml(formData) {
     const fields = formData.fields || [];
     const fieldsHtml = fields
-      .map(f => `<p><strong>${f.label}:</strong><br>${this.escapeHtml(f.value)}</p>`)
+      .map((f) => `<p><strong>${this.escapeHtml(f.label)}:</strong><br>${this.escapeHtml(f.value)}</p>`)
       .join('');
 
     return `
@@ -185,8 +165,6 @@ class EmailService {
             .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
             header { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; }
             .content { background-color: white; padding: 20px; border-radius: 5px; }
-            .field { margin-bottom: 15px; }
-            .label { font-weight: bold; color: #007bff; }
             .value { white-space: pre-wrap; word-break: break-word; }
             footer { font-size: 12px; color: #666; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px; }
           </style>
@@ -212,11 +190,11 @@ class EmailService {
   }
 
   /**
-   * Build plain text email content
+   * Build plain text email content.
    */
   buildContactFormText(formData) {
     const fields = formData.fields || [];
-    const fieldsText = fields.map(f => `${f.label}:\n${f.value}`).join('\n\n');
+    const fieldsText = fields.map((f) => `${f.label}:\n${f.value}`).join('\n\n');
 
     return `
 NOUVEAU MESSAGE DE CONTACT
@@ -233,23 +211,47 @@ Timestamp: ${new Date().toLocaleString('fr-FR')}
   }
 
   /**
-   * Check if error is permanent (shouldn't retry)
+   * Send a single email through Resend.
    */
-  isPermanentError(error) {
-    // Permanent SMTP errors
-    const permanentCodes = ['ENOTFOUND', 'EINVAL', 'ERR_INVALID_ARG_TYPE'];
-    if (permanentCodes.includes(error.code)) return true;
+  async sendEmail(payload) {
+    const result = await this.client.emails.send(payload);
 
-    // Check for permanent SMTP status codes (4xx client errors)
-    if (error.message && error.message.match(/^Invalid (email|login|credentials|response)/) ) {
-      return true;
+    if (result.error) {
+      const error = new Error(result.error.message || 'Resend email send failed');
+      error.code = result.error.name || 'resend_error';
+      error.statusCode = result.error.statusCode || null;
+      throw error;
     }
 
-    return false;
+    return result.data;
   }
 
   /**
-   * Escape HTML to prevent injection
+   * Check if an error should not be retried.
+   */
+  isPermanentError(error) {
+    if (error.statusCode && error.statusCode >= 400 && error.statusCode < 500 && error.code !== 'rate_limit_exceeded') {
+      return true;
+    }
+
+    const permanentCodes = new Set([
+      'missing_api_key',
+      'invalid_api_key',
+      'restricted_api_key',
+      'validation_error',
+      'invalid_from_address',
+      'invalid_access',
+      'invalid_parameter',
+      'missing_required_field',
+      'daily_quota_exceeded',
+      'monthly_quota_exceeded',
+    ]);
+
+    return permanentCodes.has(error.code);
+  }
+
+  /**
+   * Escape HTML to prevent injection.
    */
   escapeHtml(text) {
     if (!text) return '';
@@ -260,25 +262,78 @@ Timestamp: ${new Date().toLocaleString('fr-FR')}
       '"': '&quot;',
       "'": '&#039;'
     };
-    return text.replace(/[&<>"']/g, m => map[m]);
+    return String(text).replace(/[&<>"']/g, (m) => map[m]);
   }
 
   /**
-   * Verify transporter configuration with test email
+   * Verify Resend configuration and the sender domain.
    */
   async verifyConfiguration() {
-    if (!this.transporter) {
-      return { success: false, error: 'Transporter not initialized' };
+    if (!this.isReady()) {
+      return { success: false, error: 'Resend client not initialized' };
     }
 
     try {
-      await this.transporter.verify();
-      logger.info('Email configuration verified successfully');
-      return { success: true };
+      const senderDomain = this.getSenderDomain();
+      if (!senderDomain) {
+        return { success: false, error: 'CONTACT_EMAIL_FROM must contain a valid email address' };
+      }
+
+      const result = await this.client.domains.list();
+      if (result.error) {
+        logger.error('Resend configuration verification failed:', result.error.message);
+        return { success: false, error: result.error.message };
+      }
+
+      const domains = Array.isArray(result.data?.data) ? result.data.data : [];
+      const verifiedDomain = domains.find((domain) =>
+        domain.status === 'verified' && this.matchesSenderDomain(senderDomain, domain.name)
+      );
+
+      if (!verifiedDomain) {
+        const availableDomains = domains
+          .map((domain) => `${domain.name} (${domain.status})`)
+          .join(', ');
+
+        return {
+          success: false,
+          error: availableDomains
+            ? `No verified Resend domain matches ${senderDomain}. Available domains: ${availableDomains}`
+            : `No Resend domains found for sender domain ${senderDomain}`,
+          senderDomain,
+        };
+      }
+
+      logger.info(`Resend configuration verified successfully for ${senderDomain}`);
+      return { success: true, senderDomain, verifiedDomain: verifiedDomain.name };
     } catch (error) {
-      logger.error('Email configuration verification failed:', error.message);
+      logger.error('Resend configuration verification failed:', error.message);
       return { success: false, error: error.message };
     }
+  }
+
+  formatFromAddress(fallbackName) {
+    const displayName = this.escapeHeaderValue(this.config.fromName || fallbackName || 'Contact');
+    return displayName
+      ? `"${displayName}" <${this.config.fromAddress}>`
+      : this.config.fromAddress;
+  }
+
+  escapeHeaderValue(value) {
+    return String(value || '').replace(/["\\\r\n]/g, '').trim();
+  }
+
+  getSenderDomain() {
+    const parts = this.config.fromAddress.split('@');
+    if (parts.length !== 2 || !parts[1]) {
+      return null;
+    }
+    return parts[1].toLowerCase();
+  }
+
+  matchesSenderDomain(senderDomain, verifiedDomain) {
+    const normalizedVerifiedDomain = String(verifiedDomain || '').toLowerCase();
+    return senderDomain === normalizedVerifiedDomain || senderDomain.endsWith(`.${normalizedVerifiedDomain}`);
   }
 }
 
