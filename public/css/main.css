@@ -2482,10 +2482,40 @@ main > .c-hero:first-child.l-full-page {
 }
 
 .c-headline__content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   color: var(--ref-text-light);
   line-height: 1.7;
   margin-bottom: 1.5rem;
   text-wrap: pretty;
+}
+
+.c-headline__content,
+.c-headline__content > *,
+.c-headline__content p,
+.c-headline__content li,
+.c-headline__content h1,
+.c-headline__content h2,
+.c-headline__content h3,
+.c-headline__content h4,
+.c-headline__content h5,
+.c-headline__content h6,
+.c-headline__content a,
+.c-headline__content blockquote,
+.c-headline__content pre,
+.c-headline__content code {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.c-headline__content img,
+.c-headline__content iframe,
+.c-headline__content video,
+.c-headline__content table {
+  max-width: 100%;
 }
 
 @media (min-width: 992px) {
