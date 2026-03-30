@@ -1,13 +1,36 @@
 <%
-  const footerLinks = (settings && settings.footer_menu_links && Array.isArray(settings.footer_menu_links)) ? settings.footer_menu_links : [];
-  footerLinks.sort((a, b) => (a.order || 0) - (b.order || 0));
+  const footerLinks = (settings && settings.footer_menu_links && Array.isArray(settings.footer_menu_links))
+    ? [...settings.footer_menu_links]
+        .filter(link => link && link.label && link.url)
+        .sort((a, b) => (a.order || 0) - (b.order || 0))
+    : [];
   const siteTitle = settings?.site_title || 'My Site';
-  const socialLinks = settings?.social_links || [];
+  const socialLinks = Array.isArray(settings?.social_links) ? settings.social_links.filter(link => link && link.url) : [];
   const currentYear = new Date().getFullYear();
   const footerText = settings?.footer_text || `© ${currentYear} ${siteTitle}. Mentions légales.`;
 %>
 <footer class="c-footer" role="contentinfo">
   <div class="l-container">
+    <% if (footerLinks.length > 0) { %>
+    <nav class="c-footer__nav" aria-label="Liens du pied de page">
+      <ul class="c-footer__nav-list">
+        <% footerLinks.forEach(link => {
+          const isExternal = /^https?:\/\//i.test(link.url);
+        %>
+        <li class="c-footer__nav-item">
+          <a
+            class="c-footer__nav-link"
+            href="<%= link.url %>"
+            <%= isExternal ? 'target="_blank" rel="noopener noreferrer"' : '' %>
+          >
+            <span><%= link.label %></span>
+          </a>
+        </li>
+        <% }); %>
+      </ul>
+    </nav>
+    <% } %>
+
     <% if (socialLinks.length > 0) { %>
     <div class="c-footer__socials">
       <% socialLinks.forEach(link => { %>
@@ -27,6 +50,6 @@
       <% }); %>
     </div>
     <% } %>
-    <p class="c-footer__copy" style="font-size: 0.8rem; opacity: 0.6;"><%= footerText %></p>
+    <p class="c-footer__copy"><%= footerText %></p>
   </div>
 </footer>
