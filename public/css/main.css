@@ -1891,12 +1891,12 @@ textarea.input-field {
 /* ============================================
    Lazy Loading Images
    ============================================ */
-img[loading="lazy"] {
+img[data-media-id][loading="lazy"] {
   opacity: 0;
   transition: opacity var(--transition-normal);
 }
 
-img[loading="lazy"].loaded {
+img[data-media-id][loading="lazy"].loaded {
   opacity: 1;
 }
 
