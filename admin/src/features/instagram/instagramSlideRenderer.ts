@@ -5,6 +5,7 @@ export type SlideTextAlignment = 'normal' | 'center';
 export interface SlideRenderOptions {
   variant: SlideVariant;
   colorTheme: SlideColorTheme;
+  showNextArrow?: boolean;
   title: string;
   body: string;
   bodyAlignment?: SlideTextAlignment;
@@ -501,6 +502,32 @@ function drawLogo(ctx: CanvasRenderingContext2D, logo: CanvasImageSource | null,
   ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
 }
 
+function drawNextArrow(ctx: CanvasRenderingContext2D, colorTheme: SlideColorTheme) {
+  const arrowColor = backgroundThemes[colorTheme].logo;
+  const arrowWidth = 240;
+  const shaftHeight = 14;
+  const headWidth = 52;
+  const headHeight = 56;
+  const startX = (WIDTH - arrowWidth) / 2;
+  const y = HEIGHT - 218;
+  const endX = startX + arrowWidth;
+  const shaftEndX = endX - headWidth;
+
+  ctx.save();
+  ctx.fillStyle = arrowColor;
+  ctx.beginPath();
+  ctx.rect(startX, y - (shaftHeight / 2), shaftEndX - startX, shaftHeight);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(shaftEndX, y - (headHeight / 2));
+  ctx.lineTo(endX, y);
+  ctx.lineTo(shaftEndX, y + (headHeight / 2));
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
 function drawTitleBlock(
   ctx: CanvasRenderingContext2D,
   title: string,
@@ -803,6 +830,9 @@ export async function renderInstagramSlide(options: SlideRenderOptions) {
   }
 
   drawLogo(ctx, logoImage, options.colorTheme);
+  if (options.showNextArrow) {
+    drawNextArrow(ctx, options.colorTheme);
+  }
 
   return canvas.toDataURL('image/png');
 }

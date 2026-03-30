@@ -102,6 +102,7 @@ function slugifyFilename(value: string) {
 export function InstagramSlideGenerator() {
   const [variant, setVariant] = useState<SlideVariant>("text-only");
   const [colorTheme, setColorTheme] = useState<SlideColorTheme>("dedicated");
+  const [showNextArrow, setShowNextArrow] = useState(false);
   const [title, setTitle] = useState("");
   const [bodyAlignment, setBodyAlignment] =
     useState<SlideTextAlignment>("normal");
@@ -119,6 +120,7 @@ export function InstagramSlideGenerator() {
   const deferredBodyAlignment = useDeferredValue(bodyAlignment);
   const deferredVariant = useDeferredValue(variant);
   const deferredColorTheme = useDeferredValue(colorTheme);
+  const deferredShowNextArrow = useDeferredValue(showNextArrow);
   const deferredImageId = useDeferredValue(selectedImageId);
 
   const { data: settings, isLoading: settingsLoading } = useQuery<Settings>({
@@ -202,6 +204,7 @@ export function InstagramSlideGenerator() {
         const nextPreviewUrl = await renderInstagramSlide({
           variant: deferredVariant,
           colorTheme: deferredColorTheme,
+          showNextArrow: deferredShowNextArrow,
           title: deferredTitle,
           body: deferredBody,
           bodyAlignment: deferredBodyAlignment,
@@ -233,6 +236,7 @@ export function InstagramSlideGenerator() {
   }, [
     deferredVariant,
     deferredColorTheme,
+    deferredShowNextArrow,
     deferredTitle,
     deferredBody,
     deferredBodyAlignment,
@@ -333,6 +337,22 @@ export function InstagramSlideGenerator() {
                 );
               })}
             </div>
+          </div>
+
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <label className="flex items-center justify-between gap-4">
+              <div>
+                <span className="text-sm font-medium text-gray-900">
+                  Flèche de continuation
+                </span>
+              </div>
+              <input
+                type="checkbox"
+                checked={showNextArrow}
+                onChange={(event) => setShowNextArrow(event.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+            </label>
           </div>
 
           {requiresText && (
