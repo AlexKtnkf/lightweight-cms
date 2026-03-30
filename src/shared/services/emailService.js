@@ -5,19 +5,33 @@
 
 const nodemailer = require('nodemailer');
 const logger = require('../../../utils/logger');
+const net = require('net');
 
 class EmailService {
   constructor() {
     this.transporter = null;
     this.isConfigured = false;
+    const port = parseInt(process.env.SMTP_PORT || '587');
+    const smtpDebug = process.env.SMTP_DEBUG === 'true';
+    const configuredHost = process.env.SMTP_HOST;
+    const isIpHost = configuredHost ? net.isIP(configuredHost) !== 0 : false;
+    const tlsServername = process.env.SMTP_TLS_SERVERNAME || (!isIpHost ? configuredHost : undefined);
     this.config = {
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
+      host: configuredHost,
+      port,
+      secure: port === 465, // true for 465, false for other ports
+      requireTLS: port === 587,
+      name: process.env.SMTP_CLIENT_NAME || process.env.SITE_HOST || 'localhost',
+      connectionTimeout: parseInt(process.env.SMTP_CONNECTION_TIMEOUT || '15000', 10),
+      greetingTimeout: parseInt(process.env.SMTP_GREETING_TIMEOUT || '10000', 10),
+      socketTimeout: parseInt(process.env.SMTP_SOCKET_TIMEOUT || '20000', 10),
+      logger: smtpDebug,
+      debug: smtpDebug,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      ...(tlsServername ? { tls: { servername: tlsServername } } : {}),
     };
 
     // Validate configuration
@@ -36,6 +50,17 @@ class EmailService {
       this.transporter = nodemailer.createTransport(this.config);
       this.isConfigured = true;
       logger.info(`Email service initialized (${this.config.host}:${this.config.port})`);
+      setImmediate(() => {
+        this.verifyConfiguration().then((result) => {
+          if (result.success) {
+            logger.info(`SMTP verification succeeded (${this.config.host}:${this.config.port})`);
+          } else {
+            logger.warn(`SMTP verification failed (${this.config.host}:${this.config.port}): ${result.error}`);
+          }
+        }).catch((error) => {
+          logger.warn(`SMTP verification threw an unexpected error: ${error.message}`);
+        });
+      });
     } catch (error) {
       logger.error('Failed to initialize email transporter:', error.message);
       this.isConfigured = false;
@@ -83,6 +108,7 @@ class EmailService {
     // Retry logic with exponential backoff
     for (let attempt = 0; attempt < retries; attempt++) {
       try {
+        logger.info(`Sending admin notification email via ${this.config.host}:${this.config.port} to ${recipientEmail} (attempt ${attempt + 1}/${retries})`);
         const result = await this.transporter.sendMail(mailOptions);
         logger.info(`Email de formulaire de contact envoyé avec succès (tentative ${attempt + 1}): ${result.messageId}`);
         return result;
@@ -129,6 +155,7 @@ class EmailService {
     };
 
     try {
+      logger.info(`Sending confirmation email via ${this.config.host}:${this.config.port} to ${visitorEmail}`);
       const result = await this.transporter.sendMail(mailOptions);
       logger.info(`Email de confirmation envoyé à ${visitorEmail}`);
       return result;
