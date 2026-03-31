@@ -150,6 +150,8 @@
   --spacing-xxl: 3rem;    /* 48px */
   --spacing-xxxl: 4rem;   /* 64px */
   --spacing-section: 5rem;/* 80px */
+  --layout-gutter: clamp(1rem, 4vw, 1.5rem);
+  --layout-max-width: 1100px;
 
   /* ════════════════════════════════════════════════════════════════════
      BORDER RADIUS
@@ -246,20 +248,6 @@ img {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
-}
-
-.container {
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-m);
-  box-sizing: border-box;
-}
-
-@media (min-width: 768px) {
-  .container {
-    padding: 0 var(--spacing-l);
-  }
 }
 
 /* ============================================
@@ -2056,7 +2044,7 @@ select {
   --ref-line-strong: rgba(61, 115, 112, 0.22);
   --ref-shadow: 0 20px 60px rgba(42, 37, 32, 0.08);
   --ref-shadow-strong: 0 22px 70px rgba(42, 37, 32, 0.14);
-  --ref-container-width: 1100px;
+  --ref-container-width: var(--layout-max-width);
   --ref-space-s: 1.5rem;
   --ref-space-m: 4rem;
   --ref-space-l: 8rem;
@@ -2071,10 +2059,29 @@ select {
 }
 
 /* Layout */
+.container,
 .l-container {
-  max-width: var(--ref-container-width);
+  width: 100%;
+  max-width: calc(var(--ref-container-width) + (var(--layout-gutter) * 2));
   margin: 0 auto;
-  padding: 0 var(--ref-space-s);
+  padding-inline: var(--layout-gutter);
+  box-sizing: border-box;
+}
+
+.container > *,
+.l-container > * {
+  min-width: 0;
+}
+
+.l-contained-block {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.l-contained-block > * {
+  min-width: 0;
 }
 
 .l-section {
@@ -2562,11 +2569,16 @@ main > .c-hero:first-child.l-full-page {
   display: flex;
   flex-direction: column;
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  gap: 1rem;
 }
 
 .c-main-feature__image {
   height: 50vh;
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .c-main-feature__image img {
@@ -2577,6 +2589,9 @@ main > .c-hero:first-child.l-full-page {
 }
 
 .c-main-feature__card {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: var(--ref-space-m);
   background: linear-gradient(180deg, rgba(255, 253, 252, 0.95), rgba(247, 241, 233, 0.92));
   display: flex;
@@ -2644,12 +2659,16 @@ main > .c-hero:first-child.l-full-page {
 
 .c-num-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   gap: 1.5rem;
+  min-width: 0;
+  width: 100%;
 }
 
 .c-num-card {
   position: relative;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 2rem 1.6rem 1.7rem;
   border: 1px solid rgba(61, 115, 112, 0.1);
   border-radius: calc(var(--ref-radius-m) - 4px);
@@ -2698,6 +2717,8 @@ main > .c-hero:first-child.l-full-page {
   gap: 1.5rem;
   scroll-snap-type: x mandatory;
   padding-bottom: 1.5rem;
+  width: 100%;
+  min-width: 0;
 }
 
 .c-pin-grid__item {
@@ -2897,6 +2918,8 @@ main > .c-hero:first-child.l-full-page {
   background:
     radial-gradient(circle at top right, rgba(143, 196, 193, 0.14), transparent 34%),
     linear-gradient(180deg, rgba(255, 253, 252, 0.98), rgba(247, 241, 233, 0.94));
+  width: 100%;
+  box-sizing: border-box;
   padding: var(--ref-space-m);
   border-radius: var(--ref-radius-m);
   max-width: 900px;
@@ -2918,6 +2941,8 @@ main > .c-hero:first-child.l-full-page {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .c-contact__group label {
@@ -2928,9 +2953,11 @@ main > .c-hero:first-child.l-full-page {
 
 .c-contact__form {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.5rem;
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .c-contact__group--full { grid-column: span 2; }
@@ -2958,6 +2985,10 @@ main > .c-hero:first-child.l-full-page {
 }
 
 @media (max-width: 600px) {
+  .c-num-grid {
+    grid-template-columns: 1fr;
+  }
+
   .c-contact {
     padding: 2rem 1.5rem;
   }

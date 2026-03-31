@@ -9,7 +9,7 @@
       <h2 class="c-headline__title section-title centered"><%= block.block_data.section_title %></h2>
     </div>
     <% } %>
-    <div class="c-num-grid">
+    <div class="c-num-grid l-contained-block">
     <% block.block_data.cards.forEach((card, index) => { %>
     <div class="c-num-card">
       <span class="c-num-card__number"><%= String(card.number != null ? card.number : index + 1).padStart(2, '0') %></span>
