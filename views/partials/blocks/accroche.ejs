@@ -1,3 +1,8 @@
+<%
+  const normalizedContent = typeof block.block_data.content === 'string'
+    ? block.block_data.content.replace(/(?:&nbsp;|\u00A0)/g, ' ')
+    : '';
+%>
 <section class="l-section" id="<%= block.block_data.section_id || (block.id ? 'block-' + block.id : 'accroche') %>" aria-labelledby="headline-<%= block.id || 'default' %>-title">
   <div class="l-container">
     <div class="c-headline">
@@ -7,8 +12,8 @@
     <% if (block.block_data.title) { %>
     <h2 id="headline-<%= block.id || 'default' %>-title" class="c-headline__title"><%= block.block_data.title %></h2>
     <% } %>
-    <% if (block.block_data.content) { %>
-    <div class="c-headline__content"><%- block.block_data.content %></div>
+    <% if (normalizedContent) { %>
+    <div class="c-headline__content"><%- normalizedContent %></div>
     <% } %>
     </div>
   </div>

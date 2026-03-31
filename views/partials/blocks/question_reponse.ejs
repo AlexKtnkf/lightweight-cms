@@ -1,4 +1,6 @@
 <%
+  const normalizeHtmlSpacing = (html) =>
+    typeof html === 'string' ? html.replace(/(?:&nbsp;|\u00A0)/g, ' ') : '';
   const faqItems = Array.isArray(block.block_data.items) && block.block_data.items.length > 0
     ? block.block_data.items
     : (block.block_data.question || block.block_data.reponse)
@@ -15,7 +17,7 @@
       <h2 class="c-headline__title section-title centered"><%= block.block_data.section_title %></h2>
       <% } %>
       <% if (block.block_data.intro) { %>
-      <div class="c-headline__content"><%- block.block_data.intro %></div>
+      <div class="c-headline__content"><%- normalizeHtmlSpacing(block.block_data.intro) %></div>
       <% } %>
     </div>
     <% } %>
@@ -28,7 +30,7 @@
         <summary><%= item.question %></summary>
         <% } %>
         <% if (item.reponse) { %>
-        <div class="c-faq__answer"><%- item.reponse %></div>
+        <div class="c-faq__answer"><%- normalizeHtmlSpacing(item.reponse) %></div>
         <% } %>
       </details>
       <% } %>

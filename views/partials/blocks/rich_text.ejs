@@ -1,7 +1,12 @@
+<%
+  const normalizedRichText = typeof block.block_data.richText === 'string'
+    ? block.block_data.richText.replace(/(?:&nbsp;|\u00A0)/g, ' ')
+    : '';
+%>
 <article class="l-section" id="<%= block.id ? 'block-' + block.id : 'rich-text' %>">
   <div class="l-container">
     <div class="c-rich-text">
-      <%- block.block_data.richText %>
+      <%- normalizedRichText %>
     </div>
   </div>
 </article>

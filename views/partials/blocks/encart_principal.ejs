@@ -1,3 +1,8 @@
+<%
+  const normalizedFeatureText = typeof block.block_data.texte === 'string'
+    ? block.block_data.texte.replace(/(?:&nbsp;|\u00A0)/g, ' ')
+    : '';
+%>
 <section class="l-section" aria-labelledby="encart-title-<%= block.id || 'default' %>">
   <div class="c-main-feature">
     <div class="c-main-feature__wrapper">
@@ -10,8 +15,8 @@
       <% if (block.block_data.titre) { %>
       <h2 id="encart-title-<%= block.id || 'default' %>" class="c-headline__title"><%= block.block_data.titre %></h2>
       <% } %>
-      <% if (block.block_data.texte) { %>
-      <div class="c-main-feature__content"><%- block.block_data.texte %></div>
+      <% if (normalizedFeatureText) { %>
+      <div class="c-main-feature__content"><%- normalizedFeatureText %></div>
       <% } %>
       <% if (block.block_data.url && block.block_data.lien) { %>
       <a href="<%= block.block_data.url %>" class="btn btn--outline"><%= block.block_data.lien %></a>
