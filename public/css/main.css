@@ -2543,7 +2543,7 @@ main > .c-hero:first-child.l-full-page {
   }
 
   .c-hero__content {
-    margin: 0;
+    margin: 0 auto;
   }
 
   .c-hero__content p {
