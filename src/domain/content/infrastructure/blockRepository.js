@@ -1,4 +1,66 @@
 const db = require('../../../infrastructure/database/database');
+const sanitize = require('../../../shared/utils/sanitize');
+const normalizeHtmlSpacing = sanitize.normalizeHtmlSpacing;
+
+function normalizeBlockHtml(blockType, blockData) {
+  if (!blockData || typeof blockData !== 'object') {
+    return blockData;
+  }
+
+  const normalize = (value) => normalizeHtmlSpacing(typeof value === 'string' ? value : '');
+
+  switch (blockType) {
+    case 'rich_text':
+      return {
+        ...blockData,
+        richText: normalize(blockData.richText)
+      };
+
+    case 'encart_principal':
+      return {
+        ...blockData,
+        texte: normalize(blockData.texte)
+      };
+
+    case 'question_reponse':
+      return {
+        ...blockData,
+        intro: normalize(blockData.intro),
+        items: Array.isArray(blockData.items)
+          ? blockData.items.map((item) => ({
+              ...item,
+              reponse: normalize(item?.reponse)
+            }))
+          : blockData.items
+      };
+
+    case 'accroche':
+      return {
+        ...blockData,
+        content: normalize(blockData.content)
+      };
+
+    case 'numbered_cards':
+      return {
+        ...blockData,
+        cards: Array.isArray(blockData.cards)
+          ? blockData.cards.map((card) => ({
+              ...card,
+              description: normalize(card?.description)
+            }))
+          : blockData.cards
+      };
+
+    case 'lead_magnet':
+      return {
+        ...blockData,
+        description: normalize(blockData.description)
+      };
+
+    default:
+      return blockData;
+  }
+}
 
 class BlockRepository {
   // Find all blocks for a content item
@@ -78,11 +140,13 @@ class BlockRepository {
    * Handles both string and already-parsed objects
    */
   parseBlockData(block) {
+    const parsedBlockData = typeof block.block_data === 'string'
+      ? JSON.parse(block.block_data)
+      : block.block_data;
+
     return {
       ...block,
-      block_data: typeof block.block_data === 'string' 
-        ? JSON.parse(block.block_data) 
-        : block.block_data
+      block_data: normalizeBlockHtml(block.block_type, parsedBlockData)
     };
   }
 
