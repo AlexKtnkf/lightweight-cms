@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState, useDeferredValue } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ImagePickerModal } from "../../shared/components/ImagePickerModal";
-import { settingsApi } from "../../shared/api/settings";
 import { mediaApi } from "../../shared/api/media";
-import type { Settings } from "../../domain/settings/types";
 import type { Media } from "../../domain/media/types";
 import { Loading } from "../../shared/components/Loading";
 import {
@@ -123,12 +121,6 @@ export function InstagramSlideGenerator() {
   const deferredShowNextArrow = useDeferredValue(showNextArrow);
   const deferredImageId = useDeferredValue(selectedImageId);
 
-  const { data: settings, isLoading: settingsLoading } = useQuery<Settings>({
-    queryKey: ["settings"],
-    queryFn: () => settingsApi.get(),
-    staleTime: 1000 * 60 * 5,
-  });
-
   const { data: media, isLoading: mediaLoading } = useQuery<Media[]>({
     queryKey: ["media"],
     queryFn: () => mediaApi.list(),
@@ -139,9 +131,7 @@ export function InstagramSlideGenerator() {
     let active = true;
 
     async function loadThemeLogo() {
-      const sourceUrl = settings?.logo_media_id
-        ? `/api/media/${settings.logo_media_id}`
-        : "/media/logo.svg";
+      const sourceUrl = "/media/logo.svg";
 
       try {
         const response = await fetch(sourceUrl);
@@ -170,11 +160,7 @@ export function InstagramSlideGenerator() {
         setThemeLogoUrl(sourceUrl);
       } catch {
         if (active) {
-          setThemeLogoUrl(
-            settings?.logo_media_id
-              ? `/api/media/${settings.logo_media_id}`
-              : "/media/logo.svg",
-          );
+          setThemeLogoUrl(sourceUrl);
         }
       }
     }
@@ -184,7 +170,7 @@ export function InstagramSlideGenerator() {
     return () => {
       active = false;
     };
-  }, [colorTheme, settings?.logo_media_id]);
+  }, [colorTheme]);
 
   const selectedImage = useMemo(
     () => media?.find((item) => item.id === deferredImageId) ?? null,
@@ -242,7 +228,6 @@ export function InstagramSlideGenerator() {
     deferredBodyAlignment,
     imageUrl,
     logoUrl,
-    settings?.site_title,
   ]);
 
   const requiresImage = variant !== "text-only";
@@ -259,7 +244,7 @@ export function InstagramSlideGenerator() {
     anchor.click();
   };
 
-  if (settingsLoading || mediaLoading) {
+  if (mediaLoading) {
     return <Loading />;
   }
 
