@@ -2482,6 +2482,7 @@ main > .c-hero:first-child.l-full-page {
 }
 
 .c-headline__content {
+  display: block;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -2502,16 +2503,21 @@ main > .c-hero:first-child.l-full-page {
 .c-headline__content h5,
 .c-headline__content h6,
 .c-headline__content blockquote {
-  max-width: 100%;
+  width: 100%;
+  max-width: min(100%, 42rem);
   min-width: 0;
+  margin-left: auto;
+  margin-right: auto;
+  white-space: normal;
   overflow-wrap: normal;
   word-break: normal;
-  hyphens: manual;
+  hyphens: none;
 }
 
 .c-headline__content a,
 .c-headline__content pre,
 .c-headline__content code {
+  white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
   hyphens: none;
@@ -2837,19 +2843,37 @@ main > .c-hero:first-child.l-full-page {
 .c-rich-text h5,
 .c-rich-text h6,
 .c-rich-text blockquote {
+  width: 100%;
   max-width: 100%;
   min-width: 0;
+  white-space: normal;
   overflow-wrap: normal;
   word-break: normal;
-  hyphens: manual;
+  hyphens: none;
 }
 
 .c-rich-text a,
 .c-rich-text pre,
 .c-rich-text code {
+  white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
   hyphens: none;
+}
+
+.c-headline__content .ql-align-center,
+.c-rich-text .ql-align-center {
+  text-align: center;
+}
+
+.c-headline__content .ql-align-right,
+.c-rich-text .ql-align-right {
+  text-align: right;
+}
+
+.c-headline__content .ql-align-justify,
+.c-rich-text .ql-align-justify {
+  text-align: justify;
 }
 
 .c-rich-text img,
