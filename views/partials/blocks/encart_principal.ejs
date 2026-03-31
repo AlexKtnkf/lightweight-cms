@@ -4,24 +4,26 @@
     : '';
 %>
 <section class="l-section" aria-labelledby="encart-title-<%= block.id || 'default' %>">
-  <div class="c-main-feature">
-    <div class="c-main-feature__wrapper">
+  <div class="l-container">
+    <div class="c-main-feature">
+      <div class="c-main-feature__wrapper">
     <% if (block.block_data.image_id) { %>
-    <div class="c-main-feature__image">
-      <img src="/api/media/<%= block.block_data.image_id %>" alt="<%= block.block_data.titre || 'Illustration' %>">
-    </div>
+      <div class="c-main-feature__image">
+        <img src="/api/media/<%= block.block_data.image_id %>" alt="<%= block.block_data.titre || 'Illustration' %>">
+      </div>
     <% } %>
-    <div class="c-main-feature__card">
+      <div class="c-main-feature__card">
       <% if (block.block_data.titre) { %>
-      <h2 id="encart-title-<%= block.id || 'default' %>" class="c-headline__title"><%= block.block_data.titre %></h2>
+        <h2 id="encart-title-<%= block.id || 'default' %>" class="c-headline__title"><%= block.block_data.titre %></h2>
       <% } %>
       <% if (normalizedFeatureText) { %>
-      <div class="c-main-feature__content"><%- normalizedFeatureText %></div>
+        <div class="c-main-feature__content"><%- normalizedFeatureText %></div>
       <% } %>
       <% if (block.block_data.url && block.block_data.lien) { %>
-      <a href="<%= block.block_data.url %>" class="btn btn--outline"><%= block.block_data.lien %></a>
+        <a href="<%= block.block_data.url %>" class="btn btn--outline"><%= block.block_data.lien %></a>
       <% } %>
-    </div>
+      </div>
+      </div>
     </div>
   </div>
 </section>

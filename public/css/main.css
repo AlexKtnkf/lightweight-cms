@@ -2930,6 +2930,7 @@ main > .c-hero:first-child.l-full-page {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
+  width: 100%;
 }
 
 .c-contact__group--full { grid-column: span 2; }
@@ -2937,6 +2938,7 @@ main > .c-hero:first-child.l-full-page {
 .c-contact__form input,
 .c-contact__form textarea,
 .c-contact__form select {
+  box-sizing: border-box;
   width: 100%;
   padding: 1rem;
   border: 1px solid rgba(61, 115, 112, 0.14);
