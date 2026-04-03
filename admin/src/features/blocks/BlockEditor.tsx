@@ -8,6 +8,7 @@ import { NumberedCardsBlock } from './components/NumberedCardsBlock';
 import { QuestionReponseBlock } from './components/QuestionReponseBlock';
 import { LeadMagnetBlock } from './components/LeadMagnetBlock';
 import { ContactFormBlock } from './components/ContactFormBlock';
+import { BlockPicker } from './BlockPicker';
 
 interface BlockEditorProps {
   blocks: Block[];
@@ -135,73 +136,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
         </div>
       ))}
       
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => addBlock('rich_text')}
-            className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
-          >
-            + Texte enrichi
-          </button>
-          <button
-            type="button"
-            onClick={() => addBlock('hero')}
-            className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
-          >
-            + Hero
-          </button>
-          <button
-            type="button"
-            onClick={() => addBlock('encart_principal')}
-            className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
-          >
-            + Encart Principal
-          </button>
-          <button
-            type="button"
-            onClick={() => addBlock('accroche')}
-            className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
-          >
-            + Accroche
-          </button>
-          <button
-            type="button"
-            onClick={() => addBlock('pin_grid')}
-            className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
-          >
-            + Pin Grid
-          </button>
-          <button
-            type="button"
-            onClick={() => addBlock('numbered_cards')}
-            className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
-          >
-            + Cartes numérotées
-          </button>
-          <button
-            type="button"
-            onClick={() => addBlock('question_reponse')}
-            className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
-          >
-            + FAQ
-          </button>
-          <button
-            type="button"
-            onClick={() => addBlock('lead_magnet')}
-            className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
-          >
-            + Lead Magnet
-          </button>
-          <button
-            type="button"
-            onClick={() => addBlock('contact_form')}
-            className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded"
-          >
-            + Formulaire de contact
-          </button>
-        </div>
-      </div>
+      <BlockPicker onSelect={addBlock} />
     </div>
   );
 }

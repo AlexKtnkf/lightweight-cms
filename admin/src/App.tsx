@@ -11,6 +11,7 @@ import { Dashboard } from './features/dashboard/Dashboard';
 import { Login } from './features/auth/Login';
 import { ProtectedRoute } from './features/auth/ProtectedRoute';
 import { InstagramSlideGenerator } from './features/instagram/InstagramSlideGenerator';
+import { HowTo } from './features/howto/HowTo';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -166,6 +167,7 @@ function AdminApp() {
           <Route path="/media" element={<ImagesList />} />
           <Route path="/instagram-slides" element={<InstagramSlideGenerator />} />
           <Route path="/settings" element={<SettingsEditor />} />
+          <Route path="/howto" element={<HowTo />} />
         </Routes>
       </main>
     </div>

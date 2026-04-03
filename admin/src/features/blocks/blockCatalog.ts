@@ -1,0 +1,84 @@
+import type { BlockType } from '../../domain/content/types';
+import type { ComponentType } from 'react';
+import { HeroPreview } from './previews/HeroPreview';
+import { RichTextPreview } from './previews/RichTextPreview';
+import { EncartPrincipalPreview } from './previews/EncartPrincipalPreview';
+import { AccrochePreview } from './previews/AccrochePreview';
+import { PinGridPreview } from './previews/PinGridPreview';
+import { NumberedCardsPreview } from './previews/NumberedCardsPreview';
+import { QuestionReponsePreview } from './previews/QuestionReponsePreview';
+import { LeadMagnetPreview } from './previews/LeadMagnetPreview';
+import { ContactFormPreview } from './previews/ContactFormPreview';
+
+export interface BlockCatalogEntry {
+  type: BlockType;
+  label: string;
+  description: string;
+  Preview: ComponentType;
+}
+
+export const blockCatalog: BlockCatalogEntry[] = [
+  {
+    type: 'hero',
+    label: 'Hero',
+    description:
+      'Grande bannière d\'en-tête pleine largeur. Idéale pour la première section d\'une page d\'accueil : elle affiche un slogan, un titre accrocheur, un court texte de présentation et jusqu\'à deux boutons d\'appel à l\'action.',
+    Preview: HeroPreview,
+  },
+  {
+    type: 'rich_text',
+    label: 'Texte enrichi',
+    description:
+      'Bloc de contenu libre avec mise en forme riche (gras, italique, listes, liens, images…). Parfait pour rédiger un paragraphe, un article ou toute section de texte.',
+    Preview: RichTextPreview,
+  },
+  {
+    type: 'encart_principal',
+    label: 'Encart principal',
+    description:
+      'Section mise en avant avec une image, un titre, un texte descriptif et un lien optionnel. Idéal pour présenter un service, une offre phare, un point clé...',
+    Preview: EncartPrincipalPreview,
+  },
+  {
+    type: 'accroche',
+    label: 'Accroche',
+    description:
+      'Section d\'introduction avec un titre, un texte riche et une image optionnelle. Sert à introduire une rubrique ou attirer l\'attention sur un sujet important.',
+    Preview: AccrochePreview,
+  },
+  {
+    type: 'pin_grid',
+    label: 'Pin Grid',
+    description:
+      'Grille d\'images façon Pinterest avec un titre de section. Chaque « pin » contient une image et un libellé. Idéal pour une galerie de recettes, réalisations ou inspirations visuelles.',
+    Preview: PinGridPreview,
+  },
+  {
+    type: 'numbered_cards',
+    label: 'Cartes numérotées',
+    description:
+      'Série de cartes numérotées sur fond sombre ou clair. Chaque carte affiche un numéro, un titre et une description. Parfait pour détailler des étapes, une méthode ou un programme.',
+    Preview: NumberedCardsPreview,
+  },
+  {
+    type: 'question_reponse',
+    label: 'FAQ',
+    description:
+      'Section de questions fréquentes en accordéon. Ajoutez un titre, un texte d\'introduction optionnel et autant de couples question / réponse que nécessaire.',
+    Preview: QuestionReponsePreview,
+  },
+  {
+    type: 'lead_magnet',
+    label: 'Lead Magnet',
+    description:
+      'Encart d\'inscription par e-mail avec icône, titre, description et un bouton d\'action. Utile pour proposer un guide gratuit, une newsletter ou tout contenu à télécharger.',
+    Preview: LeadMagnetPreview,
+  },
+  {
+    type: 'contact_form',
+    label: 'Formulaire de contact',
+    description:
+      'Formulaire personnalisable avec des champs libres (texte, e-mail, téléphone, liste déroulante, zone de texte). Configurez le titre, la description et le bouton d\'envoi.',
+    Preview: ContactFormPreview,
+  },
+];
