@@ -23,8 +23,8 @@ class MediaRepository {
 
   // Create
   async create(mediaData) {
-    const sql = `INSERT INTO media (filename, original_filename, path, mime_type, file_size, width, height, thumbnail_path, webp_path, uploaded_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    const sql = `INSERT INTO media (filename, original_filename, path, mime_type, file_size, width, height, thumbnail_path, webp_path, src, uploaded_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
                  RETURNING id`;
     const result = await db.run(sql, [
       mediaData.filename,
@@ -35,7 +35,8 @@ class MediaRepository {
       mediaData.width || null,
       mediaData.height || null,
       mediaData.thumbnail_path || null,
-      mediaData.webp_path || null
+      mediaData.webp_path || null,
+      mediaData.src || null
     ]);
     return this.findById(result.lastID);
   }

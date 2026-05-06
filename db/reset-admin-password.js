@@ -131,16 +131,10 @@ async function main() {
 
 main()
   .catch(async error => {
-    const isRailwayNetworkError = 
-      error.code === 'ENOTFOUND' && 
-      error.message?.includes('postgres.railway.internal');
-    
-    if (isRailwayNetworkError) {
-      logger.error('\n❌ Railway Networking Error');
-      logger.error('You cannot connect to Railway\'s internal Postgres from outside the Railway environment.');
-      logger.error('\n✓ Solution: Use Railway shell instead:');
-      logger.error('   railway shell');
-      logger.error('   npm run reset-admin-password\n');
+    if (error.code === 'ENOTFOUND') {
+      logger.error('\n❌ Cannot reach database host.');
+      logger.error('Ensure DATABASE_URL is correct and the database is reachable from this environment.');
+      logger.error('If the database is only accessible from within the hosting platform, run this script from there.\n');
     } else {
       logger.error(`✗ ${error.message}`);
     }

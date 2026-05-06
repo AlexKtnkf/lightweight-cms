@@ -1,10 +1,9 @@
-const mediaRepository = require('../infrastructure/mediaRepository');
-const { processImage } = require('../../../../utils/imageOptimizer');
 const path = require('path');
 
 class UploadMedia {
-  constructor(mediaRepository) {
+  constructor(mediaRepository, storageAdapter) {
     this.mediaRepository = mediaRepository;
+    this.storageAdapter = storageAdapter;
   }
 
   async execute(file) {
@@ -14,8 +13,8 @@ class UploadMedia {
       throw error;
     }
 
-    // Process image (resize, generate thumbnails, WebP)
-    const processed = await processImage(file);
+    // Process image and store via configured adapter
+    const processed = await this.storageAdapter.upload(file);
 
     // Create media entry
     const mediaData = {
@@ -27,7 +26,8 @@ class UploadMedia {
       width: processed.width,
       height: processed.height,
       thumbnail_path: processed.thumbnailPath,
-      webp_path: processed.webpPath
+      webp_path: processed.webpPath,
+      src: processed.src || null
     };
 
     return this.mediaRepository.create(mediaData);

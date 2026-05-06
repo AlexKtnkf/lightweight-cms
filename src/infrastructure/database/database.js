@@ -21,13 +21,12 @@ class Database {
       await this.client.connect();
       logger.info('Connected to Postgres database');
     } catch (err) {
-      // If using Railway internal hostname, try to extract public URL or provide helpful error
-      if (err.code === 'ENOTFOUND' && connectionString.includes('postgres.railway.internal')) {
-        logger.error('Cannot connect to Railway internal hostname from outside Railway infrastructure.');
-        logger.error('Use "railway shell" to run commands inside Railway, or ensure DATABASE_URL points to public gateway URL.');
-        throw err;
+      if (err.code === 'ENOTFOUND') {
+        logger.error(`Cannot reach database host: ${err.hostname || 'unknown'}`);
+        logger.error('Ensure DATABASE_URL points to a reachable PostgreSQL instance and the process has network access.');
+      } else {
+        logger.error('Postgres connection error:', err);
       }
-      logger.error('Postgres connection error:', err);
       throw err;
     }
   }

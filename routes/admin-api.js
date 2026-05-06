@@ -82,10 +82,14 @@ const articlesController = new ArticlesController(
   listArticles
 );
 
+// Storage adapter (local filesystem or S3-compatible object storage)
+const { createStorageAdapter } = require('../config/storage');
+const storageAdapter = createStorageAdapter();
+
 // Instantiate use cases - Media
-const uploadMedia = new UploadMedia(mediaRepository);
+const uploadMedia = new UploadMedia(mediaRepository, storageAdapter);
 const listMedia = new ListMedia(mediaRepository);
-const deleteMedia = new DeleteMedia(mediaRepository);
+const deleteMedia = new DeleteMedia(mediaRepository, storageAdapter);
 
 // Instantiate controller - Media
 const mediaController = new MediaController(uploadMedia, listMedia, deleteMedia);

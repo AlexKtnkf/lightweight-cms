@@ -1,9 +1,7 @@
-const mediaRepository = require('../infrastructure/mediaRepository');
-const { deleteImage } = require('../../../../utils/imageOptimizer');
-
 class DeleteMedia {
-  constructor(mediaRepository) {
+  constructor(mediaRepository, storageAdapter) {
     this.mediaRepository = mediaRepository;
+    this.storageAdapter = storageAdapter;
   }
 
   async execute(id) {
@@ -14,8 +12,8 @@ class DeleteMedia {
       throw error;
     }
 
-    // Delete files from filesystem
-    await deleteImage(media.path);
+    // Delete files via configured adapter
+    await this.storageAdapter.delete(media);
 
     // Delete from database
     await this.mediaRepository.delete(id);
