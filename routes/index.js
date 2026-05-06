@@ -41,7 +41,7 @@ router.get('/', async (req, res, next) => {
 
 // Public routes (blog gated by FEATURE_SECTION_BLOG)
 router.get('/blog', (req, res, next) => {
-  if (!isEnabled('FEATURE_SECTION_BLOG')) return res.status(404).next ? next() : res.status(404).render('errors/404');
+  if (!isEnabled('FEATURE_SECTION_BLOG')) return res.status(404).render('errors/404');
   return pageController.blog(req, res, next);
 });
 router.get('/blog/:slug', (req, res, next) => {

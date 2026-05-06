@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import api from '../shared/api/client';
+import api from '../../shared/api/client';
 
 type Flags = Record<string, boolean>;
 
@@ -23,7 +23,7 @@ export function FeatureFlagsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     api
       .get('/admin/features')
-      .then((res) => setFlags(res.data))
+      .then((res: { data: Flags }) => setFlags(res.data))
       .catch(() => {
         // If the endpoint is unreachable, fail open — all features enabled
         setFlags({});

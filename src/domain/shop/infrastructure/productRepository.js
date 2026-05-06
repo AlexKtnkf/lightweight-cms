@@ -4,15 +4,33 @@ const slugify = require('../../../../shared/utils/slugify');
 class ProductRepository {
   async findAll({ activeOnly = false } = {}) {
     const where = activeOnly ? 'WHERE active = TRUE' : '';
-    return db.all(`SELECT * FROM products ${where} ORDER BY created_at DESC`);
+    return db.all(
+      `SELECT p.*, COALESCE(m.src, m.path) AS image_url
+       FROM products p
+       LEFT JOIN media m ON m.id = p.image_media_id
+       ${where.replace('active', 'p.active')}
+       ORDER BY p.created_at DESC`
+    );
   }
 
   async findById(id) {
-    return db.get('SELECT * FROM products WHERE id = ?', [id]);
+    return db.get(
+      `SELECT p.*, COALESCE(m.src, m.path) AS image_url
+       FROM products p
+       LEFT JOIN media m ON m.id = p.image_media_id
+       WHERE p.id = ?`,
+      [id]
+    );
   }
 
   async findBySlug(slug) {
-    return db.get('SELECT * FROM products WHERE slug = ?', [slug]);
+    return db.get(
+      `SELECT p.*, COALESCE(m.src, m.path) AS image_url
+       FROM products p
+       LEFT JOIN media m ON m.id = p.image_media_id
+       WHERE p.slug = ?`,
+      [slug]
+    );
   }
 
   async create(data) {
