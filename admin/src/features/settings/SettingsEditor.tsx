@@ -7,7 +7,7 @@ import {
 } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form'; // Fix for verbatimModuleSyntax
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { z } from 'zod';
 import { settingsApi } from '../../shared/api/settings';
 import type { Settings } from '../../domain/settings/types';
@@ -141,6 +141,25 @@ function ThemeEditor({ settings, onSave }: { settings: Settings | undefined; onS
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  // Keep local editor state in sync with server data after load/save refreshes.
+  useEffect(() => {
+    setTokens(Object.entries(settings?.theme_tokens ?? {}).map(([key, value]) => ({ key, value })));
+  }, [settings?.theme_tokens]);
+
+  function normalizeHexColor(value: string | undefined): string | null {
+    if (!value) return null;
+    const trimmed = value.trim();
+    const short = /^#([0-9a-fA-F]{3})$/;
+    const full = /^#([0-9a-fA-F]{6})$/;
+    if (full.test(trimmed)) return trimmed;
+    const shortMatch = trimmed.match(short);
+    if (shortMatch) {
+      const s = shortMatch[1];
+      return `#${s[0]}${s[0]}${s[1]}${s[1]}${s[2]}${s[2]}`;
+    }
+    return null;
+  }
+
   function upsert(key: string, value: string) {
     setTokens(prev => {
       const idx = prev.findIndex(t => t.key === key);
@@ -195,8 +214,12 @@ function ThemeEditor({ settings, onSave }: { settings: Settings | undefined; onS
               {type === 'color' && (
                 <input
                   type="color"
-                  value={tokenMap[key] ?? '#000000'}
+                  value={normalizeHexColor(tokenMap[key]) ?? '#e85d26'}
                   onChange={e => upsert(key, e.target.value)}
+                  onClick={(e) => {
+                    const input = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+                    input.showPicker?.();
+                  }}
                   className="h-9 w-14 border border-gray-300 rounded cursor-pointer"
                 />
               )}
