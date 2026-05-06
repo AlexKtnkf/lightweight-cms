@@ -1,5 +1,5 @@
-const db = require('../../../../infrastructure/database/database');
-const slugify = require('../../../../shared/utils/slugify');
+const db = require('../../../infrastructure/database/database');
+const slugify = require('../../../shared/utils/slugify');
 
 class ProductRepository {
   async findAll({ activeOnly = false } = {}) {

@@ -1,4 +1,4 @@
-const db = require('../../../../infrastructure/database/database');
+const db = require('../../../infrastructure/database/database');
 
 class BookingRepository {
   async findAll({ status } = {}) {
