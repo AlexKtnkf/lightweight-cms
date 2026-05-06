@@ -142,6 +142,149 @@ class AuthController {
       });
     }
   }
+
+  /**
+   * Return the current authenticated user's profile.
+   * GET /api/admin/auth/me
+   */
+  async me(req, res) {
+    try {
+      const user = await userRepository.findById(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      res.json({
+        id: user.id,
+        username: user.username,
+        role: user.role || 'editor',
+        email: user.email || null,
+        created_at: user.created_at,
+        last_login: user.last_login
+      });
+    } catch (error) {
+      logger.error('Me endpoint error:', error);
+      res.status(500).json({ error: 'Failed to fetch user profile' });
+    }
+  }
+
+  /**
+   * List all users. Requires super_admin.
+   * GET /api/admin/users
+   */
+  async listUsers(req, res) {
+    try {
+      const users = await userRepository.findAll();
+      res.json(users);
+    } catch (error) {
+      logger.error('List users error:', error);
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  }
+
+  /**
+   * Create a new user. Requires super_admin.
+   * POST /api/admin/users
+   * Body: { username, password, role, email? }
+   */
+  async createUser(req, res) {
+    try {
+      const { username, password, role, email } = req.body;
+
+      if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password are required' });
+      }
+      if (password.length < 12) {
+        return res.status(400).json({ error: 'Password must be at least 12 characters' });
+      }
+      const allowedRoles = ['editor', 'admin', 'super_admin'];
+      if (role && !allowedRoles.includes(role)) {
+        return res.status(400).json({ error: `Invalid role. Allowed: ${allowedRoles.join(', ')}` });
+      }
+
+      const existing = await userRepository.findByUsername(username);
+      if (existing) {
+        return res.status(409).json({ error: 'Username already exists' });
+      }
+
+      const saltRounds = parseInt(process.env.BCRYPT_ROUNDS, 10) || 10;
+      const passwordHash = await bcrypt.hash(password, saltRounds);
+      const user = await userRepository.create({
+        username,
+        password_hash: passwordHash,
+        role: role || 'editor',
+        email: email || null
+      });
+
+      logger.info(`User created: ${username} (role: ${user.role}) by ${req.session.username}`);
+      res.status(201).json({ success: true, user });
+    } catch (error) {
+      logger.error('Create user error:', error);
+      res.status(500).json({ error: 'Failed to create user' });
+    }
+  }
+
+  /**
+   * Update a user's role and/or email. Requires super_admin.
+   * PATCH /api/admin/users/:id
+   * Body: { role?, email? }
+   */
+  async updateUser(req, res) {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const { role, email } = req.body;
+
+      const allowedRoles = ['editor', 'admin', 'super_admin'];
+      if (role && !allowedRoles.includes(role)) {
+        return res.status(400).json({ error: `Invalid role. Allowed: ${allowedRoles.join(', ')}` });
+      }
+
+      // Prevent a super_admin from demoting themselves
+      if (String(id) === String(req.session.userId) && role && role !== 'super_admin') {
+        return res.status(400).json({ error: 'Cannot change your own role' });
+      }
+
+      const user = await userRepository.findById(id);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      if (role) await userRepository.updateRole(id, role);
+      if (email !== undefined) await userRepository.updateEmail(id, email);
+
+      const updated = await userRepository.findById(id);
+      logger.info(`User ${id} updated by ${req.session.username}`);
+      res.json({ success: true, user: updated });
+    } catch (error) {
+      logger.error('Update user error:', error);
+      res.status(500).json({ error: 'Failed to update user' });
+    }
+  }
+
+  /**
+   * Delete a user. Requires super_admin. Cannot delete yourself.
+   * DELETE /api/admin/users/:id
+   */
+  async deleteUser(req, res) {
+    try {
+      const id = parseInt(req.params.id, 10);
+
+      if (String(id) === String(req.session.userId)) {
+        return res.status(400).json({ error: 'Cannot delete your own account' });
+      }
+
+      const user = await userRepository.findById(id);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      await userRepository.delete(id);
+      logger.info(`User ${id} deleted by ${req.session.username}`);
+      res.json({ success: true });
+    } catch (error) {
+      logger.error('Delete user error:', error);
+      res.status(500).json({ error: 'Failed to delete user' });
+    }
+  }
 }
 
 module.exports = new AuthController();

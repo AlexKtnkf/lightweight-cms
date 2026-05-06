@@ -26,6 +26,7 @@ class AdminController {
       
       req.session.userId = user.id;
       req.session.username = user.username;
+      req.session.userRole = user.role || 'editor';
       
       // Force save session and wait for it before responding
       await new Promise((resolve, reject) => {

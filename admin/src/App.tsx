@@ -13,6 +13,8 @@ import { ProtectedRoute } from './features/auth/ProtectedRoute';
 import { InstagramSlideGenerator } from './features/instagram/InstagramSlideGenerator';
 import { HowTo } from './features/howto/HowTo';
 import { FeatureFlagsProvider, useFeatureFlags } from './features/flags/FeatureFlagsContext';
+import { AuthProvider, useAuth } from './features/auth/AuthContext';
+import { UsersPage } from './features/users/UsersPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,16 +29,18 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <FeatureFlagsProvider>
-        <BrowserRouter basename="/admin">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/*" element={
-              <ProtectedRoute>
-                <AdminApp />
-              </ProtectedRoute>
-            } />
-          </Routes>
-        </BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter basename="/admin">
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/*" element={
+                <ProtectedRoute>
+                  <AdminApp />
+                </ProtectedRoute>
+              } />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
       </FeatureFlagsProvider>
     </QueryClientProvider>
   );
@@ -45,6 +49,7 @@ function App() {
 function AdminApp() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isEnabled } = useFeatureFlags();
+  const { isSuperAdmin } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -82,6 +87,11 @@ function AdminApp() {
               <Link to="/settings" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
                 Paramètres
               </Link>
+              {isSuperAdmin && (
+                <Link to="/users" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
+                  Utilisateurs
+                </Link>
+              )}
               <a href="/admin/logout" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
                 Déconnexion
               </a>
@@ -157,6 +167,15 @@ function AdminApp() {
               >
                 Paramètres
               </Link>
+              {isSuperAdmin && (
+                <Link
+                  to="/users"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 block px-3 py-2 rounded-md text-base"
+                >
+                  Utilisateurs
+                </Link>
+              )}
               <a
                 href="/admin/logout"
                 className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 block px-3 py-2 rounded-md text-base"
@@ -186,6 +205,9 @@ function AdminApp() {
           )}
           <Route path="/settings" element={<SettingsEditor />} />
           <Route path="/howto" element={<HowTo />} />
+          {isSuperAdmin && (
+            <Route path="/users" element={<UsersPage />} />
+          )}
         </Routes>
       </main>
     </div>
@@ -193,32 +215,6 @@ function AdminApp() {
 }
 
 export default App;
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
-});
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename="/admin">
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/*" element={
-            <ProtectedRoute>
-              <AdminApp />
-            </ProtectedRoute>
-          } />
-        </Routes>
-      </BrowserRouter>
-    </QueryClientProvider>
-  );
-}
 
 function AdminApp() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

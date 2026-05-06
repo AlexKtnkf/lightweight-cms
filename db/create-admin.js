@@ -15,20 +15,13 @@ async function createAdmin() {
       const passwordHash = await bcrypt.hash(password, saltRounds);
 
       try {
-        const sql = `INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, CURRENT_TIMESTAMP) RETURNING id`;
+        const sql = `INSERT INTO users (username, password_hash, role, created_at) VALUES (?, ?, 'super_admin', CURRENT_TIMESTAMP) RETURNING id`;
         await db.run(sql, [username, passwordHash]);
-        logger.info(`✓ Utilisateur admin "${username}" créé avec succès`);
+        logger.info(`✓ Utilisateur admin "${username}" créé avec succès (rôle: super_admin)`);
       } catch (error) {
-        const isRailwayNetworkError = 
-          error.code === 'ENOTFOUND' && 
-          error.message?.includes('postgres.railway.internal');
-        
-        if (isRailwayNetworkError) {
-          logger.error('\n❌ Railway Networking Error');
-          logger.error('You cannot connect to Railway\'s internal Postgres from outside the Railway environment.');
-          logger.error('\n✓ Solution: Use Railway shell instead:');
-          logger.error('   railway shell');
-          logger.error('   npm run create-admin\n');
+        if (error.code === 'ENOTFOUND') {
+          logger.error('\n❌ Cannot reach database host.');
+          logger.error('Ensure DATABASE_URL is correct and the database is reachable from this environment.\n');
         } else if (error.code === '23505') {
           logger.error('✗ Un utilisateur avec ce nom existe déjà');
         } else {

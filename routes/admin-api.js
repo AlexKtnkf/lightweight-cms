@@ -134,11 +134,21 @@ router.get('/media', (req, res, next) => mediaController.list(req, res, next));
 router.post('/media/upload', uploadLimiter, upload.single('file'), (req, res, next) => mediaController.upload(req, res, next));
 router.delete('/media/:id', (req, res, next) => mediaController.delete(req, res, next));
 
-// Settings API routes
+// Current user profile
+router.get('/auth/me', (req, res, next) => authController.me(req, res, next));
+
+// Settings API routes — write access restricted to admin+
+const { requireRole } = require('../middleware/auth');
 router.get('/settings', (req, res, next) => settingsController.get(req, res, next));
-router.put('/settings', (req, res, next) => settingsController.update(req, res, next));
-router.post('/regenerate', (req, res, next) => settingsController.regenerate(req, res, next));
-router.post('/backup', (req, res, next) => settingsController.backup(req, res, next));
-router.get('/backup/media', (req, res, next) => settingsController.downloadMediaBackup(req, res, next));
+router.put('/settings', requireRole(['admin', 'super_admin']), (req, res, next) => settingsController.update(req, res, next));
+router.post('/regenerate', requireRole(['admin', 'super_admin']), (req, res, next) => settingsController.regenerate(req, res, next));
+router.post('/backup', requireRole(['super_admin']), (req, res, next) => settingsController.backup(req, res, next));
+router.get('/backup/media', requireRole(['super_admin']), (req, res, next) => settingsController.downloadMediaBackup(req, res, next));
+
+// Users API routes — super_admin only
+router.get('/users', requireRole(['super_admin']), (req, res, next) => authController.listUsers(req, res, next));
+router.post('/users', requireRole(['super_admin']), (req, res, next) => authController.createUser(req, res, next));
+router.patch('/users/:id', requireRole(['super_admin']), (req, res, next) => authController.updateUser(req, res, next));
+router.delete('/users/:id', requireRole(['super_admin']), (req, res, next) => authController.deleteUser(req, res, next));
 
 module.exports = router;

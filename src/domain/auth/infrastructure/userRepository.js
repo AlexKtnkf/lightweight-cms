@@ -3,7 +3,7 @@ const db = require('../../../infrastructure/database/database');
 class UserRepository {
   // Find by ID
   async findById(id) {
-    const sql = `SELECT id, username, created_at, last_login FROM users WHERE id = ?`;
+    const sql = `SELECT id, username, role, email, created_at, last_login FROM users WHERE id = ?`;
     return db.get(sql, [id]);
   }
 
@@ -15,18 +15,20 @@ class UserRepository {
 
   // Find all users
   async findAll() {
-    const sql = `SELECT id, username, created_at, last_login FROM users ORDER BY created_at ASC`;
+    const sql = `SELECT id, username, role, email, created_at, last_login FROM users ORDER BY created_at ASC`;
     return db.all(sql, []);
   }
 
   // Create user
   async create(userData) {
-    const sql = `INSERT INTO users (username, password_hash, created_at)
-                 VALUES (?, ?, CURRENT_TIMESTAMP)
+    const sql = `INSERT INTO users (username, password_hash, role, email, created_at)
+                 VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
                  RETURNING id`;
     const result = await db.run(sql, [
       userData.username,
-      userData.password_hash
+      userData.password_hash,
+      userData.role || 'editor',
+      userData.email || null
     ]);
     return this.findById(result.lastID);
   }
@@ -41,6 +43,26 @@ class UserRepository {
   async updatePassword(id, passwordHash) {
     const sql = `UPDATE users SET password_hash = ? WHERE id = ?`;
     await db.run(sql, [passwordHash, id]);
+  }
+
+  // Update role
+  async updateRole(id, role) {
+    const sql = `UPDATE users SET role = ? WHERE id = ?`;
+    await db.run(sql, [role, id]);
+    return this.findById(id);
+  }
+
+  // Update email
+  async updateEmail(id, email) {
+    const sql = `UPDATE users SET email = ? WHERE id = ?`;
+    await db.run(sql, [email, id]);
+    return this.findById(id);
+  }
+
+  // Delete user
+  async delete(id) {
+    const sql = `DELETE FROM users WHERE id = ?`;
+    await db.run(sql, [id]);
   }
 }
 
