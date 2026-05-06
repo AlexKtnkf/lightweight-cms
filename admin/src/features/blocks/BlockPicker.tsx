@@ -1,13 +1,20 @@
 import { useState } from 'react';
 import type { BlockType } from '../../domain/content/types';
 import { blockCatalog } from './blockCatalog';
+import { useFeatureFlags } from '../flags/FeatureFlagsContext';
 
 interface BlockPickerProps {
   onSelect: (type: BlockType) => void;
+  isSuperAdmin?: boolean;
 }
 
-export function BlockPicker({ onSelect }: BlockPickerProps) {
+export function BlockPicker({ onSelect, isSuperAdmin = false }: BlockPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { isEnabled } = useFeatureFlags();
+
+  const availableBlocks = blockCatalog.filter(
+    (entry) => isSuperAdmin || isEnabled(entry.featureFlag)
+  );
 
   return (
     <>
@@ -46,7 +53,7 @@ export function BlockPicker({ onSelect }: BlockPickerProps) {
             {/* Grid */}
             <div className="overflow-y-auto p-6">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {blockCatalog.map((entry) => (
+                {availableBlocks.map((entry) => (
                   <button
                     key={entry.type}
                     type="button"

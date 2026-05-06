@@ -4,6 +4,7 @@ const pageController = require('../src/presentation/web/pageController');
 const path = require('path');
 const fs = require('fs').promises;
 const logger = require('../utils/logger');
+const { isEnabled } = require('../src/shared/featureFlags');
 const shouldServeStaticFiles = process.env.NODE_ENV === 'production';
 
 // Homepage route - check for static file first, fallback to dynamic
@@ -35,9 +36,15 @@ router.get('/', async (req, res, next) => {
   return pageController.index(req, res, next);
 });
 
-// Public routes
-router.get('/blog', pageController.blog);
-router.get('/blog/:slug', pageController.article);
+// Public routes (blog gated by FEATURE_SECTION_BLOG)
+router.get('/blog', (req, res, next) => {
+  if (!isEnabled('FEATURE_SECTION_BLOG')) return res.status(404).next ? next() : res.status(404).render('errors/404');
+  return pageController.blog(req, res, next);
+});
+router.get('/blog/:slug', (req, res, next) => {
+  if (!isEnabled('FEATURE_SECTION_BLOG')) return res.status(404).render('errors/404');
+  return pageController.article(req, res, next);
+});
 
 // Static pages route - check for static file first, fallback to dynamic
 router.get('/:slug', async (req, res, next) => {
@@ -76,9 +83,15 @@ router.get('/:slug', async (req, res, next) => {
   return pageController.page(req, res, next);
 });
 
-// SEO routes
-router.get('/sitemap.xml', pageController.sitemap);
+// SEO routes (gated by feature flags)
+router.get('/sitemap.xml', (req, res, next) => {
+  if (!isEnabled('FEATURE_PUBLIC_SITEMAP')) return res.status(404).send('Not found');
+  return pageController.sitemap(req, res, next);
+});
 router.get('/robots.txt', pageController.robots);
-router.get('/feed.xml', pageController.feed);
+router.get('/feed.xml', (req, res, next) => {
+  if (!isEnabled('FEATURE_PUBLIC_RSS')) return res.status(404).send('Not found');
+  return pageController.feed(req, res, next);
+});
 
 module.exports = router;

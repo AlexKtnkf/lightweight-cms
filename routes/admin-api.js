@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const requireAuth = require('../middleware/auth');
+const { requireFeature } = require('../middleware/auth');
 const { uploadLimiter } = require('../config/security');
+const { flags } = require('../src/shared/featureFlags');
 
 // Repositories (infrastructure) - from domain infrastructure
 const pageRepository = require('../src/domain/content/infrastructure/pageRepository');
@@ -98,6 +100,9 @@ const robotsGenerator = new RobotsGenerator();
 // Instantiate controller - Settings
 const settingsController = new SettingsController(getSettings, updateSettings, staticGenerator, robotsGenerator, backupService, mediaBackupService);
 
+// Feature flags endpoint — unauthenticated, deployment-level info
+router.get('/features', (req, res) => res.json(flags));
+
 // Setup and token-based recovery must stay reachable before session auth
 router.post('/auth/reset-password', (req, res, next) => authController.resetPassword(req, res, next));
 router.post('/auth/setup-admin', (req, res, next) => authController.setupAdmin(req, res, next));
@@ -112,12 +117,12 @@ router.post('/pages', (req, res, next) => pagesController.create(req, res, next)
 router.put('/pages/:id', (req, res, next) => pagesController.update(req, res, next));
 router.delete('/pages/:id', (req, res, next) => pagesController.delete(req, res, next));
 
-// Articles API routes
-router.get('/articles', (req, res, next) => articlesController.list(req, res, next));
-router.get('/articles/:id', (req, res, next) => articlesController.get(req, res, next));
-router.post('/articles', (req, res, next) => articlesController.create(req, res, next));
-router.put('/articles/:id', (req, res, next) => articlesController.update(req, res, next));
-router.delete('/articles/:id', (req, res, next) => articlesController.delete(req, res, next));
+// Articles API routes (gated by FEATURE_SECTION_BLOG)
+router.get('/articles', requireFeature('FEATURE_SECTION_BLOG'), (req, res, next) => articlesController.list(req, res, next));
+router.get('/articles/:id', requireFeature('FEATURE_SECTION_BLOG'), (req, res, next) => articlesController.get(req, res, next));
+router.post('/articles', requireFeature('FEATURE_SECTION_BLOG'), (req, res, next) => articlesController.create(req, res, next));
+router.put('/articles/:id', requireFeature('FEATURE_SECTION_BLOG'), (req, res, next) => articlesController.update(req, res, next));
+router.delete('/articles/:id', requireFeature('FEATURE_SECTION_BLOG'), (req, res, next) => articlesController.delete(req, res, next));
 
 // Media API routes
 router.get('/media', (req, res, next) => mediaController.list(req, res, next));
