@@ -16,6 +16,7 @@ import { FeatureFlagsProvider, useFeatureFlags } from './features/flags/FeatureF
 import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import { UsersPage } from './features/users/UsersPage';
 import ShopPage from './features/shop/ShopPage';
+import AppointmentsPage from './features/appointments/AppointmentsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -91,6 +92,11 @@ function AdminApp() {
               {isEnabled('FEATURE_SECTION_SHOP') && (
                 <Link to="/shop" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
                   Boutique
+                </Link>
+              )}
+              {isEnabled('FEATURE_SECTION_APPOINTMENTS') && (
+                <Link to="/appointments" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
+                  Rendez-vous
                 </Link>
               )}
               {isSuperAdmin && (
@@ -182,6 +188,15 @@ function AdminApp() {
                   Boutique
                 </Link>
               )}
+              {isEnabled('FEATURE_SECTION_APPOINTMENTS') && (
+                <Link
+                  to="/appointments"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 block px-3 py-2 rounded-md text-base"
+                >
+                  Rendez-vous
+                </Link>
+              )}
               {isSuperAdmin && (
                 <Link
                   to="/users"
@@ -222,6 +237,9 @@ function AdminApp() {
           <Route path="/howto" element={<HowTo />} />
           {isEnabled('FEATURE_SECTION_SHOP') && (
             <Route path="/shop" element={<ShopPage />} />
+          )}
+          {isEnabled('FEATURE_SECTION_APPOINTMENTS') && (
+            <Route path="/appointments" element={<AppointmentsPage />} />
           )}
           {isSuperAdmin && (
             <Route path="/users" element={<UsersPage />} />

@@ -130,6 +130,14 @@ function sanitizeBlockData(blockType, blockData) {
         cta_text: blockData.cta_text || 'Voir le produit',
         cta_url: blockData.cta_url || '/boutique'
       };
+
+    case 'appointment_booking':
+      return {
+        title: blockData.title || '',
+        description: sanitize(blockData.description || ''),
+        cta_text: blockData.cta_text || 'Prendre rendez-vous',
+        cta_url: blockData.cta_url || '/rdv'
+      };
     
     default:
       return blockData;

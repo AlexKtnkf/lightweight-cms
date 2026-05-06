@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pageController = require('../src/presentation/web/pageController');
 const shopController = require('../src/presentation/web/shopController');
+const appointmentsController = require('../src/presentation/web/appointmentsController');
 const path = require('path');
 const fs = require('fs').promises;
 const logger = require('../utils/logger');
@@ -69,6 +70,20 @@ router.post('/boutique/:id/checkout', (req, res, next) => {
 router.get('/boutique/:slug', (req, res, next) => {
   if (!isEnabled('FEATURE_SECTION_SHOP')) return res.status(404).render('errors/404');
   return shopController.shopProduct(req, res, next);
+});
+
+// Appointments routes (gated by FEATURE_SECTION_APPOINTMENTS)
+router.get('/rdv', (req, res, next) => {
+  if (!isEnabled('FEATURE_SECTION_APPOINTMENTS')) return res.status(404).render('errors/404');
+  return appointmentsController.rdvIndex(req, res, next);
+});
+router.get('/rdv/slots', (req, res, next) => {
+  if (!isEnabled('FEATURE_SECTION_APPOINTMENTS')) return res.status(404).json({ error: 'Not found' });
+  return appointmentsController.listSlots(req, res, next);
+});
+router.post('/rdv/book', (req, res, next) => {
+  if (!isEnabled('FEATURE_SECTION_APPOINTMENTS')) return res.status(404).json({ error: 'Not found' });
+  return appointmentsController.createBooking(req, res, next);
 });
 
 // Static pages route - check for static file first, fallback to dynamic

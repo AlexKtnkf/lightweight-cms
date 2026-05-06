@@ -41,4 +41,5 @@ export type BlockType =
   | 'numbered_cards'
   | 'lead_magnet'
   | 'contact_form'
-  | 'shop_product';
+  | 'shop_product'
+  | 'appointment_booking';

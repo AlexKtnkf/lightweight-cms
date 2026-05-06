@@ -9,6 +9,7 @@ import { QuestionReponseBlock } from './components/QuestionReponseBlock';
 import { LeadMagnetBlock } from './components/LeadMagnetBlock';
 import { ContactFormBlock } from './components/ContactFormBlock';
 import { ShopProductBlock } from './components/ShopProductBlock';
+import { AppointmentBookingBlock } from './components/AppointmentBookingBlock';
 import { BlockPicker } from './BlockPicker';
 
 interface BlockEditorProps {
@@ -73,6 +74,8 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
         return <ContactFormBlock {...commonProps} />;
       case 'shop_product':
         return <ShopProductBlock {...commonProps} />;
+      case 'appointment_booking':
+        return <AppointmentBookingBlock {...commonProps} />;
       default:
         return <div className="p-4 bg-yellow-50 border border-yellow-200 rounded">
           Type de bloc inconnu: {block.block_type}
@@ -108,6 +111,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                 <option value="lead_magnet">Lead Magnet</option>
                 <option value="contact_form">Formulaire de contact</option>
                 <option value="shop_product">Produit boutique</option>
+                <option value="appointment_booking">Prise de rendez-vous</option>
               </select>
             </div>
             <div className="flex items-center space-x-2">
@@ -221,6 +225,13 @@ function getDefaultBlockData(type: BlockType): Record<string, any> {
         image_url: '',
         cta_text: 'Voir le produit',
         cta_url: '/boutique',
+      };
+    case 'appointment_booking':
+      return {
+        title: '',
+        description: '',
+        cta_text: 'Prendre rendez-vous',
+        cta_url: '/rdv',
       };
     default:
       return {};

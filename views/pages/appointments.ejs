@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - <%= settings?.site_title || 'My Site' %></title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/custom.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+  <%- include('../partials/navbar') %>
+
+  <main id="main-content" class="l-section">
+    <div class="l-container c-rdv-page" x-data="appointmentBooking()">
+      <h1 class="c-page-title">Prendre rendez-vous</h1>
+
+      <div class="c-rdv-layout">
+        <section class="c-rdv-card">
+          <h2>Services</h2>
+          <ul class="c-rdv-list">
+            <% services.forEach(s => { %>
+            <li>
+              <button type="button" @click="selectService(<%= s.id %>)" :class="selectedServiceId === <%= s.id %> ? 'is-selected' : ''">
+                <strong><%= s.name %></strong>
+                <span><%= s.duration_min %> min<% if (s.price != null) { %> - <%= (s.price / 100).toFixed(2).replace('.', ',') %> <%= s.currency %><% } %></span>
+              </button>
+            </li>
+            <% }) %>
+          </ul>
+        </section>
+
+        <section class="c-rdv-card">
+          <h2>Reservation</h2>
+          <form @submit.prevent="book" class="c-rdv-form">
+            <label class="c-form-label">Date</label>
+            <input class="c-form-input" type="date" x-model="date" required>
+
+            <label class="c-form-label">Heure</label>
+            <input class="c-form-input" type="time" x-model="time" required>
+
+            <label class="c-form-label">Nom</label>
+            <input class="c-form-input" type="text" x-model="name" required>
+
+            <label class="c-form-label">Email</label>
+            <input class="c-form-input" type="email" x-model="email" required>
+
+            <label class="c-form-label">Telephone</label>
+            <input class="c-form-input" type="text" x-model="phone">
+
+            <label class="c-form-label">Notes</label>
+            <textarea class="c-form-input" x-model="notes" rows="3"></textarea>
+
+            <div x-show="error" class="c-alert--error" x-text="error"></div>
+            <div x-show="success" class="c-alert--success">Votre demande de rendez-vous a ete enregistree.</div>
+
+            <button type="submit" class="btn btn-primary" :disabled="loading || !selectedServiceId">
+              <span x-show="!loading">Confirmer la demande</span>
+              <span x-show="loading">Envoi...</span>
+            </button>
+          </form>
+        </section>
+      </div>
+
+      <section class="c-rdv-card c-rdv-card--full">
+        <h2>Disponibilites hebdomadaires</h2>
+        <ul class="c-rdv-availability">
+          <% weeklyAvailability.forEach(slot => { %>
+          <li><strong><%= slot.day_label %></strong> : <%= slot.start_time %> - <%= slot.end_time %></li>
+          <% }) %>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    function appointmentBooking() {
+      return {
+        selectedServiceId: null,
+        date: '',
+        time: '',
+        name: '',
+        email: '',
+        phone: '',
+        notes: '',
+        loading: false,
+        error: '',
+        success: false,
+        selectService(id) {
+          this.selectedServiceId = id;
+          this.success = false;
+        },
+        async book() {
+          this.loading = true;
+          this.error = '';
+          this.success = false;
+          try {
+            const res = await fetch('/rdv/book', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                service_id: this.selectedServiceId,
+                customer_name: this.name,
+                customer_email: this.email,
+                customer_phone: this.phone,
+                date: this.date,
+                time: this.time,
+                notes: this.notes
+              })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              this.error = data.error || 'Erreur lors de la reservation';
+              return;
+            }
+            this.success = true;
+          } catch (e) {
+            this.error = 'Erreur reseau';
+          } finally {
+            this.loading = false;
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>

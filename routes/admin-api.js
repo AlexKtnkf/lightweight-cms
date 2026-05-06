@@ -51,6 +51,7 @@ const MediaController = require('../src/presentation/api/admin/mediaController')
 const SettingsController = require('../src/presentation/api/admin/settingsController');
 const authController = require('../src/presentation/api/admin/authController');
 const shopController = require('../src/presentation/api/admin/shopController');
+const appointmentsController = require('../src/presentation/api/admin/appointmentsController');
 
 // Instantiate use cases - Pages
 const createPage = new CreatePage(pageRepository, blockRepository, staticGenerator);
@@ -161,5 +162,19 @@ router.delete('/shop/products/:id', requireFeature('FEATURE_SECTION_SHOP'), requ
 router.get('/shop/orders', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.listOrders(req, res, next));
 router.get('/shop/orders/:id', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.getOrder(req, res, next));
 router.patch('/shop/orders/:id/status', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.updateOrderStatus(req, res, next));
+
+// Appointments API routes
+router.get('/appointments/services', requireFeature('FEATURE_SECTION_APPOINTMENTS'), (req, res, next) => appointmentsController.listServices(req, res, next));
+router.post('/appointments/services', requireFeature('FEATURE_SECTION_APPOINTMENTS'), requireRole(['admin', 'super_admin']), (req, res, next) => appointmentsController.createService(req, res, next));
+router.put('/appointments/services/:id', requireFeature('FEATURE_SECTION_APPOINTMENTS'), requireRole(['admin', 'super_admin']), (req, res, next) => appointmentsController.updateService(req, res, next));
+router.delete('/appointments/services/:id', requireFeature('FEATURE_SECTION_APPOINTMENTS'), requireRole(['admin', 'super_admin']), (req, res, next) => appointmentsController.deleteService(req, res, next));
+
+router.get('/appointments/availability', requireFeature('FEATURE_SECTION_APPOINTMENTS'), (req, res, next) => appointmentsController.listAvailability(req, res, next));
+router.post('/appointments/availability', requireFeature('FEATURE_SECTION_APPOINTMENTS'), requireRole(['admin', 'super_admin']), (req, res, next) => appointmentsController.createAvailability(req, res, next));
+router.put('/appointments/availability/:id', requireFeature('FEATURE_SECTION_APPOINTMENTS'), requireRole(['admin', 'super_admin']), (req, res, next) => appointmentsController.updateAvailability(req, res, next));
+router.delete('/appointments/availability/:id', requireFeature('FEATURE_SECTION_APPOINTMENTS'), requireRole(['admin', 'super_admin']), (req, res, next) => appointmentsController.deleteAvailability(req, res, next));
+
+router.get('/appointments/bookings', requireFeature('FEATURE_SECTION_APPOINTMENTS'), requireRole(['admin', 'super_admin']), (req, res, next) => appointmentsController.listBookings(req, res, next));
+router.patch('/appointments/bookings/:id/status', requireFeature('FEATURE_SECTION_APPOINTMENTS'), requireRole(['admin', 'super_admin']), (req, res, next) => appointmentsController.updateBookingStatus(req, res, next));
 
 module.exports = router;

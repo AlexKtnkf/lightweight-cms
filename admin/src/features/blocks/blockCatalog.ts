@@ -10,6 +10,7 @@ import { QuestionReponsePreview } from './previews/QuestionReponsePreview';
 import { LeadMagnetPreview } from './previews/LeadMagnetPreview';
 import { ContactFormPreview } from './previews/ContactFormPreview';
 import { ShopProductPreview } from './previews/ShopProductPreview';
+import { AppointmentBookingPreview } from './previews/AppointmentBookingPreview';
 
 export interface BlockCatalogEntry {
   type: BlockType;
@@ -100,5 +101,13 @@ export const blockCatalog: BlockCatalogEntry[] = [
       'Bloc de mise en avant d\'un produit avec image, prix et bouton vers la boutique.',
     Preview: ShopProductPreview,
     featureFlag: 'FEATURE_BLOCK_SHOP_PRODUCT',
+  },
+  {
+    type: 'appointment_booking',
+    label: 'Prise de rendez-vous',
+    description:
+      'Bloc d\'appel a l\'action vers le module de reservation de rendez-vous.',
+    Preview: AppointmentBookingPreview,
+    featureFlag: 'FEATURE_BLOCK_APPOINTMENT',
   },
 ];

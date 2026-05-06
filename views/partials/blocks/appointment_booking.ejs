@@ -1,0 +1,15 @@
+<section class="l-section c-appointment-highlight">
+  <div class="l-container">
+    <div class="c-appointment-highlight__card">
+      <% if (block.block_data.title) { %>
+      <h2><%= block.block_data.title %></h2>
+      <% } %>
+      <% if (block.block_data.description) { %>
+      <div class="c-appointment-highlight__description"><%- block.block_data.description %></div>
+      <% } %>
+      <a class="btn btn-primary" href="<%= block.block_data.cta_url || '/rdv' %>">
+        <%= block.block_data.cta_text || 'Prendre rendez-vous' %>
+      </a>
+    </div>
+  </div>
+</section>
