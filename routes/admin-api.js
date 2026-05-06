@@ -50,6 +50,7 @@ const ArticlesController = require('../src/presentation/api/admin/articlesContro
 const MediaController = require('../src/presentation/api/admin/mediaController');
 const SettingsController = require('../src/presentation/api/admin/settingsController');
 const authController = require('../src/presentation/api/admin/authController');
+const shopController = require('../src/presentation/api/admin/shopController');
 
 // Instantiate use cases - Pages
 const createPage = new CreatePage(pageRepository, blockRepository, staticGenerator);
@@ -150,5 +151,15 @@ router.get('/users', requireRole(['super_admin']), (req, res, next) => authContr
 router.post('/users', requireRole(['super_admin']), (req, res, next) => authController.createUser(req, res, next));
 router.patch('/users/:id', requireRole(['super_admin']), (req, res, next) => authController.updateUser(req, res, next));
 router.delete('/users/:id', requireRole(['super_admin']), (req, res, next) => authController.deleteUser(req, res, next));
+
+// Shop API routes — products (admin+), orders (admin+)
+router.get('/shop/products', requireFeature('FEATURE_SECTION_SHOP'), (req, res, next) => shopController.listProducts(req, res, next));
+router.get('/shop/products/:id', requireFeature('FEATURE_SECTION_SHOP'), (req, res, next) => shopController.getProduct(req, res, next));
+router.post('/shop/products', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.createProduct(req, res, next));
+router.put('/shop/products/:id', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.updateProduct(req, res, next));
+router.delete('/shop/products/:id', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.deleteProduct(req, res, next));
+router.get('/shop/orders', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.listOrders(req, res, next));
+router.get('/shop/orders/:id', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.getOrder(req, res, next));
+router.patch('/shop/orders/:id/status', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.updateOrderStatus(req, res, next));
 
 module.exports = router;

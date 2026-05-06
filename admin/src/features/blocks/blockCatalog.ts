@@ -9,6 +9,7 @@ import { NumberedCardsPreview } from './previews/NumberedCardsPreview';
 import { QuestionReponsePreview } from './previews/QuestionReponsePreview';
 import { LeadMagnetPreview } from './previews/LeadMagnetPreview';
 import { ContactFormPreview } from './previews/ContactFormPreview';
+import { ShopProductPreview } from './previews/ShopProductPreview';
 
 export interface BlockCatalogEntry {
   type: BlockType;
@@ -91,5 +92,13 @@ export const blockCatalog: BlockCatalogEntry[] = [
       'Formulaire personnalisable avec des champs libres (texte, e-mail, téléphone, liste déroulante, zone de texte). Configurez le titre, la description et le bouton d\'envoi.',
     Preview: ContactFormPreview,
     featureFlag: 'FEATURE_BLOCK_CONTACT_FORM',
+  },
+  {
+    type: 'shop_product',
+    label: 'Produit boutique',
+    description:
+      'Bloc de mise en avant d\'un produit avec image, prix et bouton vers la boutique.',
+    Preview: ShopProductPreview,
+    featureFlag: 'FEATURE_BLOCK_SHOP_PRODUCT',
   },
 ];

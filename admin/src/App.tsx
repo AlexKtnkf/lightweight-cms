@@ -15,6 +15,7 @@ import { HowTo } from './features/howto/HowTo';
 import { FeatureFlagsProvider, useFeatureFlags } from './features/flags/FeatureFlagsContext';
 import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import { UsersPage } from './features/users/UsersPage';
+import ShopPage from './features/shop/ShopPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -87,6 +88,11 @@ function AdminApp() {
               <Link to="/settings" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
                 Paramètres
               </Link>
+              {isEnabled('FEATURE_SECTION_SHOP') && (
+                <Link to="/shop" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
+                  Boutique
+                </Link>
+              )}
               {isSuperAdmin && (
                 <Link to="/users" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
                   Utilisateurs
@@ -167,6 +173,15 @@ function AdminApp() {
               >
                 Paramètres
               </Link>
+              {isEnabled('FEATURE_SECTION_SHOP') && (
+                <Link
+                  to="/shop"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 block px-3 py-2 rounded-md text-base"
+                >
+                  Boutique
+                </Link>
+              )}
               {isSuperAdmin && (
                 <Link
                   to="/users"
@@ -205,6 +220,9 @@ function AdminApp() {
           )}
           <Route path="/settings" element={<SettingsEditor />} />
           <Route path="/howto" element={<HowTo />} />
+          {isEnabled('FEATURE_SECTION_SHOP') && (
+            <Route path="/shop" element={<ShopPage />} />
+          )}
           {isSuperAdmin && (
             <Route path="/users" element={<UsersPage />} />
           )}

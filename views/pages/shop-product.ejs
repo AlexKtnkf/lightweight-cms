@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - <%= settings?.site_title || 'My Site' %></title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/custom.css">
+  <% if (typeof gaId !== 'undefined' && gaId) { %>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=<%= gaId %>"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '<%= gaId %>');
+  </script>
+  <% } %>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+  <%- include('../partials/navbar') %>
+
+  <main id="main-content" class="l-section">
+    <div class="l-container">
+      <a href="/boutique" class="c-back-link">&larr; Boutique</a>
+
+      <div class="c-product-detail" x-data="{ loading: false, error: '' }">
+        <% if (product.image_url) { %>
+        <div class="c-product-detail__image">
+          <img src="<%= product.image_url %>" alt="<%= product.name %>">
+        </div>
+        <% } %>
+        <div class="c-product-detail__info">
+          <h1 class="c-product-detail__title"><%= product.name %></h1>
+          <p class="c-product-detail__price">
+            <%= (product.price / 100).toFixed(2).replace('.', ',') %> <%= product.currency %>
+          </p>
+          <% if (product.description) { %>
+          <div class="c-product-detail__desc"><%- product.description %></div>
+          <% } %>
+          <% if (product.stock !== null && product.stock === 0) { %>
+          <p class="c-product-detail__stock">Rupture de stock</p>
+          <% } else { %>
+          <div x-show="error" class="c-alert c-alert--error" x-text="error"></div>
+          <form
+            @submit.prevent="
+              loading = true;
+              error = '';
+              fetch('/boutique/<%= product.id %>/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: $refs.email.value })
+              })
+              .then(r => r.json())
+              .then(d => { if (d.url) window.location.href = d.url; else error = d.error || 'Erreur'; })
+              .catch(() => error = 'Erreur réseau')
+              .finally(() => loading = false)
+            "
+            class="c-product-detail__form"
+          >
+            <label for="email" class="c-form-label">Votre e-mail</label>
+            <input
+              type="email"
+              id="email"
+              x-ref="email"
+              required
+              class="c-form-input"
+              placeholder="vous@exemple.fr"
+            >
+            <button type="submit" class="btn btn-primary" :disabled="loading">
+              <span x-show="!loading">Commander — <%= (product.price / 100).toFixed(2).replace('.', ',') %> <%= product.currency %></span>
+              <span x-show="loading">Redirection...</span>
+            </button>
+          </form>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

@@ -8,6 +8,7 @@ import { NumberedCardsBlock } from './components/NumberedCardsBlock';
 import { QuestionReponseBlock } from './components/QuestionReponseBlock';
 import { LeadMagnetBlock } from './components/LeadMagnetBlock';
 import { ContactFormBlock } from './components/ContactFormBlock';
+import { ShopProductBlock } from './components/ShopProductBlock';
 import { BlockPicker } from './BlockPicker';
 
 interface BlockEditorProps {
@@ -70,6 +71,8 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
         return <LeadMagnetBlock {...commonProps} />;
       case 'contact_form':
         return <ContactFormBlock {...commonProps} />;
+      case 'shop_product':
+        return <ShopProductBlock {...commonProps} />;
       default:
         return <div className="p-4 bg-yellow-50 border border-yellow-200 rounded">
           Type de bloc inconnu: {block.block_type}
@@ -104,6 +107,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                 <option value="numbered_cards">Cartes numérotées</option>
                 <option value="lead_magnet">Lead Magnet</option>
                 <option value="contact_form">Formulaire de contact</option>
+                <option value="shop_product">Produit boutique</option>
               </select>
             </div>
             <div className="flex items-center space-x-2">
@@ -208,6 +212,15 @@ function getDefaultBlockData(type: BlockType): Record<string, any> {
         description: '',
         submit_button_text: 'Envoyer',
         fields: [],
+      };
+    case 'shop_product':
+      return {
+        title: '',
+        description: '',
+        price_label: '',
+        image_url: '',
+        cta_text: 'Voir le produit',
+        cta_url: '/boutique',
       };
     default:
       return {};

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - <%= settings?.site_title || 'My Site' %></title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/custom.css">
+  <% if (typeof gaId !== 'undefined' && gaId) { %>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=<%= gaId %>"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '<%= gaId %>');
+  </script>
+  <% } %>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+  <%- include('../partials/navbar') %>
+
+  <main id="main-content" class="l-section">
+    <div class="l-container">
+      <h1 class="c-page-title">Boutique</h1>
+
+      <% if (products.length === 0) { %>
+      <p>Aucun produit disponible pour le moment.</p>
+      <% } else { %>
+      <div class="c-shop-grid">
+        <% products.forEach(product => { %>
+        <article class="c-shop-card">
+          <% if (product.image_url) { %>
+          <div class="c-shop-card__image">
+            <a href="/boutique/<%= product.slug %>">
+              <img src="<%= product.image_url %>" alt="<%= product.name %>" loading="lazy">
+            </a>
+          </div>
+          <% } %>
+          <div class="c-shop-card__body">
+            <h2 class="c-shop-card__title">
+              <a href="/boutique/<%= product.slug %>"><%= product.name %></a>
+            </h2>
+            <% if (product.description) { %>
+            <p class="c-shop-card__desc"><%= product.description %></p>
+            <% } %>
+            <div class="c-shop-card__footer">
+              <span class="c-shop-card__price">
+                <%= (product.price / 100).toFixed(2).replace('.', ',') %> <%= product.currency %>
+              </span>
+              <a href="/boutique/<%= product.slug %>" class="btn btn-primary">Voir le produit</a>
+            </div>
+          </div>
+        </article>
+        <% }); %>
+      </div>
+      <% } %>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

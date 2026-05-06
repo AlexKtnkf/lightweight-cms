@@ -40,4 +40,5 @@ export type BlockType =
   | 'pin_grid'
   | 'numbered_cards'
   | 'lead_magnet'
-  | 'contact_form';
+  | 'contact_form'
+  | 'shop_product';

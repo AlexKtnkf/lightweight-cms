@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pageController = require('../src/presentation/web/pageController');
+const shopController = require('../src/presentation/web/shopController');
 const path = require('path');
 const fs = require('fs').promises;
 const logger = require('../utils/logger');
@@ -45,6 +46,29 @@ router.get('/blog', (req, res, next) => {
 router.get('/blog/:slug', (req, res, next) => {
   if (!isEnabled('FEATURE_SECTION_BLOG')) return res.status(404).render('errors/404');
   return pageController.article(req, res, next);
+});
+
+// Shop routes (gated by FEATURE_SECTION_SHOP)
+// Webhook needs raw body — must come before /:slug and after bodyParser setup
+router.post('/boutique/webhook', (req, res, next) => {
+  if (!isEnabled('FEATURE_SECTION_SHOP')) return res.status(404).send('Not found');
+  return shopController.stripeWebhook(req, res, next);
+});
+router.get('/boutique', (req, res, next) => {
+  if (!isEnabled('FEATURE_SECTION_SHOP')) return res.status(404).render('errors/404');
+  return shopController.shopIndex(req, res, next);
+});
+router.get('/boutique/merci', (req, res, next) => {
+  if (!isEnabled('FEATURE_SECTION_SHOP')) return res.status(404).render('errors/404');
+  return shopController.checkoutSuccess(req, res, next);
+});
+router.post('/boutique/:id/checkout', (req, res, next) => {
+  if (!isEnabled('FEATURE_SECTION_SHOP')) return res.status(404).json({ error: 'Not found' });
+  return shopController.createCheckout(req, res, next);
+});
+router.get('/boutique/:slug', (req, res, next) => {
+  if (!isEnabled('FEATURE_SECTION_SHOP')) return res.status(404).render('errors/404');
+  return shopController.shopProduct(req, res, next);
 });
 
 // Static pages route - check for static file first, fallback to dynamic

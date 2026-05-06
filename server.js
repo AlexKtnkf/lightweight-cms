@@ -53,6 +53,7 @@ app.use((req, res, next) => {
 });
 
 // Body parsing middleware
+app.use('/boutique/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

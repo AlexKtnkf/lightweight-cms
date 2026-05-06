@@ -120,6 +120,16 @@ function sanitizeBlockData(blockType, blockData) {
           }) : []
         })) : []
       };
+
+    case 'shop_product':
+      return {
+        title: blockData.title || '',
+        description: sanitize(blockData.description || ''),
+        price_label: blockData.price_label || '',
+        image_url: blockData.image_url || '',
+        cta_text: blockData.cta_text || 'Voir le produit',
+        cta_url: blockData.cta_url || '/boutique'
+      };
     
     default:
       return blockData;

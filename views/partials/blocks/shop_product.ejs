@@ -1,0 +1,27 @@
+<section class="l-section c-shop-highlight">
+  <div class="l-container">
+    <article class="c-shop-highlight__card">
+      <% if (block.block_data.image_url) { %>
+      <div class="c-shop-highlight__media">
+        <img src="<%= block.block_data.image_url %>" alt="<%= block.block_data.title || 'Produit' %>" loading="lazy">
+      </div>
+      <% } %>
+      <div class="c-shop-highlight__content">
+        <% if (block.block_data.title) { %>
+        <h2><%= block.block_data.title %></h2>
+        <% } %>
+        <% if (block.block_data.description) { %>
+        <div class="c-shop-highlight__description"><%- block.block_data.description %></div>
+        <% } %>
+        <div class="c-shop-highlight__footer">
+          <% if (block.block_data.price_label) { %>
+          <p class="c-shop-highlight__price"><%= block.block_data.price_label %></p>
+          <% } %>
+          <a class="btn btn-primary" href="<%= block.block_data.cta_url || '/boutique' %>">
+            <%= block.block_data.cta_text || 'Voir le produit' %>
+          </a>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>

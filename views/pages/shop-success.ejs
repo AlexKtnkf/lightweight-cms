@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - <%= settings?.site_title || 'My Site' %></title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  <main class="l-section">
+    <div class="l-container c-success-page">
+      <h1>Merci pour votre commande !</h1>
+      <% if (order) { %>
+      <p>Votre paiement a bien été reçu. Un e-mail de confirmation vous sera envoyé à <strong><%= order.customer_email %></strong>.</p>
+      <p>Référence commande : <strong>#<%= order.id %></strong></p>
+      <% } else { %>
+      <p>Votre paiement a bien été traité. Merci !</p>
+      <% } %>
+      <a href="/boutique" class="btn btn-secondary">Continuer mes achats</a>
+    </div>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>
