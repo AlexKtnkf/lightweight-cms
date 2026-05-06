@@ -44,7 +44,18 @@ class SettingsRepository {
         { platform: 'linkedin', url: 'https://linkedin.com', icon: 'linkedin' }
       ];
     }
-    
+
+    // theme_tokens is JSONB — pg returns it pre-parsed; handle text fallback
+    if (settings.theme_tokens && typeof settings.theme_tokens === 'string') {
+      try {
+        settings.theme_tokens = JSON.parse(settings.theme_tokens);
+      } catch {
+        settings.theme_tokens = {};
+      }
+    } else if (!settings.theme_tokens) {
+      settings.theme_tokens = {};
+    }
+
     return settings;
   }
 
@@ -60,9 +71,10 @@ class SettingsRepository {
     const sql = `INSERT INTO settings (
                    id, site_title, site_tagline, logo_media_id,
                    header_menu_links, footer_menu_links, footer_text,
-                   social_links, allow_search_indexing, contact_email, updated_at
+                   social_links, allow_search_indexing, contact_email,
+                   theme_tokens, updated_at
                  )
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
                  ON CONFLICT (id) DO UPDATE
                  SET site_title = EXCLUDED.site_title,
                      site_tagline = EXCLUDED.site_tagline,
@@ -73,6 +85,7 @@ class SettingsRepository {
                      social_links = EXCLUDED.social_links,
                      allow_search_indexing = EXCLUDED.allow_search_indexing,
                      contact_email = EXCLUDED.contact_email,
+                     theme_tokens = EXCLUDED.theme_tokens,
                      updated_at = CURRENT_TIMESTAMP`;
     await db.run(sql, [
       1,
@@ -84,7 +97,8 @@ class SettingsRepository {
       settingsData.footer_text || null,
       settingsData.social_links ? JSON.stringify(settingsData.social_links) : defaultSocialLinks,
       settingsData.allow_search_indexing !== undefined ? Boolean(settingsData.allow_search_indexing) : true,
-      settingsData.contact_email || null
+      settingsData.contact_email || null,
+      settingsData.theme_tokens ? JSON.stringify(settingsData.theme_tokens) : null
     ]);
     return this.get();
   }

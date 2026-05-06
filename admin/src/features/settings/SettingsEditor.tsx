@@ -119,6 +119,168 @@ function SocialLinksSection() {
   );
 }
 
+// --- 2b. THEME EDITOR ---
+
+const SUGGESTED_TOKENS: { key: string; label: string; type: 'color' | 'text' }[] = [
+  { key: '--color-primary',        label: 'Couleur principale',   type: 'color' },
+  { key: '--color-secondary',      label: 'Couleur secondaire',   type: 'color' },
+  { key: '--color-accent',         label: 'Couleur accent',       type: 'color' },
+  { key: '--color-bg',             label: 'Fond de page',         type: 'color' },
+  { key: '--color-text',           label: 'Texte principal',      type: 'color' },
+  { key: '--color-text-muted',     label: 'Texte atténué',        type: 'color' },
+  { key: '--font-heading',         label: 'Police titres',        type: 'text'  },
+  { key: '--font-body',            label: 'Police corps de texte',type: 'text'  },
+];
+
+function ThemeEditor({ settings, onSave }: { settings: Settings | undefined; onSave: (tokens: Record<string, string>) => void }) {
+  const [tokens, setTokens] = useState<{ key: string; value: string }[]>(() =>
+    Object.entries(settings?.theme_tokens ?? {}).map(([key, value]) => ({ key, value }))
+  );
+  const [newKey, setNewKey] = useState('');
+  const [newValue, setNewValue] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  function upsert(key: string, value: string) {
+    setTokens(prev => {
+      const idx = prev.findIndex(t => t.key === key);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = { key, value };
+        return next;
+      }
+      return [...prev, { key, value }];
+    });
+  }
+
+  function remove(key: string) {
+    setTokens(prev => prev.filter(t => t.key !== key));
+  }
+
+  function addCustom() {
+    const k = newKey.trim();
+    const v = newValue.trim();
+    if (!k || !v) return;
+    upsert(k.startsWith('--') ? k : `--${k}`, v);
+    setNewKey('');
+    setNewValue('');
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    setSaved(false);
+    const obj = Object.fromEntries(tokens.map(t => [t.key, t.value]));
+    await onSave(obj);
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  }
+
+  const tokenMap = Object.fromEntries(tokens.map(t => [t.key, t.value]));
+
+  return (
+    <div className="bg-white shadow rounded-lg p-6 space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900">Thème visuel</h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Surcharge les variables CSS du site sans modifier le code. Les changements s'appliquent à toutes les pages publiques.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {SUGGESTED_TOKENS.map(({ key, label, type }) => (
+          <div key={key}>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+            <div className="flex items-center gap-2">
+              {type === 'color' && (
+                <input
+                  type="color"
+                  value={tokenMap[key] ?? '#000000'}
+                  onChange={e => upsert(key, e.target.value)}
+                  className="h-9 w-14 border border-gray-300 rounded cursor-pointer"
+                />
+              )}
+              <input
+                type="text"
+                value={tokenMap[key] ?? ''}
+                onChange={e => upsert(key, e.target.value)}
+                placeholder={type === 'color' ? '#e85d26' : 'ex: Georgia, serif'}
+                className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm font-mono"
+              />
+              {tokenMap[key] && (
+                <button onClick={() => remove(key)} className="text-red-500 hover:text-red-700 text-sm">✕</button>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 mt-0.5 font-mono">{key}</p>
+          </div>
+        ))}
+      </div>
+
+      {tokens.filter(t => !SUGGESTED_TOKENS.some(s => s.key === t.key)).length > 0 && (
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Tokens personnalisés</h3>
+          <div className="space-y-2">
+            {tokens
+              .filter(t => !SUGGESTED_TOKENS.some(s => s.key === t.key))
+              .map(({ key, value }) => (
+                <div key={key} className="flex items-center gap-2">
+                  <code className="text-xs text-gray-600 w-48 truncate">{key}</code>
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={e => upsert(key, e.target.value)}
+                    className="flex-1 border border-gray-300 rounded px-2 py-1.5 text-sm font-mono"
+                  />
+                  <button onClick={() => remove(key)} className="text-red-500 hover:text-red-700 text-sm">✕</button>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      <div className="border-t border-gray-200 pt-4">
+        <h3 className="text-sm font-medium text-gray-700 mb-2">Ajouter un token CSS personnalisé</h3>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newKey}
+            onChange={e => setNewKey(e.target.value)}
+            placeholder="--ma-variable"
+            className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm font-mono"
+          />
+          <input
+            type="text"
+            value={newValue}
+            onChange={e => setNewValue(e.target.value)}
+            placeholder="valeur"
+            className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm font-mono"
+          />
+          <button
+            type="button"
+            onClick={addCustom}
+            className="px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50"
+          >
+            + Ajouter
+          </button>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-2">
+        {saved && <span className="text-green-600 text-sm">✓ Thème enregistré</span>}
+        {!saved && <span />}
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saving}
+          className="px-6 py-2 bg-blue-600 text-white rounded-md text-sm disabled:opacity-50 hover:bg-blue-700"
+        >
+          {saving ? 'Enregistrement…' : 'Enregistrer le thème'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // --- 3. MAIN COMPONENT ---
 
 export function SettingsEditor() {
@@ -436,6 +598,16 @@ export function SettingsEditor() {
         }}
         selectedId={logoMediaId ?? null}
       />
+
+      <div className="mt-8">
+        <ThemeEditor
+          settings={settings}
+          onSave={async (theme_tokens) => {
+            await settingsApi.update({ ...settings!, theme_tokens });
+            queryClient.invalidateQueries({ queryKey: ['settings'] });
+          }}
+        />
+      </div>
     </div>
   );
 }

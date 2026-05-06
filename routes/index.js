@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const logger = require('../utils/logger');
 const { isEnabled } = require('../src/shared/featureFlags');
+const settingsRepository = require('../src/domain/settings/infrastructure/settingsRepository');
 const shouldServeStaticFiles = process.env.NODE_ENV === 'production';
 
 // Homepage route - check for static file first, fallback to dynamic
@@ -92,6 +93,33 @@ router.get('/robots.txt', pageController.robots);
 router.get('/feed.xml', (req, res, next) => {
   if (!isEnabled('FEATURE_PUBLIC_RSS')) return res.status(404).send('Not found');
   return pageController.feed(req, res, next);
+});
+
+// Theme CSS overrides — dynamically generated from settings.theme_tokens
+router.get('/css/custom.css', async (req, res) => {
+  try {
+    const settings = await settingsRepository.get();
+    const tokens = settings.theme_tokens || {};
+    const entries = Object.entries(tokens).filter(([k]) => k.startsWith('--'));
+
+    if (entries.length === 0) {
+      res.set('Content-Type', 'text/css');
+      return res.send('/* no custom theme tokens */\n');
+    }
+
+    const vars = entries.map(([k, v]) => `  ${k}: ${v};`).join('\n');
+    const css = `:root {\n${vars}\n}\n`;
+
+    res.set({
+      'Content-Type': 'text/css',
+      'Cache-Control': 'public, max-age=300'
+    });
+    res.send(css);
+  } catch (err) {
+    logger.error('Error generating custom.css:', err);
+    res.set('Content-Type', 'text/css');
+    res.send('/* error loading theme tokens */\n');
+  }
 });
 
 module.exports = router;

@@ -9,5 +9,6 @@ export interface Settings {
   social_links?: Array<{ platform: string; url: string; icon: string }>;
   allow_search_indexing?: boolean;
   contact_email?: string;
+  theme_tokens?: Record<string, string>;
   updated_at: string;
 }
