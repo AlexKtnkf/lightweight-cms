@@ -141,13 +141,14 @@ router.get('/css/custom.css', async (req, res) => {
     const tokens = settings.theme_tokens || {};
     const entries = Object.entries(tokens).filter(([k]) => k.startsWith('--'));
 
-    if (entries.length === 0) {
-      res.set('Content-Type', 'text/css');
-      return res.send('/* no custom theme tokens */\n');
+    const vars = entries.map(([k, v]) => `  ${k}: ${v};`).join('\n');
+    let css = entries.length > 0 ? `:root {\n${vars}\n}\n` : '';
+
+    if (settings.custom_css) {
+      css += `\n/* custom CSS */\n${settings.custom_css}\n`;
     }
 
-    const vars = entries.map(([k, v]) => `  ${k}: ${v};`).join('\n');
-    const css = `:root {\n${vars}\n}\n`;
+    if (!css) css = '/* no custom styles */\n';
 
     res.set({
       'Content-Type': 'text/css',

@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  useForm, 
-  useFieldArray, 
-  useFormContext, 
-  FormProvider 
+import {
+  useForm,
+  useFieldArray,
+  useFormContext,
+  FormProvider
 } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form'; // Fix for verbatimModuleSyntax
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -30,7 +30,7 @@ const socialLinkSchema = z.object({
 const settingsSchema = z.object({
   site_title: z.string().min(1, 'Le titre du site est requis'),
   site_tagline: z.string(),
-  logo_media_id: z.number().nullable().optional(), 
+  logo_media_id: z.number().nullable().optional(),
   header_menu_links: z.array(menuLinkSchema),
   footer_menu_links: z.array(menuLinkSchema),
   footer_text: z.string(),
@@ -55,7 +55,7 @@ function MenuLinksSection({ name, title }: MenuLinksSectionProps) {
   return (
     <div className="border-t border-gray-200 pt-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+        <h3 className="text-md font-medium text-gray-900">{title}</h3>
         <button
           type="button"
           onClick={() => append({ label: '', url: '', order: fields.length })}
@@ -83,13 +83,193 @@ function MenuLinksSection({ name, title }: MenuLinksSectionProps) {
   );
 }
 
+function MaintenanceSection() {
+  const [regenerateMessage, setRegenerateMessage] = useState<string | null>(null);
+  const [regenerateError, setRegenerateError] = useState<string | null>(null);
+  const [backupMessage, setBackupMessage] = useState<string | null>(null);
+
+  const [backupError, setBackupError] = useState<string | null>(null);
+  const [mediaBackupMessage, setMediaBackupMessage] = useState<string | null>(null);
+  const [mediaBackupError, setMediaBackupError] = useState<string | null>(null);
+
+  const backupMutation = useMutation({
+    mutationFn: () => settingsApi.backup(),
+    onSuccess: ({ blob, filename }) => {
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(downloadUrl);
+
+      setRegenerateMessage(null);
+      setRegenerateError(null);
+      setBackupError(null);
+      setMediaBackupMessage(null);
+      setMediaBackupError(null);
+      setBackupMessage(`Sauvegarde téléchargée (${filename})`);
+    },
+    onError: (error: any) => {
+      setBackupMessage(null);
+      setBackupError(error?.response?.data?.error || error?.message || 'Erreur lors de la sauvegarde');
+    },
+  });
+
+  const regenerateMutation = useMutation({
+    mutationFn: () => settingsApi.regenerate(),
+    onSuccess: (result) => {
+      setBackupMessage(null);
+      setBackupError(null);
+      setRegenerateError(null);
+      setMediaBackupMessage(null);
+      setMediaBackupError(null);
+      setRegenerateMessage(result.message);
+    },
+    onError: (error: any) => {
+      setRegenerateMessage(null);
+      setRegenerateError(error?.response?.data?.error || error?.message || 'Erreur lors de la régénération');
+    },
+  });
+
+  const mediaBackupMutation = useMutation({
+    mutationFn: () => settingsApi.downloadMediaBackup(),
+    onSuccess: ({ blob, filename }) => {
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(downloadUrl);
+
+      setRegenerateMessage(null);
+      setRegenerateError(null);
+      setBackupMessage(null);
+      setBackupError(null);
+      setMediaBackupError(null);
+      setMediaBackupMessage(`Archive téléchargée (${filename})`);
+    },
+    onError: (error: any) => {
+      setMediaBackupMessage(null);
+      setMediaBackupError(error?.response?.data?.error || error?.message || 'Erreur lors du téléchargement des images');
+    },
+  });
+  return (
+        <div className="bg-white shadow rounded-lg p-6 space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900">Maintenance</h2>
+      </div>
+
+
+      <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h4 className="text-sm font-medium text-gray-900">Régénération statique</h4>
+          <p className="text-xs text-gray-500 mt-1">
+            Relance la génération des pages statiques du site.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => regenerateMutation.mutate()}
+          disabled={regenerateMutation.isPending}
+          className="px-4 py-2 rounded-md bg-orange-600 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
+        >
+          {regenerateMutation.isPending ? 'Régénération...' : 'Régénérer le site'}
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h4 className="text-sm font-medium text-gray-900">Sauvegarde de la base</h4>
+          <p className="text-xs text-gray-500 mt-1">
+            Génère un fichier de sauvegarde de la base de données.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => backupMutation.mutate()}
+          disabled={backupMutation.isPending}
+          className="px-4 py-2 border rounded-md bg-white text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+        >
+          {backupMutation.isPending ? 'Sauvegarde...' : 'Générer une sauvegarde de la base'}
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h4 className="text-sm font-medium text-gray-900">Images uploadées</h4>
+          <p className="text-xs text-gray-500 mt-1">
+            Télécharge une archive ZIP contenant toutes les images originales envoyées dans le CMS.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => mediaBackupMutation.mutate()}
+          disabled={mediaBackupMutation.isPending}
+          className="px-4 py-2 border rounded-md bg-white text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+        >
+          {mediaBackupMutation.isPending ? 'Préparation du ZIP...' : 'Télécharger les images uploadées'}
+        </button>
+      </div>
+
+      {regenerateMessage && (
+        <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+          {regenerateMessage}
+        </div>
+      )}
+
+      {regenerateError && (
+        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+          {regenerateError}
+        </div>
+      )}
+
+      {backupMessage && (
+        <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+          {backupMessage}
+        </div>
+      )}
+
+      {backupError && (
+        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+          {backupError}
+        </div>
+      )}
+
+      {mediaBackupMessage && (
+        <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+          {mediaBackupMessage}
+        </div>
+      )}
+
+      {mediaBackupError && (
+        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+          {mediaBackupError}
+        </div>
+      )}
+    </div>)
+    ;
+}
+
 function SocialLinksSection() {
   const { control, register, setValue } = useFormContext<SettingsForm>();
   const { fields, append, remove } = useFieldArray({ control, name: 'social_links' });
 
   return (
     <div className="border-t border-gray-200 pt-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Réseaux Sociaux</h3>
+            <div className="flex justify-between items-center mb-4">
+        <h3 className="text-md font-medium text-gray-900">Réseaux sociaux</h3>
+        <button
+          type="button"
+          onClick={() => append({ platform: 'instagram', url: '', icon: 'instagram' })}
+          className="text-sm bg-gray-100 px-3 py-1.5 rounded-md hover:bg-gray-200 text-gray-700"
+        >
+          + Ajouter un lien
+        </button>
+      </div>
       <div className="space-y-3">
         {fields.map((field, index) => (
           <div key={field.id} className="flex gap-3 p-3 bg-gray-50 rounded-md items-start">
@@ -111,9 +291,6 @@ function SocialLinksSection() {
             <button type="button" onClick={() => remove(index)} className="px-2 py-1.5 text-red-600">×</button>
           </div>
         ))}
-        <button type="button" onClick={() => append({ platform: 'instagram', url: '', icon: 'instagram' })} className="text-sm bg-gray-100 px-3 py-1.5 rounded-md mt-2">
-          + Ajouter un réseau
-        </button>
       </div>
     </div>
   );
@@ -122,14 +299,14 @@ function SocialLinksSection() {
 // --- 2b. THEME EDITOR ---
 
 const SUGGESTED_TOKENS: { key: string; label: string; type: 'color' | 'text' }[] = [
-  { key: '--color-primary',        label: 'Couleur principale',   type: 'color' },
-  { key: '--color-secondary',      label: 'Couleur secondaire',   type: 'color' },
-  { key: '--color-accent',         label: 'Couleur accent',       type: 'color' },
-  { key: '--color-bg',             label: 'Fond de page',         type: 'color' },
-  { key: '--color-text',           label: 'Texte principal',      type: 'color' },
-  { key: '--color-text-muted',     label: 'Texte atténué',        type: 'color' },
-  { key: '--font-heading',         label: 'Police titres',        type: 'text'  },
-  { key: '--font-body',            label: 'Police corps de texte',type: 'text'  },
+  { key: '--color-primary', label: 'Couleur principale', type: 'color' },
+  { key: '--color-secondary', label: 'Couleur secondaire', type: 'color' },
+  { key: '--color-accent', label: 'Couleur accent', type: 'color' },
+  { key: '--color-bg', label: 'Fond de page', type: 'color' },
+  { key: '--color-text', label: 'Texte principal', type: 'color' },
+  { key: '--color-text-muted', label: 'Texte atténué', type: 'color' },
+  { key: '--font-heading', label: 'Police titres', type: 'text' },
+  { key: '--font-body', label: 'Police corps de texte', type: 'text' },
 ];
 
 function ThemeEditor({ settings, onSave }: { settings: Settings | undefined; onSave: (tokens: Record<string, string>) => void }) {
@@ -200,9 +377,9 @@ function ThemeEditor({ settings, onSave }: { settings: Settings | undefined; onS
   return (
     <div className="bg-white shadow rounded-lg p-6 space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">Thème visuel</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Apparence</h2>
         <p className="text-sm text-gray-500 mt-1">
-          Surcharge les variables CSS du site sans modifier le code. Les changements s'appliquent à toutes les pages publiques.
+          Surcharge les variables CSS du site. Les changements s'appliquent à toutes les pages publiques.
         </p>
       </div>
 
@@ -289,15 +466,90 @@ function ThemeEditor({ settings, onSave }: { settings: Settings | undefined; onS
       </div>
 
       <div className="flex items-center justify-between pt-2">
-        {saved && <span className="text-green-600 text-sm">✓ Thème enregistré</span>}
+        {saved && <span className="text-green-600 text-sm">✓ Apparence enregistrée</span>}
         {!saved && <span />}
         <button
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md text-sm disabled:opacity-50 hover:bg-blue-700"
+          className="px-6 py-2 bg-blue-600 text-white rounded-md disabled:bg-blue-300"
         >
-          {saving ? 'Enregistrement…' : 'Enregistrer le thème'}
+          {saving ? 'Enregistrement…' : 'Enregistrer apparence'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// --- 2c. CUSTOM CSS EDITOR ---
+
+const CSS_VARS_HINT = `/* Variables disponibles (définies dans main.css) :
+  --color-primary   --color-secondary   --color-accent
+  --color-bg        --color-text        --color-text-muted
+  --font-heading    --font-body
+
+Exemple :
+  .btn-primary { background: var(--color-accent); }
+  h1, h2 { font-family: var(--font-heading); }
+*/`;
+
+function CustomCssEditor({ settings, onSave }: { settings: Settings | undefined; onSave: (css: string) => Promise<void> }) {
+  const [css, setCss] = useState(settings?.custom_css ?? '');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setCss(settings?.custom_css ?? '');
+  }, [settings?.custom_css]);
+
+  async function handleSave() {
+    setSaving(true);
+    setSaved(false);
+    await onSave(css);
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  }
+
+  return (
+    <div className="bg-white shadow rounded-lg p-6 space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900">CSS personnalisé</h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Ajoutez votre propre CSS. Il sera chargé après les styles du site et les tokens de couleurs.
+          Vous pouvez utiliser les variables CSS définies dans le thème.
+        </p>
+      </div>
+
+      <details className="text-xs text-gray-500 border border-gray-200 rounded-md">
+        <summary className="px-3 py-2 cursor-pointer select-none font-medium text-gray-600">
+          Variables CSS disponibles &amp; exemples
+        </summary>
+        <pre className="px-3 py-3 bg-gray-50 rounded-b-md overflow-x-auto leading-relaxed">{CSS_VARS_HINT}</pre>
+      </details>
+
+      <textarea
+        value={css}
+        onChange={e => setCss(e.target.value)}
+        rows={14}
+        spellCheck={false}
+        placeholder={`/* Votre CSS personnalisé */\n.hero { background: var(--color-primary); }`}
+        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm font-mono leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+
+      <div className="flex items-center justify-between">
+        {saved ? (
+          <span className="text-green-600 text-sm">✓ CSS enregistré</span>
+        ) : (
+          <span className="text-xs text-gray-400">Le CSS sera appliqué sur toutes les pages publiques.</span>
+        )}
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saving}
+          className="px-6 py-2 bg-blue-600 text-white rounded-md disabled:bg-blue-300 text-sm"
+        >
+          {saving ? 'Enregistrement…' : 'Enregistrer CSS'}
         </button>
       </div>
     </div>
@@ -308,12 +560,6 @@ function ThemeEditor({ settings, onSave }: { settings: Settings | undefined; onS
 
 export function SettingsEditor() {
   const [isLogoPickerOpen, setIsLogoPickerOpen] = useState(false);
-  const [regenerateMessage, setRegenerateMessage] = useState<string | null>(null);
-  const [regenerateError, setRegenerateError] = useState<string | null>(null);
-  const [backupMessage, setBackupMessage] = useState<string | null>(null);
-  const [backupError, setBackupError] = useState<string | null>(null);
-  const [mediaBackupMessage, setMediaBackupMessage] = useState<string | null>(null);
-  const [mediaBackupError, setMediaBackupError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: settings, isLoading, error } = useQuery<Settings>({
@@ -327,72 +573,6 @@ export function SettingsEditor() {
     onSuccess: (updated) => {
       queryClient.setQueryData(['settings'], updated);
       alert('Paramètres enregistrés ! Le site est en cours de régénération...');
-    },
-  });
-
-  const backupMutation = useMutation({
-    mutationFn: () => settingsApi.backup(),
-    onSuccess: ({ blob, filename }) => {
-      const downloadUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(downloadUrl);
-
-      setRegenerateMessage(null);
-      setRegenerateError(null);
-      setBackupError(null);
-      setMediaBackupMessage(null);
-      setMediaBackupError(null);
-      setBackupMessage(`Sauvegarde téléchargée (${filename})`);
-    },
-    onError: (error: any) => {
-      setBackupMessage(null);
-      setBackupError(error?.response?.data?.error || error?.message || 'Erreur lors de la sauvegarde');
-    },
-  });
-
-  const regenerateMutation = useMutation({
-    mutationFn: () => settingsApi.regenerate(),
-    onSuccess: (result) => {
-      setBackupMessage(null);
-      setBackupError(null);
-      setRegenerateError(null);
-      setMediaBackupMessage(null);
-      setMediaBackupError(null);
-      setRegenerateMessage(result.message);
-    },
-    onError: (error: any) => {
-      setRegenerateMessage(null);
-      setRegenerateError(error?.response?.data?.error || error?.message || 'Erreur lors de la régénération');
-    },
-  });
-
-  const mediaBackupMutation = useMutation({
-    mutationFn: () => settingsApi.downloadMediaBackup(),
-    onSuccess: ({ blob, filename }) => {
-      const downloadUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(downloadUrl);
-
-      setRegenerateMessage(null);
-      setRegenerateError(null);
-      setBackupMessage(null);
-      setBackupError(null);
-      setMediaBackupError(null);
-      setMediaBackupMessage(`Archive téléchargée (${filename})`);
-    },
-    onError: (error: any) => {
-      setMediaBackupMessage(null);
-      setMediaBackupError(error?.response?.data?.error || error?.message || 'Erreur lors du téléchargement des images');
     },
   });
 
@@ -433,7 +613,7 @@ export function SettingsEditor() {
 
   const onFormSubmit: SubmitHandler<SettingsForm> = (data) => {
     // Re-calculate order based on array index
-    const prepare = (arr: { label: string; url: string; order: number }[]) => 
+    const prepare = (arr: { label: string; url: string; order: number }[]) =>
       arr.map((item, i) => ({ ...item, order: i }));
 
     // Align logo_media_id: convert null to undefined for the API
@@ -453,7 +633,7 @@ export function SettingsEditor() {
   return (
     <div className="max-w-4xl mx-auto py-6 px-4">
       <h1 className="text-2xl font-bold mb-6">Paramètres du site</h1>
-      
+
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onFormSubmit)} className="bg-white shadow rounded-lg p-6 space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -494,16 +674,6 @@ export function SettingsEditor() {
             </div>
           </div>
 
-          <MenuLinksSection name="header_menu_links" title="Menu Header" />
-          <MenuLinksSection name="footer_menu_links" title="Menu Footer" />
-
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">Texte Footer</label>
-            <textarea {...register('footer_text')} rows={3} className="w-full px-3 py-2 border rounded-md" />
-          </div>
-
-          <SocialLinksSection />
-
           <div className="border-t border-gray-200 pt-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">Email pour le formulaire de contact</label>
             <p className="text-xs text-gray-500 mb-2">Les messages du formulaire de contact seront envoyés à cet email</p>
@@ -511,102 +681,19 @@ export function SettingsEditor() {
             {errors.contact_email && <p className="text-red-500 text-xs mt-1">{errors.contact_email.message}</p>}
           </div>
 
-          <div className="border-t border-gray-200 pt-6 space-y-4">
-            <div className="space-y-1">
-              <h3 className="text-sm font-medium text-gray-900">Maintenance</h3>
-            </div>
+          <MenuLinksSection name="header_menu_links" title="Navigation" />
+          <MenuLinksSection name="footer_menu_links" title="Pied de page" />
 
-            <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h4 className="text-sm font-medium text-gray-900">Régénération statique</h4>
-                <p className="text-xs text-gray-500 mt-1">
-                  Relance la génération des pages statiques du site.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => regenerateMutation.mutate()}
-                disabled={regenerateMutation.isPending}
-                className="px-4 py-2 rounded-md bg-orange-600 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
-              >
-                {regenerateMutation.isPending ? 'Régénération...' : 'Régénérer le site'}
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h4 className="text-sm font-medium text-gray-900">Sauvegarde de la base</h4>
-                <p className="text-xs text-gray-500 mt-1">
-                  Génère un fichier de sauvegarde de la base de données.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => backupMutation.mutate()}
-                disabled={backupMutation.isPending}
-                className="px-4 py-2 border rounded-md bg-white text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
-              >
-                {backupMutation.isPending ? 'Sauvegarde...' : 'Générer une sauvegarde de la base'}
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h4 className="text-sm font-medium text-gray-900">Images uploadées</h4>
-                <p className="text-xs text-gray-500 mt-1">
-                  Télécharge une archive ZIP contenant toutes les images originales envoyées dans le CMS.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => mediaBackupMutation.mutate()}
-                disabled={mediaBackupMutation.isPending}
-                className="px-4 py-2 border rounded-md bg-white text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
-              >
-                {mediaBackupMutation.isPending ? 'Préparation du ZIP...' : 'Télécharger les images uploadées'}
-              </button>
-            </div>
-
-            {regenerateMessage && (
-              <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
-                {regenerateMessage}
-              </div>
-            )}
-
-            {regenerateError && (
-              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
-                {regenerateError}
-              </div>
-            )}
-
-            {backupMessage && (
-              <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
-                {backupMessage}
-              </div>
-            )}
-
-            {backupError && (
-              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
-                {backupError}
-              </div>
-            )}
-
-            {mediaBackupMessage && (
-              <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
-                {mediaBackupMessage}
-              </div>
-            )}
-
-            {mediaBackupError && (
-              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
-                {mediaBackupError}
-              </div>
-            )}
+      <div className="space-y-3">
+            <label className="block text-sm font-medium text-gray-900 mb-2">Texte du pied de page</label>
+            <textarea {...register('footer_text')} rows={3} className="w-full px-3 py-2 border rounded-md" />
           </div>
 
-          <div className="flex justify-end pt-4 border-t">
+          <SocialLinksSection />
+
+          <div className="flex justify-end pt-4">
             <button type="submit" disabled={mutation.isPending} className="px-6 py-2 bg-blue-600 text-white rounded-md disabled:bg-blue-300">
-              {mutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
+              {mutation.isPending ? 'Enregistrement...' : 'Enregistrer paramètres'}
             </button>
           </div>
         </form>
@@ -630,6 +717,21 @@ export function SettingsEditor() {
             queryClient.invalidateQueries({ queryKey: ['settings'] });
           }}
         />
+      </div>
+
+      <div className="mt-8">
+        <CustomCssEditor
+          settings={settings}
+          onSave={async (custom_css) => {
+            await settingsApi.update({ ...settings!, custom_css });
+            queryClient.invalidateQueries({ queryKey: ['settings'] });
+          }}
+        />
+      </div>
+
+      <div className="mt-8 mb-8">
+                  <MaintenanceSection />
+
       </div>
     </div>
   );

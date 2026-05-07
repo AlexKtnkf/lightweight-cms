@@ -56,6 +56,9 @@ class SettingsRepository {
       settings.theme_tokens = {};
     }
 
+    // custom_css is plain text — leave as-is
+    settings.custom_css = settings.custom_css || null;
+
     return settings;
   }
 
@@ -72,9 +75,9 @@ class SettingsRepository {
                    id, site_title, site_tagline, logo_media_id,
                    header_menu_links, footer_menu_links, footer_text,
                    social_links, allow_search_indexing, contact_email,
-                   theme_tokens, updated_at
+                   theme_tokens, custom_css, updated_at
                  )
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
                  ON CONFLICT (id) DO UPDATE
                  SET site_title = EXCLUDED.site_title,
                      site_tagline = EXCLUDED.site_tagline,
@@ -86,6 +89,7 @@ class SettingsRepository {
                      allow_search_indexing = EXCLUDED.allow_search_indexing,
                      contact_email = EXCLUDED.contact_email,
                      theme_tokens = EXCLUDED.theme_tokens,
+                     custom_css = EXCLUDED.custom_css,
                      updated_at = CURRENT_TIMESTAMP`;
     await db.run(sql, [
       1,
@@ -98,7 +102,8 @@ class SettingsRepository {
       settingsData.social_links ? JSON.stringify(settingsData.social_links) : defaultSocialLinks,
       settingsData.allow_search_indexing !== undefined ? Boolean(settingsData.allow_search_indexing) : true,
       settingsData.contact_email || null,
-      settingsData.theme_tokens ? JSON.stringify(settingsData.theme_tokens) : null
+      settingsData.theme_tokens ? JSON.stringify(settingsData.theme_tokens) : null,
+      settingsData.custom_css || null
     ]);
     return this.get();
   }

@@ -10,5 +10,6 @@ export interface Settings {
   allow_search_indexing?: boolean;
   contact_email?: string;
   theme_tokens?: Record<string, string>;
+  custom_css?: string;
   updated_at: string;
 }
