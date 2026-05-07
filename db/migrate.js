@@ -24,17 +24,12 @@ async function runMigrations() {
     const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8');
 
     try {
-      await db.raw('BEGIN');
-      await db.raw(sql);
-      await db.run('INSERT INTO schema_migrations (name) VALUES (?)', [file]);
-      await db.raw('COMMIT');
+      await db.transaction(async () => {
+        await db.raw(sql);
+        await db.run('INSERT INTO schema_migrations (name) VALUES (?)', [file]);
+      });
       logger.info(`✓ Migration ${file} completed`);
     } catch (error) {
-      try {
-        await db.raw('ROLLBACK');
-      } catch (rollbackError) {
-        logger.error(`Rollback failed for migration ${file}:`, rollbackError);
-      }
       logger.error(`✗ Migration ${file} failed:`, error);
       throw error;
     }
