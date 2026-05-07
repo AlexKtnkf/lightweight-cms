@@ -1,6 +1,7 @@
 const serviceRepository = require('../../domain/appointments/infrastructure/serviceRepository');
 const availabilityRepository = require('../../domain/appointments/infrastructure/availabilityRepository');
 const bookingRepository = require('../../domain/appointments/infrastructure/bookingRepository');
+const emailService = require('../../shared/services/emailServiceInstance');
 
 const DAY_LABELS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 
@@ -83,6 +84,9 @@ async function createBooking(req, res, next) {
       notes,
       status: 'pending'
     });
+
+    // Fire-and-forget admin notification
+    emailService.sendBookingNotification(booking, service.name, process.env.ADMIN_EMAIL).catch(() => {});
 
     res.status(201).json({ success: true, booking });
   } catch (err) { next(err); }
