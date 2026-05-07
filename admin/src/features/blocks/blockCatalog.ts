@@ -108,6 +108,6 @@ export const blockCatalog: BlockCatalogEntry[] = [
     description:
       'Bloc d\'appel a l\'action vers le module de reservation de rendez-vous.',
     Preview: AppointmentBookingPreview,
-    featureFlag: 'FEATURE_BLOCK_APPOINTMENT',
+    featureFlag: 'FEATURE_BLOCK_APPOINTMENT_BOOKING',
   },
 ];

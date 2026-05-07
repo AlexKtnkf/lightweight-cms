@@ -29,7 +29,7 @@ const flags = {
   FEATURE_BLOCK_CONTACT_FORM:     parseFlag('FEATURE_BLOCK_CONTACT_FORM'),
   // future blocks — off by default until milestones implement them
   FEATURE_BLOCK_SHOP_PRODUCT:     parseFlag('FEATURE_BLOCK_SHOP_PRODUCT'),
-  FEATURE_BLOCK_APPOINTMENT:      parseFlag('FEATURE_BLOCK_APPOINTMENT'),
+  FEATURE_BLOCK_APPOINTMENT_BOOKING: parseFlag('FEATURE_BLOCK_APPOINTMENT_BOOKING'),
 
   // ── Admin sections ────────────────────────────────────────────────────────
   FEATURE_SECTION_BLOG:           parseFlag('FEATURE_SECTION_BLOG'),
