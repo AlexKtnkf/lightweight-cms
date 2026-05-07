@@ -275,8 +275,9 @@ app.use((req, res, next) => {
 app.use(errorHandler);
 
 // Start server function
+let server;
 function startServer() {
-  app.listen(PORT, () => {
+  server = app.listen(PORT, () => {
     logger.info(`Server running on http://localhost:${PORT}`);
     logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
     
@@ -293,17 +294,17 @@ function startServer() {
   });
 }
 
-// Graceful shutdown
-process.on('SIGINT', async () => {
-  logger.info('Shutting down gracefully...');
+// Graceful shutdown — stop accepting connections, drain DB pool, exit
+async function shutdown(signal) {
+  logger.info(`${signal} received, shutting down gracefully...`);
+  if (server) {
+    await new Promise(resolve => server.close(resolve));
+  }
   await db.close();
   process.exit(0);
-});
+}
 
-process.on('SIGTERM', async () => {
-  logger.info('Shutting down gracefully...');
-  await db.close();
-  process.exit(0);
-});
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 module.exports = app;
