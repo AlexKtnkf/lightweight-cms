@@ -16,7 +16,8 @@
   <meta property="og:description" content="<%= ogDescription %>">
   <% } %>
   <% if (typeof ogImage !== 'undefined' && ogImage) { %>
-  <meta property="og:image" content="<%= ogImage %>">
+  <% const _ogImgUrl = ogImage.startsWith('http') ? ogImage : (typeof baseUrl !== 'undefined' ? baseUrl : '') + ogImage; %>
+  <meta property="og:image" content="<%= _ogImgUrl %>">
   <% } %>
   <meta property="og:type" content="website">
   <% if (typeof canonicalUrl !== 'undefined' && canonicalUrl) { %>

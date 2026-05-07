@@ -40,6 +40,7 @@ async function loadSettings(req, res, next) {
     res.locals.settings = cache.settings;
     res.locals.logoSvg = cache.logoSvg;
     res.locals.turnstileSiteKey = process.env.TURNSTILE_SITE_KEY || null;
+    res.locals.baseUrl = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
 
     next();
   } catch (error) {
@@ -55,6 +56,7 @@ async function loadSettings(req, res, next) {
     };
     res.locals.logoSvg = '';
     res.locals.turnstileSiteKey = process.env.TURNSTILE_SITE_KEY || null;
+    res.locals.baseUrl = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
     next();
   }
 }
