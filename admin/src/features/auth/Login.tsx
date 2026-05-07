@@ -10,21 +10,11 @@ export function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    // Store logs in sessionStorage so they persist across redirects
-    const log = (msg: string, data?: any) => {
-      const logEntry = `[${new Date().toISOString()}] ${msg}${data ? ' ' + JSON.stringify(data) : ''}`;
-      console.log(logEntry);
-      const existingLogs = sessionStorage.getItem('loginLogs') || '';
-      sessionStorage.setItem('loginLogs', existingLogs + '\n' + logEntry);
-    };
-    
+
     setError('');
     setLoading(true);
-    log('Login form submitted', { username });
 
     try {
-      log('Sending login request...');
       const response = await axios.post('/admin/login', new URLSearchParams({
         username,
         password,
@@ -35,29 +25,11 @@ export function Login() {
         },
       });
 
-      log('Login response received', { 
-        status: response.status, 
-        success: response.data.success,
-        cookies: document.cookie 
-      });
-      
       if (response.data.success) {
-        log('Login successful, redirecting in 500ms...');
-        // Longer delay to ensure cookie is set and logs are visible
-        setTimeout(() => {
-          log('Redirecting now...');
-          window.location.href = '/admin';
-        }, 500);
+        window.location.href = '/admin';
         return; // Don't set loading to false
       }
     } catch (err: any) {
-      log('Login error', {
-        status: err.response?.status,
-        data: err.response?.data,
-        message: err.message,
-        cookies: document.cookie
-      });
-      
       // Handle rate limiting error
       if (err.response?.status === 429) {
         setError('Trop de tentatives de connexion. Veuillez attendre quelques minutes ou redémarrer le serveur en développement.');
@@ -78,13 +50,6 @@ export function Login() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {/* Debug: Show logs from sessionStorage */}
-          {typeof window !== 'undefined' && sessionStorage.getItem('loginLogs') && (
-            <div className="mb-4 p-2 bg-gray-100 text-xs font-mono overflow-auto max-h-32">
-              <strong>Logs:</strong>
-              <pre>{sessionStorage.getItem('loginLogs')}</pre>
-            </div>
-          )}
           <form className="space-y-6" onSubmit={handleSubmit} noValidate>
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
