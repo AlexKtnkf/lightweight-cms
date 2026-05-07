@@ -1,4 +1,5 @@
 const path = require('path');
+const sharp = require('sharp');
 
 class UploadMedia {
   constructor(mediaRepository, storageAdapter) {
@@ -9,6 +10,16 @@ class UploadMedia {
   async execute(file) {
     if (!file) {
       const error = new Error('Aucun fichier téléchargé');
+      error.status = 400;
+      throw error;
+    }
+
+    // Verify actual image bytes regardless of the client-supplied MIME type.
+    // sharp.metadata() decodes the file header and throws for non-image data.
+    try {
+      await sharp(file.buffer).metadata();
+    } catch {
+      const error = new Error('Fichier invalide : le contenu ne correspond pas à une image');
       error.status = 400;
       throw error;
     }
