@@ -158,7 +158,7 @@ function MaintenanceSection() {
     },
   });
   return (
-        <div className="bg-white shadow rounded-lg p-6 space-y-6">
+    <div className="bg-white shadow rounded-lg p-6 space-y-6">
       <div>
         <h2 className="text-lg font-semibold text-gray-900">Maintenance</h2>
       </div>
@@ -260,7 +260,7 @@ function SocialLinksSection() {
 
   return (
     <div className="border-t border-gray-200 pt-6">
-            <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4">
         <h3 className="text-md font-medium text-gray-900">Réseaux sociaux</h3>
         <button
           type="button"
@@ -684,7 +684,7 @@ export function SettingsEditor() {
           <MenuLinksSection name="header_menu_links" title="Navigation" />
           <MenuLinksSection name="footer_menu_links" title="Pied de page" />
 
-      <div className="space-y-3">
+          <div className="space-y-3">
             <label className="block text-sm font-medium text-gray-900 mb-2">Texte du pied de page</label>
             <textarea {...register('footer_text')} rows={3} className="w-full px-3 py-2 border rounded-md" />
           </div>
@@ -730,8 +730,7 @@ export function SettingsEditor() {
       </div>
 
       <div className="mt-8 mb-8">
-                  <MaintenanceSection />
-
+        <MaintenanceSection />
       </div>
     </div>
   );

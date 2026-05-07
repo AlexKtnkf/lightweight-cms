@@ -83,7 +83,7 @@ function AdminApp() {
               </Link>
               {isEnabled('FEATURE_SECTION_INSTAGRAM') && (
                 <Link to="/instagram-slides" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
-                  InstaStudio
+                  Posts
                 </Link>
               )}
               <Link to="/settings" className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm">
@@ -169,7 +169,7 @@ function AdminApp() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 block px-3 py-2 rounded-md text-base"
                 >
-                  InstaStudio
+                  Posts
                 </Link>
               )}
               <Link

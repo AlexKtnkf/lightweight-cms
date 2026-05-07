@@ -253,7 +253,7 @@ export function InstagramSlideGenerator() {
       <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">InstaStudio</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Posts</h1>
           </div>
 
           <button
