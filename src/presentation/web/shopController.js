@@ -2,6 +2,7 @@ const Stripe = require('stripe');
 const productRepository = require('../../domain/shop/infrastructure/productRepository');
 const orderRepository   = require('../../domain/shop/infrastructure/orderRepository');
 const db = require('../../../infrastructure/database/database');
+const emailService = require('../../shared/services/emailServiceInstance');
 const logger = require('../../../utils/logger');
 
 function getStripe() {
@@ -123,6 +124,8 @@ async function stripeWebhook(req, res, next) {
             }
           }
         });
+        // Fire-and-forget admin notification
+        emailService.sendOrderNotification(order, process.env.ADMIN_EMAIL).catch(() => {});
       }
     }
 

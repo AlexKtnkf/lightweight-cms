@@ -335,6 +335,93 @@ Timestamp: ${new Date().toLocaleString('fr-FR')}
     const normalizedVerifiedDomain = String(verifiedDomain || '').toLowerCase();
     return senderDomain === normalizedVerifiedDomain || senderDomain.endsWith(`.${normalizedVerifiedDomain}`);
   }
+
+  /**
+   * Send an order notification to the admin.
+   * @param {Object} order - Parsed order object (id, customer_email, customer_name, line_items, total_amount, currency)
+   * @param {string} adminEmail
+   */
+  async sendOrderNotification(order, adminEmail) {
+    if (!this.isReady()) {
+      logger.warn('Admin order notification not sent — email service not configured');
+      return null;
+    }
+    if (!adminEmail) {
+      logger.warn('Admin order notification not sent — ADMIN_EMAIL not configured');
+      return null;
+    }
+
+    const itemsHtml = (order.line_items || [])
+      .map(i => `<li>${this.escapeHtml(i.name)} × ${i.qty ?? 1} — ${((i.unit_price ?? 0) / 100).toFixed(2)} ${this.escapeHtml(i.currency || order.currency || 'EUR')}</li>`)
+      .join('');
+
+    const html = `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;color:#333">
+      <h2>Nouvelle commande #${order.id}</h2>
+      <p><strong>Client :</strong> ${this.escapeHtml(order.customer_name || '')} &lt;${this.escapeHtml(order.customer_email || '')}&gt;</p>
+      <ul>${itemsHtml}</ul>
+      <p><strong>Total :</strong> ${((order.total_amount ?? 0) / 100).toFixed(2)} ${this.escapeHtml(order.currency || 'EUR')}</p>
+    </body></html>`;
+
+    const text = `Nouvelle commande #${order.id}\nClient : ${order.customer_name || ''} <${order.customer_email || ''}>\nTotal : ${((order.total_amount ?? 0) / 100).toFixed(2)} ${order.currency || 'EUR'}`;
+
+    try {
+      const result = await this.sendEmail({
+        from: this.formatFromAddress(process.env.SITE_TITLE || 'Boutique'),
+        to: [adminEmail],
+        subject: `Nouvelle commande #${order.id}`,
+        html,
+        text,
+      });
+      logger.info(`Admin order notification sent (order #${order.id}): ${result.id}`);
+      return result;
+    } catch (err) {
+      logger.warn(`Admin order notification failed (order #${order.id}): ${err.message}`);
+      return null;
+    }
+  }
+
+  /**
+   * Send a booking notification to the admin.
+   * @param {Object} booking - { id, customer_name, customer_email, start_at }
+   * @param {string} serviceName
+   * @param {string} adminEmail
+   */
+  async sendBookingNotification(booking, serviceName, adminEmail) {
+    if (!this.isReady()) {
+      logger.warn('Admin booking notification not sent — email service not configured');
+      return null;
+    }
+    if (!adminEmail) {
+      logger.warn('Admin booking notification not sent — ADMIN_EMAIL not configured');
+      return null;
+    }
+
+    const when = booking.start_at ? new Date(booking.start_at).toLocaleString('fr-FR') : '—';
+    const html = `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;color:#333">
+      <h2>Nouvelle réservation #${booking.id}</h2>
+      <p><strong>Service :</strong> ${this.escapeHtml(serviceName || '')}</p>
+      <p><strong>Client :</strong> ${this.escapeHtml(booking.customer_name || '')} &lt;${this.escapeHtml(booking.customer_email || '')}&gt;</p>
+      <p><strong>Date :</strong> ${this.escapeHtml(when)}</p>
+      ${booking.notes ? `<p><strong>Notes :</strong> ${this.escapeHtml(booking.notes)}</p>` : ''}
+    </body></html>`;
+
+    const text = `Nouvelle réservation #${booking.id}\nService : ${serviceName || ''}\nClient : ${booking.customer_name || ''} <${booking.customer_email || ''}>\nDate : ${when}`;
+
+    try {
+      const result = await this.sendEmail({
+        from: this.formatFromAddress(process.env.SITE_TITLE || 'Agenda'),
+        to: [adminEmail],
+        subject: `Nouvelle réservation — ${serviceName || ''} le ${when}`,
+        html,
+        text,
+      });
+      logger.info(`Admin booking notification sent (booking #${booking.id}): ${result.id}`);
+      return result;
+    } catch (err) {
+      logger.warn(`Admin booking notification failed (booking #${booking.id}): ${err.message}`);
+      return null;
+    }
+  }
 }
 
 module.exports = EmailService;
