@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const { securityHeaders, generalLimiter } = require('./config/security');
 const errorHandler = require('./middleware/errorHandler');
 const db = require('./src/infrastructure/database/database');
@@ -61,6 +62,11 @@ app.use(express.urlencoded({ extended: true }));
 // Set secure to false for localhost/HTTP development
 // In production with HTTPS, set FORCE_HTTPS=true in env
 const sessionConfig = {
+  store: new pgSession({
+    pool: db.pool,
+    tableName: 'session',
+    createTableIfMissing: true,
+  }),
   secret: process.env.SESSION_SECRET || 'change-this-secret-in-production',
   resave: false,
   saveUninitialized: false,
