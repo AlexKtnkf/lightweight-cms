@@ -4,6 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blog - <%= settings?.site_title || 'My Site' %></title>
+  <% const blogDescription = settings?.site_tagline || ''; %>
+  <% if (blogDescription) { %>
+  <meta name="description" content="<%= blogDescription %>">
+  <% } %>
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="<%= settings?.site_title || 'My Site' %>">
+  <meta property="og:title" content="Blog - <%= settings?.site_title || 'My Site' %>">
+  <meta property="og:url" content="<%= baseUrl %>/blog">
+  <% if (blogDescription) { %>
+  <meta property="og:description" content="<%= blogDescription %>">
+  <% } %>
+  <% const blogOgImgId = settings?.logo_media_id; if (blogOgImgId) { %>
+  <meta property="og:image" content="<%= baseUrl %>/api/media/<%= blogOgImgId %>">
+  <% } %>
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="<%= baseUrl %>/blog">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
