@@ -1,5 +1,6 @@
 const Article = require('../domain/Article');
 const { prepareBlocksForCreation } = require('../../../shared/utils/blockSanitizer');
+const db = require('../../../infrastructure/database/database');
 
 class UpdateArticle {
   constructor(articleRepository, blockRepository) {
@@ -26,28 +27,28 @@ class UpdateArticle {
     // Validate
     article.validate();
 
-    // Persist
-    const savedArticleData = await this.articleRepository.update(id, article.toJSON());
-    const savedArticle = Article.fromJSON(savedArticleData);
+    // Persist article and blocks in a single transaction
+    return db.transaction(async () => {
+      const savedArticleData = await this.articleRepository.update(id, article.toJSON());
+      const savedArticle = Article.fromJSON(savedArticleData);
 
-    // Update blocks
-    if (articleData.blocks !== undefined) {
-      await this.blockRepository.deleteByContent('article', id);
-      if (article.blocks.length > 0) {
-        const preparedBlocks = prepareBlocksForCreation(article.blocks);
-        const blocksToCreate = preparedBlocks.map(block => ({
-          content_type: 'article',
-          content_id: id,
-          ...block
-        }));
-        await this.blockRepository.createMany(blocksToCreate);
+      if (articleData.blocks !== undefined) {
+        await this.blockRepository.deleteByContent('article', id);
+        if (article.blocks.length > 0) {
+          const preparedBlocks = prepareBlocksForCreation(article.blocks);
+          const blocksToCreate = preparedBlocks.map(block => ({
+            content_type: 'article',
+            content_id: id,
+            ...block
+          }));
+          await this.blockRepository.createMany(blocksToCreate);
+        }
+        const blocks = await this.blockRepository.findByContent('article', id);
+        savedArticle.blocks = this.blockRepository.parseBlocks(blocks);
       }
-      // Reload with blocks
-      const blocks = await this.blockRepository.findByContent('article', id);
-      savedArticle.blocks = this.blockRepository.parseBlocks(blocks);
-    }
 
-    return savedArticle.toJSON();
+      return savedArticle.toJSON();
+    });
   }
 }
 

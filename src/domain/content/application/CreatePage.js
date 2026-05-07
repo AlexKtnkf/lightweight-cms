@@ -1,6 +1,7 @@
 const Page = require('../domain/Page');
 const slugify = require('../../../shared/utils/slugify');
 const { prepareBlocksForCreation } = require('../../../shared/utils/blockSanitizer');
+const db = require('../../../infrastructure/database/database');
 
 class CreatePage {
   constructor(pageRepository, blockRepository, staticGenerator) {
@@ -33,25 +34,27 @@ class CreatePage {
     // Validate
     page.validate();
 
-    // Persist
-    const savedPageData = await this.pageRepository.create(page.toJSON());
-    const savedPage = Page.fromJSON(savedPageData);
+    // Persist page and blocks in a single transaction
+    const savedPage = await db.transaction(async () => {
+      const savedPageData = await this.pageRepository.create(page.toJSON());
+      const sp = Page.fromJSON(savedPageData);
 
-    // Save blocks
-    if (page.blocks.length > 0) {
-      const preparedBlocks = prepareBlocksForCreation(page.blocks);
-      const blocksToCreate = preparedBlocks.map(block => ({
-        content_type: 'page',
-        content_id: savedPage.id,
-        ...block
-      }));
-      await this.blockRepository.createMany(blocksToCreate);
-      // Reload with blocks
-      const blocks = await this.blockRepository.findByContent('page', savedPage.id);
-      savedPage.blocks = this.blockRepository.parseBlocks(blocks);
-    }
+      if (page.blocks.length > 0) {
+        const preparedBlocks = prepareBlocksForCreation(page.blocks);
+        const blocksToCreate = preparedBlocks.map(block => ({
+          content_type: 'page',
+          content_id: sp.id,
+          ...block
+        }));
+        await this.blockRepository.createMany(blocksToCreate);
+        const blocks = await this.blockRepository.findByContent('page', sp.id);
+        sp.blocks = this.blockRepository.parseBlocks(blocks);
+      }
 
-    // Keep the static copy in sync immediately after creation
+      return sp;
+    });
+
+    // Static generation happens outside the transaction (not critical path)
     if (savedPage.id === 1) {
       await this.staticGenerator.generateHomepage();
     } else if (savedPage.published) {

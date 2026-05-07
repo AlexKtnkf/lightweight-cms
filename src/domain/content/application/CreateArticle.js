@@ -1,6 +1,7 @@
 const Article = require('../domain/Article');
 const slugify = require('../../../shared/utils/slugify');
 const { prepareBlocksForCreation } = require('../../../shared/utils/blockSanitizer');
+const db = require('../../../infrastructure/database/database');
 
 class CreateArticle {
   constructor(articleRepository, blockRepository) {
@@ -30,25 +31,25 @@ class CreateArticle {
     // Validate
     article.validate();
 
-    // Persist
-    const savedArticleData = await this.articleRepository.create(article.toJSON());
-    const savedArticle = Article.fromJSON(savedArticleData);
+    // Persist article and blocks in a single transaction
+    return db.transaction(async () => {
+      const savedArticleData = await this.articleRepository.create(article.toJSON());
+      const savedArticle = Article.fromJSON(savedArticleData);
 
-    // Save blocks
-    if (article.blocks.length > 0) {
-      const preparedBlocks = prepareBlocksForCreation(article.blocks);
-      const blocksToCreate = preparedBlocks.map(block => ({
-        content_type: 'article',
-        content_id: savedArticle.id,
-        ...block
-      }));
-      await this.blockRepository.createMany(blocksToCreate);
-      // Reload with blocks
-      const blocks = await this.blockRepository.findByContent('article', savedArticle.id);
-      savedArticle.blocks = this.blockRepository.parseBlocks(blocks);
-    }
+      if (article.blocks.length > 0) {
+        const preparedBlocks = prepareBlocksForCreation(article.blocks);
+        const blocksToCreate = preparedBlocks.map(block => ({
+          content_type: 'article',
+          content_id: savedArticle.id,
+          ...block
+        }));
+        await this.blockRepository.createMany(blocksToCreate);
+        const blocks = await this.blockRepository.findByContent('article', savedArticle.id);
+        savedArticle.blocks = this.blockRepository.parseBlocks(blocks);
+      }
 
-    return savedArticle.toJSON();
+      return savedArticle.toJSON();
+    });
   }
 }
 

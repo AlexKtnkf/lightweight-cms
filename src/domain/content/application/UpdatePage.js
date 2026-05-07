@@ -1,5 +1,6 @@
 const Page = require('../domain/Page');
 const { prepareBlocksForCreation } = require('../../../shared/utils/blockSanitizer');
+const db = require('../../../infrastructure/database/database');
 
 class UpdatePage {
   constructor(pageRepository, blockRepository, staticGenerator) {
@@ -27,30 +28,33 @@ class UpdatePage {
     // Validate
     page.validate();
 
-    // Persist
-    const savedPageData = await this.pageRepository.update(id, page.toJSON());
-    const savedPage = Page.fromJSON(savedPageData);
-    const previousSlug = existing.slug;
+    // Persist page and blocks in a single transaction
+    const { savedPage, previousSlug } = await db.transaction(async () => {
+      const savedPageData = await this.pageRepository.update(id, page.toJSON());
+      const sp = Page.fromJSON(savedPageData);
+
+      // Update blocks if provided
+      if (pageData.blocks !== undefined) {
+        await this.blockRepository.deleteByContent('page', id);
+        if (page.blocks.length > 0) {
+          const preparedBlocks = prepareBlocksForCreation(page.blocks);
+          const blocksToCreate = preparedBlocks.map(block => ({
+            content_type: 'page',
+            content_id: id,
+            ...block
+          }));
+          await this.blockRepository.createMany(blocksToCreate);
+        }
+        const blocks = await this.blockRepository.findByContent('page', id);
+        sp.blocks = this.blockRepository.parseBlocks(blocks);
+      }
+
+      return { savedPage: sp, previousSlug: existing.slug };
+    });
+
     const currentSlug = savedPage.slug?.toString();
 
-    // Update blocks
-    if (pageData.blocks !== undefined) {
-      await this.blockRepository.deleteByContent('page', id);
-      if (page.blocks.length > 0) {
-        const preparedBlocks = prepareBlocksForCreation(page.blocks);
-        const blocksToCreate = preparedBlocks.map(block => ({
-          content_type: 'page',
-          content_id: id,
-          ...block
-        }));
-        await this.blockRepository.createMany(blocksToCreate);
-      }
-      // Reload with blocks
-      const blocks = await this.blockRepository.findByContent('page', id);
-      savedPage.blocks = this.blockRepository.parseBlocks(blocks);
-    }
-
-    // Keep the static copy aligned with slug and publish-state changes
+    // Static generation outside the transaction
     if (savedPage.id === 1) {
       await this.staticGenerator.generateHomepage();
     } else {
