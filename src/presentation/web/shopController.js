@@ -36,6 +36,11 @@ async function createCheckout(req, res, next) {
     const product = await productRepository.findById(req.params.id);
     if (!product || !product.active) return res.status(404).json({ error: 'Produit introuvable' });
 
+    // stock === null means unlimited; stock === 0 means sold out
+    if (product.stock !== null && product.stock <= 0) {
+      return res.status(409).json({ error: 'Ce produit est épuisé' });
+    }
+
     const baseUrl = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
 
     const session = await stripe.checkout.sessions.create({
