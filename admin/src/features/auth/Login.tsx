@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../../shared/api/client';
 
 export function Login() {
   const [username, setUsername] = useState('');
@@ -15,10 +15,11 @@ export function Login() {
     setLoading(true);
 
     try {
-      const response = await axios.post('/admin/login', new URLSearchParams({
+      const response = await api.post('/admin/login', new URLSearchParams({
         username,
         password,
       }), {
+        baseURL: '/',
         withCredentials: true,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
