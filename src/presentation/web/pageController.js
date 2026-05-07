@@ -13,6 +13,7 @@ const pageRepository = require('../../domain/content/infrastructure/pageReposito
 const blockRepository = require('../../domain/content/infrastructure/blockRepository');
 const articleRepository = require('../../domain/content/infrastructure/articleRepository');
 const settingsRepository = require('../../domain/settings/infrastructure/settingsRepository');
+const productRepository = require('../../domain/shop/infrastructure/productRepository');
 
 // Infrastructure
 const staticGenerator = require('../../infrastructure/static/staticGenerator');
@@ -24,7 +25,7 @@ const getArticleBySlug = new GetArticleBySlug(articleRepository, blockRepository
 const listPublishedArticles = new ListPublishedArticles(articleRepository);
 const createPage = new CreatePage(pageRepository, blockRepository, staticGenerator);
 const getSettings = new GetSettings(settingsRepository);
-const sitemapGenerator = new SitemapGenerator(articleRepository, pageRepository);
+const sitemapGenerator = new SitemapGenerator(articleRepository, pageRepository, productRepository);
 const feedGenerator = new FeedGenerator(articleRepository, settingsRepository);
 
 const JSONLD = require('../../../utils/jsonLd');
