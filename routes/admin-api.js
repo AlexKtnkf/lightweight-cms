@@ -106,15 +106,15 @@ const robotsGenerator = new RobotsGenerator();
 // Instantiate controller - Settings
 const settingsController = new SettingsController(getSettings, updateSettings, staticGenerator, robotsGenerator, backupService, mediaBackupService);
 
-// Feature flags endpoint — unauthenticated, deployment-level info
-router.get('/features', (req, res) => res.json(flags));
-
 // Setup and token-based recovery must stay reachable before session auth
 router.post('/auth/reset-password', (req, res, next) => authController.resetPassword(req, res, next));
 router.post('/auth/setup-admin', (req, res, next) => authController.setupAdmin(req, res, next));
 
 // All remaining admin routes require authentication
 router.use(requireAuth);
+
+// Feature flags — deployment-level info, only for authenticated users
+router.get('/features', (req, res) => res.json(flags));
 
 // Pages API routes
 router.get('/pages', (req, res, next) => pagesController.list(req, res, next));
