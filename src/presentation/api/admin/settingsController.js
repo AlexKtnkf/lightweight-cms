@@ -6,6 +6,16 @@ class SettingsController {
     this.robotsGenerator = robotsGenerator;
     this.backupService = backupService;
     this.mediaBackupService = mediaBackupService;
+
+    // Lazily required to avoid a circular dependency at module load time
+    this._invalidateCache = null;
+  }
+
+  _getInvalidator() {
+    if (!this._invalidateCache) {
+      this._invalidateCache = require('../../../../middleware/settings').invalidateSettingsCache;
+    }
+    return this._invalidateCache;
   }
 
   async get(req, res, next) {
@@ -20,6 +30,10 @@ class SettingsController {
   async update(req, res, next) {
     try {
       const settings = await this.updateSettings.execute(req.body);
+
+      // Bust the settings middleware cache so the next public request
+      // sees the updated values immediately (no 30-s wait after a save).
+      this._getInvalidator()();
       
       // Update robots.txt if allow_search_indexing changed
       if (this.robotsGenerator && req.body.allow_search_indexing !== undefined) {
