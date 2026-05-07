@@ -19,6 +19,9 @@
   <meta property="og:image" content="<%= ogImage %>">
   <% } %>
   <meta property="og:type" content="website">
+  <% if (typeof canonicalUrl !== 'undefined' && canonicalUrl) { %>
+  <meta property="og:url" content="<%= canonicalUrl %>">
+  <% } %>
   
   <% if (typeof canonicalUrl !== 'undefined' && canonicalUrl) { %>
   <link rel="canonical" href="<%= canonicalUrl %>">
