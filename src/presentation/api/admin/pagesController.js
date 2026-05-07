@@ -38,7 +38,7 @@ class PagesController {
 
   async list(req, res, next) {
     try {
-      const limit = parseInt(req.query.limit) || 50;
+      const limit = Math.min(parseInt(req.query.limit) || 50, 200);
       const offset = parseInt(req.query.offset) || 0;
       const pages = await this.listPages.execute({ limit, offset });
       res.json(pages);
