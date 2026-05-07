@@ -1,11 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { appointmentsApi } from '../../shared/api/appointments';
+import { useAuth } from '../auth/AuthContext';
 
 const weekdayLabels = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
 export default function AppointmentsPage() {
   const qc = useQueryClient();
+  const { isAdmin } = useAuth();
   const [tab, setTab] = useState<'services' | 'availability' | 'bookings'>('services');
   const [serviceDraft, setServiceDraft] = useState({ name: '', duration_min: 60, price: '' as string | number, active: true });
   const [slotDraft, setSlotDraft] = useState({ weekday: 1, start_time: '09:00', end_time: '17:00' });
@@ -68,15 +70,17 @@ export default function AppointmentsPage() {
 
       {tab === 'services' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow p-4 space-y-3">
-            <h2 className="font-semibold">Nouveau service</h2>
-            <div className="grid md:grid-cols-4 gap-3">
-              <input className="border rounded px-3 py-2 text-sm" placeholder="Nom" value={serviceDraft.name} onChange={e => setServiceDraft({ ...serviceDraft, name: e.target.value })} />
-              <input className="border rounded px-3 py-2 text-sm" type="number" min={15} step={15} placeholder="Duree" value={serviceDraft.duration_min} onChange={e => setServiceDraft({ ...serviceDraft, duration_min: Number(e.target.value) })} />
-              <input className="border rounded px-3 py-2 text-sm" type="number" min={0} placeholder="Prix centimes" value={serviceDraft.price} onChange={e => setServiceDraft({ ...serviceDraft, price: e.target.value })} />
-              <button className="bg-blue-600 text-white rounded px-4 py-2 text-sm" onClick={() => addService.mutate()} disabled={addService.isPending || !serviceDraft.name}>Ajouter</button>
+          {isAdmin && (
+            <div className="bg-white rounded-lg shadow p-4 space-y-3">
+              <h2 className="font-semibold">Nouveau service</h2>
+              <div className="grid md:grid-cols-4 gap-3">
+                <input className="border rounded px-3 py-2 text-sm" placeholder="Nom" value={serviceDraft.name} onChange={e => setServiceDraft({ ...serviceDraft, name: e.target.value })} />
+                <input className="border rounded px-3 py-2 text-sm" type="number" min={15} step={15} placeholder="Duree" value={serviceDraft.duration_min} onChange={e => setServiceDraft({ ...serviceDraft, duration_min: Number(e.target.value) })} />
+                <input className="border rounded px-3 py-2 text-sm" type="number" min={0} placeholder="Prix centimes" value={serviceDraft.price} onChange={e => setServiceDraft({ ...serviceDraft, price: e.target.value })} />
+                <button className="bg-blue-600 text-white rounded px-4 py-2 text-sm" onClick={() => addService.mutate()} disabled={addService.isPending || !serviceDraft.name}>Ajouter</button>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
@@ -95,7 +99,9 @@ export default function AppointmentsPage() {
                     <td className="px-4 py-3 text-sm">{s.duration_min} min</td>
                     <td className="px-4 py-3 text-sm">{s.price != null ? `${(s.price / 100).toFixed(2)} ${s.currency}` : '—'}</td>
                     <td className="px-4 py-3 text-right">
-                      <button className="text-red-600 text-sm" onClick={() => deleteService.mutate(s.id)}>Supprimer</button>
+                      {isAdmin && (
+                        <button className="text-red-600 text-sm" onClick={() => deleteService.mutate(s.id)}>Supprimer</button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -107,17 +113,19 @@ export default function AppointmentsPage() {
 
       {tab === 'availability' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow p-4">
-            <h2 className="font-semibold mb-3">Ajouter un creneau hebdo</h2>
-            <div className="grid md:grid-cols-4 gap-3">
-              <select className="border rounded px-3 py-2 text-sm" value={slotDraft.weekday} onChange={e => setSlotDraft({ ...slotDraft, weekday: Number(e.target.value) })}>
-                {weekdayLabels.map((label, idx) => <option key={idx} value={idx}>{label}</option>)}
-              </select>
-              <input className="border rounded px-3 py-2 text-sm" type="time" value={slotDraft.start_time} onChange={e => setSlotDraft({ ...slotDraft, start_time: e.target.value })} />
-              <input className="border rounded px-3 py-2 text-sm" type="time" value={slotDraft.end_time} onChange={e => setSlotDraft({ ...slotDraft, end_time: e.target.value })} />
-              <button className="bg-blue-600 text-white rounded px-4 py-2 text-sm" onClick={() => addSlot.mutate()}>Ajouter</button>
+          {isAdmin && (
+            <div className="bg-white rounded-lg shadow p-4">
+              <h2 className="font-semibold mb-3">Ajouter un creneau hebdo</h2>
+              <div className="grid md:grid-cols-4 gap-3">
+                <select className="border rounded px-3 py-2 text-sm" value={slotDraft.weekday} onChange={e => setSlotDraft({ ...slotDraft, weekday: Number(e.target.value) })}>
+                  {weekdayLabels.map((label, idx) => <option key={idx} value={idx}>{label}</option>)}
+                </select>
+                <input className="border rounded px-3 py-2 text-sm" type="time" value={slotDraft.start_time} onChange={e => setSlotDraft({ ...slotDraft, start_time: e.target.value })} />
+                <input className="border rounded px-3 py-2 text-sm" type="time" value={slotDraft.end_time} onChange={e => setSlotDraft({ ...slotDraft, end_time: e.target.value })} />
+                <button className="bg-blue-600 text-white rounded px-4 py-2 text-sm" onClick={() => addSlot.mutate()}>Ajouter</button>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
@@ -136,7 +144,9 @@ export default function AppointmentsPage() {
                     <td className="px-4 py-3 text-sm">{slot.start_time}</td>
                     <td className="px-4 py-3 text-sm">{slot.end_time}</td>
                     <td className="px-4 py-3 text-right">
-                      <button className="text-red-600 text-sm" onClick={() => deleteSlot.mutate(slot.id)}>Supprimer</button>
+                      {isAdmin && (
+                        <button className="text-red-600 text-sm" onClick={() => deleteSlot.mutate(slot.id)}>Supprimer</button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -164,12 +174,23 @@ export default function AppointmentsPage() {
                   <td className="px-4 py-3 text-sm">{b.service_name || '—'}</td>
                   <td className="px-4 py-3 text-sm">{new Date(b.start_at).toLocaleString('fr-FR')}</td>
                   <td className="px-4 py-3 text-sm">
-                    <select value={b.status} onChange={e => updateBookingStatus.mutate({ id: b.id, status: e.target.value })} className="text-xs border border-gray-300 rounded px-2 py-1">
-                      <option value="pending">En attente</option>
-                      <option value="confirmed">Confirme</option>
-                      <option value="cancelled">Annule</option>
-                      <option value="done">Effectue</option>
-                    </select>
+                    {isAdmin ? (
+                      <select value={b.status} onChange={e => updateBookingStatus.mutate({ id: b.id, status: e.target.value })} className="text-xs border border-gray-300 rounded px-2 py-1">
+                        <option value="pending">En attente</option>
+                        <option value="confirmed">Confirme</option>
+                        <option value="cancelled">Annule</option>
+                        <option value="done">Effectue</option>
+                      </select>
+                    ) : (
+                      <span className={`inline-flex px-2 py-0.5 text-xs rounded-full font-medium ${
+                        b.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                        b.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                        b.status === 'done' ? 'bg-gray-100 text-gray-600' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {b.status === 'confirmed' ? 'Confirme' : b.status === 'cancelled' ? 'Annule' : b.status === 'done' ? 'Effectue' : 'En attente'}
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}

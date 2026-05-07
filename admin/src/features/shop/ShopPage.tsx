@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { shopApi } from '../../shared/api/shop';
+import { useAuth } from '../auth/AuthContext';
 
 interface Product {
   id: number;
@@ -20,6 +21,7 @@ const empty: Omit<Product, 'id' | 'slug'> = {
 
 export default function ShopPage() {
   const queryClient = useQueryClient();
+  const { isAdmin } = useAuth();
   const [editing, setEditing] = useState<Partial<Product> | null>(null);
   const [tab, setTab] = useState<'products' | 'orders'>('products');
 
@@ -66,7 +68,7 @@ export default function ShopPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Boutique</h1>
-        {tab === 'products' && (
+        {isAdmin && tab === 'products' && (
           <button
             onClick={() => setEditing({ ...empty })}
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm"
@@ -197,13 +199,17 @@ export default function ShopPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right space-x-2">
-                        <button onClick={() => setEditing(p)} className="text-sm text-blue-600 hover:text-blue-800">Modifier</button>
-                        <button
-                          onClick={() => { if (confirm('Supprimer ce produit ?')) deleteMutation.mutate(p.id); }}
-                          className="text-sm text-red-600 hover:text-red-800"
-                        >
-                          Supprimer
-                        </button>
+                        {isAdmin && (
+                          <>
+                            <button onClick={() => setEditing(p)} className="text-sm text-blue-600 hover:text-blue-800">Modifier</button>
+                            <button
+                              onClick={() => { if (confirm('Supprimer ce produit ?')) deleteMutation.mutate(p.id); }}
+                              className="text-sm text-red-600 hover:text-red-800"
+                            >
+                              Supprimer
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -237,16 +243,27 @@ export default function ShopPage() {
                     <td className="px-4 py-3 text-sm text-gray-600">{o.customer_email || '—'}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{(o.total_amount / 100).toFixed(2)} {o.currency}</td>
                     <td className="px-4 py-3">
-                      <select
-                        value={o.status}
-                        onChange={e => statusMutation.mutate({ id: o.id, status: e.target.value })}
-                        className="text-xs border border-gray-300 rounded px-1 py-0.5"
-                      >
-                        <option value="pending">En attente</option>
-                        <option value="paid">Payée</option>
-                        <option value="cancelled">Annulée</option>
-                        <option value="refunded">Remboursée</option>
-                      </select>
+                      {isAdmin ? (
+                        <select
+                          value={o.status}
+                          onChange={e => statusMutation.mutate({ id: o.id, status: e.target.value })}
+                          className="text-xs border border-gray-300 rounded px-1 py-0.5"
+                        >
+                          <option value="pending">En attente</option>
+                          <option value="paid">Payée</option>
+                          <option value="cancelled">Annulée</option>
+                          <option value="refunded">Remboursée</option>
+                        </select>
+                      ) : (
+                        <span className={`inline-flex px-2 py-0.5 text-xs rounded-full font-medium ${
+                          o.status === 'paid' ? 'bg-green-100 text-green-700' :
+                          o.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                          o.status === 'refunded' ? 'bg-gray-100 text-gray-600' :
+                          'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {o.status === 'paid' ? 'Payée' : o.status === 'cancelled' ? 'Annulée' : o.status === 'refunded' ? 'Remboursée' : 'En attente'}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
                       {new Date(o.created_at).toLocaleDateString('fr-FR')}

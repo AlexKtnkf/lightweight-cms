@@ -173,8 +173,8 @@ router.get('/shop/products/:id', requireFeature('FEATURE_SECTION_SHOP'), (req, r
 router.post('/shop/products', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.createProduct(req, res, next));
 router.put('/shop/products/:id', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.updateProduct(req, res, next));
 router.delete('/shop/products/:id', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.deleteProduct(req, res, next));
-router.get('/shop/orders', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.listOrders(req, res, next));
-router.get('/shop/orders/:id', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.getOrder(req, res, next));
+router.get('/shop/orders', requireFeature('FEATURE_SECTION_SHOP'), (req, res, next) => shopController.listOrders(req, res, next));
+router.get('/shop/orders/:id', requireFeature('FEATURE_SECTION_SHOP'), (req, res, next) => shopController.getOrder(req, res, next));
 router.patch('/shop/orders/:id/status', requireFeature('FEATURE_SECTION_SHOP'), requireRole(['admin', 'super_admin']), (req, res, next) => shopController.updateOrderStatus(req, res, next));
 
 // Appointments API routes
@@ -188,7 +188,7 @@ router.post('/appointments/availability', requireFeature('FEATURE_SECTION_APPOIN
 router.put('/appointments/availability/:id', requireFeature('FEATURE_SECTION_APPOINTMENTS'), requireRole(['admin', 'super_admin']), (req, res, next) => appointmentsController.updateAvailability(req, res, next));
 router.delete('/appointments/availability/:id', requireFeature('FEATURE_SECTION_APPOINTMENTS'), requireRole(['admin', 'super_admin']), (req, res, next) => appointmentsController.deleteAvailability(req, res, next));
 
-router.get('/appointments/bookings', requireFeature('FEATURE_SECTION_APPOINTMENTS'), requireRole(['admin', 'super_admin']), (req, res, next) => appointmentsController.listBookings(req, res, next));
+router.get('/appointments/bookings', requireFeature('FEATURE_SECTION_APPOINTMENTS'), (req, res, next) => appointmentsController.listBookings(req, res, next));
 router.patch('/appointments/bookings/:id/status', requireFeature('FEATURE_SECTION_APPOINTMENTS'), requireRole(['admin', 'super_admin']), (req, res, next) => appointmentsController.updateBookingStatus(req, res, next));
 
 module.exports = router;
