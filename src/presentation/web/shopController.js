@@ -62,18 +62,28 @@ async function createCheckout(req, res, next) {
       currency: product.currency
     });
 
+    // Store the session_id in the visitor's session so the success page can
+    // verify ownership without exposing order data to arbitrary visitors.
+    req.session.stripeSessionId = session.id;
+
     res.json({ url: session.url });
   } catch (err) { next(err); }
 }
 
 // GET /boutique/merci — success page
+// Only shows order details when the session_id in the query matches the one
+// stored server-side in the visitor's session (set at checkout creation).
 async function checkoutSuccess(req, res, next) {
   try {
     const { session_id } = req.query;
     let order = null;
-    if (session_id) {
+
+    if (session_id && req.session.stripeSessionId === session_id) {
+      // Clear so a refresh or shared link no longer reveals order data
+      delete req.session.stripeSessionId;
       order = await orderRepository.findByStripeSession(session_id);
     }
+
     res.render('pages/shop-success', { order, title: 'Commande confirmée' });
   } catch (err) { next(err); }
 }
