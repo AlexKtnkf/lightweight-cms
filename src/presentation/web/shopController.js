@@ -1,6 +1,7 @@
 const Stripe = require('stripe');
 const productRepository = require('../../domain/shop/infrastructure/productRepository');
 const orderRepository   = require('../../domain/shop/infrastructure/orderRepository');
+const db = require('../../../infrastructure/database/database');
 const logger = require('../../../utils/logger');
 
 function getStripe() {
@@ -111,8 +112,16 @@ async function stripeWebhook(req, res, next) {
       const session = event.data.object;
       const order = await orderRepository.findByStripeSession(session.id);
       if (order) {
-        await orderRepository.updateStatus(order.id, 'paid', {
-          stripe_payment_intent: session.payment_intent
+        await db.transaction(async () => {
+          await orderRepository.updateStatus(order.id, 'paid', {
+            stripe_payment_intent: session.payment_intent
+          });
+          const lineItems = order.line_items || [];
+          for (const item of lineItems) {
+            if (item.product_id) {
+              await productRepository.decrementStock(item.product_id, item.qty ?? 1);
+            }
+          }
         });
       }
     }

@@ -80,6 +80,20 @@ class ProductRepository {
   async delete(id) {
     await db.run('DELETE FROM products WHERE id = ?', [id]);
   }
+
+  /**
+   * Atomically decrement stock by `qty` for a product.
+   * Only decrements when stock is not NULL (NULL = unlimited).
+   * Stock floor is 0 — will not go negative.
+   */
+  async decrementStock(id, qty = 1) {
+    await db.run(
+      `UPDATE products
+       SET stock = GREATEST(stock - ?, 0), updated_at = CURRENT_TIMESTAMP
+       WHERE id = ? AND stock IS NOT NULL`,
+      [qty, id]
+    );
+  }
 }
 
 module.exports = new ProductRepository();
