@@ -1,11 +1,11 @@
 const Article = require('../domain/Article');
 const { prepareBlocksForCreation } = require('../../../shared/utils/blockSanitizer');
-const db = require('../../../infrastructure/database/database');
 
 class UpdateArticle {
-  constructor(articleRepository, blockRepository) {
+  constructor(articleRepository, blockRepository, transactionManager) {
     this.articleRepository = articleRepository;
     this.blockRepository = blockRepository;
+    this.transactionManager = transactionManager;
   }
 
   async execute(id, articleData) {
@@ -28,7 +28,7 @@ class UpdateArticle {
     article.validate();
 
     // Persist article and blocks in a single transaction
-    return db.transaction(async () => {
+    return this.transactionManager.run(async () => {
       const savedArticleData = await this.articleRepository.update(id, article.toJSON());
       const savedArticle = Article.fromJSON(savedArticleData);
 

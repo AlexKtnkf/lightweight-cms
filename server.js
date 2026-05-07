@@ -291,7 +291,7 @@ function startServer() {
     // Run asynchronously so it doesn't block server startup
     if (process.env.NODE_ENV === 'production') {
       setImmediate(() => {
-        const staticGenerator = require('./src/infrastructure/static/staticGenerator');
+        const staticGenerator = require('./src/infrastructure/bootstrap/staticGeneratorInstance');
         staticGenerator.generateAll().catch(err => {
           logger.error('Error generating static content on startup:', err);
         });

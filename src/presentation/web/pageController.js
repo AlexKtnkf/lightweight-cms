@@ -14,16 +14,17 @@ const blockRepository = require('../../domain/content/infrastructure/blockReposi
 const articleRepository = require('../../domain/content/infrastructure/articleRepository');
 const settingsRepository = require('../../domain/settings/infrastructure/settingsRepository');
 const productRepository = require('../../domain/shop/infrastructure/productRepository');
+const transactionManager = require('../../infrastructure/database/transactionManager');
 
 // Infrastructure
-const staticGenerator = require('../../infrastructure/static/staticGenerator');
+const staticGenerator = require('../../infrastructure/bootstrap/staticGeneratorInstance');
 
 // Instantiate use cases
 const getPage = new GetPage(pageRepository, blockRepository);
 const getPageBySlug = new GetPageBySlug(pageRepository, blockRepository);
 const getArticleBySlug = new GetArticleBySlug(articleRepository, blockRepository);
 const listPublishedArticles = new ListPublishedArticles(articleRepository);
-const createPage = new CreatePage(pageRepository, blockRepository, staticGenerator);
+const createPage = new CreatePage(pageRepository, blockRepository, staticGenerator, transactionManager);
 const getSettings = new GetSettings(settingsRepository);
 const sitemapGenerator = new SitemapGenerator(articleRepository, pageRepository, productRepository);
 const feedGenerator = new FeedGenerator(articleRepository, settingsRepository);

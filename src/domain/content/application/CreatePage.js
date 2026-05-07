@@ -1,13 +1,13 @@
 const Page = require('../domain/Page');
 const slugify = require('../../../shared/utils/slugify');
 const { prepareBlocksForCreation } = require('../../../shared/utils/blockSanitizer');
-const db = require('../../../infrastructure/database/database');
 
 class CreatePage {
-  constructor(pageRepository, blockRepository, staticGenerator) {
+  constructor(pageRepository, blockRepository, staticGenerator, transactionManager) {
     this.pageRepository = pageRepository;
     this.blockRepository = blockRepository;
     this.staticGenerator = staticGenerator;
+    this.transactionManager = transactionManager;
   }
 
   async execute(pageData) {
@@ -35,7 +35,7 @@ class CreatePage {
     page.validate();
 
     // Persist page and blocks in a single transaction
-    const savedPage = await db.transaction(async () => {
+    const savedPage = await this.transactionManager.run(async () => {
       const savedPageData = await this.pageRepository.create(page.toJSON());
       const sp = Page.fromJSON(savedPageData);
 

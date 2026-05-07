@@ -36,18 +36,131 @@ class Database {
     return txStorage.getStore() || this.pool;
   }
 
-  // Convert ? placeholders to $1, $2, ... for pg driver
+  // Convert ? placeholders to $1, $2, ... for pg driver.
+  // Handles single/double quoted strings, dollar-quoted strings and comments.
   convertPlaceholders(sql, params) {
     let idx = 0;
+    let out = '';
+    let i = 0;
     let inSingle = false;
     let inDouble = false;
+    let inLineComment = false;
+    let inBlockComment = false;
+    let dollarTag = null;
 
-    const out = sql.split('').map(ch => {
-      if (ch === "'" && !inDouble) { inSingle = !inSingle; return ch; }
-      if (ch === '"' && !inSingle) { inDouble = !inDouble; return ch; }
-      if (ch === '?' && !inSingle && !inDouble) { idx += 1; return `$${idx}`; }
-      return ch;
-    }).join('');
+    const tryReadDollarTag = (input, startIndex) => {
+      const rest = input.slice(startIndex);
+      const match = rest.match(/^\$[A-Za-z_][A-Za-z0-9_]*\$|^\$\$/);
+      return match ? match[0] : null;
+    };
+
+    while (i < sql.length) {
+      const ch = sql[i];
+      const next = i + 1 < sql.length ? sql[i + 1] : '';
+
+      if (inSingle) {
+        out += ch;
+        if (ch === "'" && next === "'") {
+          out += next;
+          i += 2;
+          continue;
+        }
+        if (ch === "'") inSingle = false;
+        i += 1;
+        continue;
+      }
+
+      if (inDouble) {
+        out += ch;
+        if (ch === '"' && next === '"') {
+          out += next;
+          i += 2;
+          continue;
+        }
+        if (ch === '"') inDouble = false;
+        i += 1;
+        continue;
+      }
+
+      if (dollarTag) {
+        if (sql.slice(i, i + dollarTag.length) === dollarTag) {
+          out += dollarTag;
+          i += dollarTag.length;
+          dollarTag = null;
+          continue;
+        }
+        out += ch;
+        i += 1;
+        continue;
+      }
+
+      if (inLineComment) {
+        out += ch;
+        if (ch === '\n') inLineComment = false;
+        i += 1;
+        continue;
+      }
+
+      if (inBlockComment) {
+        out += ch;
+        if (ch === '*' && next === '/') {
+          out += next;
+          i += 2;
+          inBlockComment = false;
+          continue;
+        }
+        i += 1;
+        continue;
+      }
+
+      if (ch === "'") {
+        inSingle = true;
+        out += ch;
+        i += 1;
+        continue;
+      }
+
+      if (ch === '"') {
+        inDouble = true;
+        out += ch;
+        i += 1;
+        continue;
+      }
+
+      if (ch === '-' && next === '-') {
+        inLineComment = true;
+        out += ch + next;
+        i += 2;
+        continue;
+      }
+
+      if (ch === '/' && next === '*') {
+        inBlockComment = true;
+        out += ch + next;
+        i += 2;
+        continue;
+      }
+
+      if (ch === '$') {
+        const tag = tryReadDollarTag(sql, i);
+        if (tag) {
+          dollarTag = tag;
+          out += tag;
+          i += tag.length;
+          continue;
+        }
+      }
+
+      if (ch === '?') {
+        idx += 1;
+        out += `$${idx}`;
+        i += 1;
+        continue;
+      }
+
+      out += ch;
+      i += 1;
+    }
 
     return { sql: out, params };
   }
@@ -61,7 +174,7 @@ class Database {
     return { lastID, changes: res.rowCount };
   }
 
-  async raw(sql) {
+  async executeScript(sql) {
     return this._runner().query(sql);
   }
 
@@ -79,7 +192,7 @@ class Database {
 
   /**
    * Run fn inside a PostgreSQL transaction.
-   * All db.run / db.get / db.all / db.raw calls made within fn (in the same
+    * All db.run / db.get / db.all calls made within fn (in the same
    * async context) automatically use the dedicated transaction client via
    * AsyncLocalStorage — no changes required in repositories or use cases.
    */

@@ -11,13 +11,13 @@ class AdminController {
       
       // Trim whitespace from inputs
       const trimmedUsername = username ? username.trim() : '';
-      const trimmedPassword = password ? password.trim() : '';
+      const submittedPassword = typeof password === 'string' ? password : '';
       
-      if (!trimmedUsername || !trimmedPassword) {
+      if (!trimmedUsername || !submittedPassword) {
         return res.status(400).json({ error: 'Nom d\'utilisateur et mot de passe requis' });
       }
       
-      const user = await loginUser.execute(trimmedUsername, trimmedPassword);
+      const user = await loginUser.execute(trimmedUsername, submittedPassword);
       
       // Set session
       if (!req.session) {

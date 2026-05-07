@@ -1,14 +1,29 @@
 const express = require('express');
 const router = express.Router();
 const pageController = require('../src/presentation/web/pageController');
-const shopController = require('../src/presentation/web/shopController');
-const appointmentsController = require('../src/presentation/web/appointmentsController');
+const ShopController = require('../src/presentation/web/shopController');
+const AppointmentsController = require('../src/presentation/web/appointmentsController');
 const path = require('path');
 const fs = require('fs').promises;
 const logger = require('../utils/logger');
 const { isEnabled } = require('../src/shared/featureFlags');
 const { bookingLimiter } = require('../config/security');
 const settingsRepository = require('../src/domain/settings/infrastructure/settingsRepository');
+const emailService = require('../src/shared/services/emailServiceInstance');
+const transactionManager = require('../src/infrastructure/database/transactionManager');
+
+const ShopService = require('../src/domain/shop/application/ShopService');
+const AppointmentService = require('../src/domain/appointments/application/AppointmentService');
+const productRepository = require('../src/domain/shop/infrastructure/productRepository');
+const orderRepository = require('../src/domain/shop/infrastructure/orderRepository');
+const serviceRepository = require('../src/domain/appointments/infrastructure/serviceRepository');
+const availabilityRepository = require('../src/domain/appointments/infrastructure/availabilityRepository');
+const bookingRepository = require('../src/domain/appointments/infrastructure/bookingRepository');
+
+const shopService = new ShopService(productRepository, orderRepository, transactionManager);
+const appointmentService = new AppointmentService(serviceRepository, availabilityRepository, bookingRepository, transactionManager);
+const shopController = new ShopController(shopService, emailService);
+const appointmentsController = new AppointmentsController(appointmentService, emailService);
 const shouldServeStaticFiles = process.env.NODE_ENV === 'production';
 
 // Homepage route - check for static file first, fallback to dynamic

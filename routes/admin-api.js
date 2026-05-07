@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const requireAuth = require('../middleware/auth');
 const { requireFeature } = require('../middleware/auth');
-const { uploadLimiter, loginLimiter } = require('../config/security');
+const { uploadLimiter, loginLimiter, adminLimiter } = require('../config/security');
 const { flags } = require('../src/shared/featureFlags');
 
 // Repositories (infrastructure) - from domain infrastructure
@@ -15,11 +15,12 @@ const settingsRepository = require('../src/domain/settings/infrastructure/settin
 // No services needed - all logic in use cases
 
 // Infrastructure
-const staticGenerator = require('../src/infrastructure/static/staticGenerator');
+const staticGenerator = require('../src/infrastructure/bootstrap/staticGeneratorInstance');
 const RobotsGenerator = require('../src/shared/utils/robotsGenerator');
 const upload = require('../config/upload');
 const backupService = require('../db/backup-db');
 const mediaBackupService = require('../db/backup-media');
+const transactionManager = require('../src/infrastructure/database/transactionManager');
 
 // Use cases (application) - Pages
 const CreatePage = require('../src/domain/content/application/CreatePage');
@@ -43,6 +44,8 @@ const DeleteMedia = require('../src/domain/media/application/DeleteMedia');
 // Use cases (application) - Settings
 const GetSettings = require('../src/domain/settings/application/GetSettings');
 const UpdateSettings = require('../src/domain/settings/application/UpdateSettings');
+const ShopService = require('../src/domain/shop/application/ShopService');
+const AppointmentService = require('../src/domain/appointments/application/AppointmentService');
 
 // Controllers (presentation)
 const PagesController = require('../src/presentation/api/admin/pagesController');
@@ -50,19 +53,24 @@ const ArticlesController = require('../src/presentation/api/admin/articlesContro
 const MediaController = require('../src/presentation/api/admin/mediaController');
 const SettingsController = require('../src/presentation/api/admin/settingsController');
 const authController = require('../src/presentation/api/admin/authController');
-const shopController = require('../src/presentation/api/admin/shopController');
-const appointmentsController = require('../src/presentation/api/admin/appointmentsController');
+const AdminShopController = require('../src/presentation/api/admin/shopController');
+const AdminAppointmentsController = require('../src/presentation/api/admin/appointmentsController');
+const productRepository = require('../src/domain/shop/infrastructure/productRepository');
+const orderRepository = require('../src/domain/shop/infrastructure/orderRepository');
+const serviceRepository = require('../src/domain/appointments/infrastructure/serviceRepository');
+const availabilityRepository = require('../src/domain/appointments/infrastructure/availabilityRepository');
+const bookingRepository = require('../src/domain/appointments/infrastructure/bookingRepository');
 
 // Instantiate use cases - Pages
-const createPage = new CreatePage(pageRepository, blockRepository, staticGenerator);
-const updatePage = new UpdatePage(pageRepository, blockRepository, staticGenerator);
+const createPage = new CreatePage(pageRepository, blockRepository, staticGenerator, transactionManager);
+const updatePage = new UpdatePage(pageRepository, blockRepository, staticGenerator, transactionManager);
 const getPage = new GetPage(pageRepository, blockRepository);
 const listPages = new ListPages(pageRepository);
 const deletePage = new DeletePage(pageRepository, blockRepository, staticGenerator);
 
 // Instantiate use cases - Articles
-const createArticle = new CreateArticle(articleRepository, blockRepository);
-const updateArticle = new UpdateArticle(articleRepository, blockRepository);
+const createArticle = new CreateArticle(articleRepository, blockRepository, transactionManager);
+const updateArticle = new UpdateArticle(articleRepository, blockRepository, transactionManager);
 const getArticle = new GetArticle(articleRepository, blockRepository);
 const listArticles = new ListArticles(articleRepository);
 const deleteArticle = new DeleteArticle(articleRepository, blockRepository);
@@ -105,6 +113,10 @@ const robotsGenerator = new RobotsGenerator();
 
 // Instantiate controller - Settings
 const settingsController = new SettingsController(getSettings, updateSettings, staticGenerator, robotsGenerator, backupService, mediaBackupService);
+const shopService = new ShopService(productRepository, orderRepository, transactionManager);
+const appointmentService = new AppointmentService(serviceRepository, availabilityRepository, bookingRepository, transactionManager);
+const shopController = new AdminShopController(shopService);
+const appointmentsController = new AdminAppointmentsController(appointmentService);
 
 // Setup and token-based recovery must stay reachable before session auth
 // Rate-limit these to prevent brute-force on SETUP_TOKEN
@@ -113,6 +125,7 @@ router.post('/auth/setup-admin', loginLimiter, (req, res, next) => authControlle
 
 // All remaining admin routes require authentication
 router.use(requireAuth);
+router.use(adminLimiter);
 
 // Feature flags — deployment-level info, only for authenticated users
 router.get('/features', (req, res) => res.json(flags));

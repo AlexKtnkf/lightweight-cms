@@ -25,7 +25,7 @@ async function runMigrations() {
 
     try {
       await db.transaction(async () => {
-        await db.raw(sql);
+        await db.executeScript(sql);
         await db.run('INSERT INTO schema_migrations (name) VALUES (?)', [file]);
       });
       logger.info(`✓ Migration ${file} completed`);

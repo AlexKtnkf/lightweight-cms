@@ -3,17 +3,6 @@ const path = require('path');
 const ejs = require('ejs');
 const logger = require('../../../utils/logger');
 
-// Use cases
-const GetPage = require('../../domain/content/application/GetPage');
-const ListPages = require('../../domain/content/application/ListPages');
-const GetSettings = require('../../domain/settings/application/GetSettings');
-const CreatePage = require('../../domain/content/application/CreatePage');
-
-// Repositories
-const pageRepository = require('../../domain/content/infrastructure/pageRepository');
-const blockRepository = require('../../domain/content/infrastructure/blockRepository');
-const settingsRepository = require('../../domain/settings/infrastructure/settingsRepository');
-
 /**
  * Static file generator for pages
  * Generates static HTML files for published pages (not accroches, not articles)
@@ -270,22 +259,4 @@ class StaticGenerator {
   }
 }
 
-// Instantiate use cases
-const getPage = new GetPage(pageRepository, blockRepository);
-const listPages = new ListPages(pageRepository);
-const getSettings = new GetSettings(settingsRepository);
-
-// Create instance first (createPage will be set later to avoid circular dependency)
-const staticGeneratorInstance = new StaticGenerator(
-  getPage,
-  listPages,
-  getSettings,
-  null, // createPage will be set below
-  pageRepository
-);
-
-// Now create createPage with staticGenerator reference
-const createPage = new CreatePage(pageRepository, blockRepository, staticGeneratorInstance);
-staticGeneratorInstance.createPage = createPage;
-
-module.exports = staticGeneratorInstance;
+module.exports = StaticGenerator;

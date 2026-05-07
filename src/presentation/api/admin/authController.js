@@ -1,6 +1,19 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const userRepository = require('../../../domain/auth/infrastructure/userRepository');
 const logger = require('../../../../utils/logger');
+
+function hasValidSetupToken(candidate) {
+  const expected = process.env.SETUP_TOKEN;
+  if (typeof candidate !== 'string' || candidate.length === 0) return false;
+  if (typeof expected !== 'string' || expected.length === 0) return false;
+
+  const candidateBuf = Buffer.from(candidate);
+  const expectedBuf = Buffer.from(expected);
+  if (candidateBuf.length !== expectedBuf.length) return false;
+
+  return crypto.timingSafeEqual(candidateBuf, expectedBuf);
+}
 
 class AuthController {
   /**
@@ -30,7 +43,7 @@ class AuthController {
       }
 
       // Check authorization: either valid setup token or authenticated session
-      const isSetup = setupToken && setupToken === process.env.SETUP_TOKEN;
+      const isSetup = hasValidSetupToken(setupToken);
       const isAuthenticated = req.session && req.session.userId;
 
       if (!isSetup && !isAuthenticated) {
@@ -81,7 +94,7 @@ class AuthController {
       const { username, password, setupToken } = req.body;
 
       // Validate setup token
-      if (!setupToken || setupToken !== process.env.SETUP_TOKEN) {
+      if (!hasValidSetupToken(setupToken)) {
         logger.warn('Invalid setup token attempt');
         return res.status(403).json({ 
           error: 'Invalid or missing setup token' 

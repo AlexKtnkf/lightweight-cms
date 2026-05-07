@@ -14,7 +14,7 @@ async function run() {
   }
 
   const sql = fs.readFileSync(backupPath, 'utf8');
-  await db.raw(sql);
+  await db.executeScript(sql);
   logger.info(`✓ Database restored from ${backupPath}`);
 }
 
