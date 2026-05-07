@@ -118,6 +118,10 @@ async function stripeWebhook(req, res, next) {
       const session = event.data.object;
       const order = await orderRepository.findByStripeSession(session.id);
       if (order) {
+        // Idempotency guard: skip if order is already paid (replayed webhook)
+        if (order.status === 'paid') {
+          return res.json({ received: true });
+        }
         await db.transaction(async () => {
           await orderRepository.updateStatus(order.id, 'paid', {
             stripe_payment_intent: session.payment_intent
