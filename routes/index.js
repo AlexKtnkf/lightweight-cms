@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const logger = require('../utils/logger');
 const { isEnabled } = require('../src/shared/featureFlags');
+const { bookingLimiter } = require('../config/security');
 const settingsRepository = require('../src/domain/settings/infrastructure/settingsRepository');
 const shouldServeStaticFiles = process.env.NODE_ENV === 'production';
 
@@ -81,7 +82,7 @@ router.get('/rdv/slots', (req, res, next) => {
   if (!isEnabled('FEATURE_SECTION_APPOINTMENTS')) return res.status(404).json({ error: 'Not found' });
   return appointmentsController.listSlots(req, res, next);
 });
-router.post('/rdv/book', (req, res, next) => {
+router.post('/rdv/book', bookingLimiter, (req, res, next) => {
   if (!isEnabled('FEATURE_SECTION_APPOINTMENTS')) return res.status(404).json({ error: 'Not found' });
   return appointmentsController.createBooking(req, res, next);
 });

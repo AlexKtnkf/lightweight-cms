@@ -64,10 +64,20 @@ const uploadLimiter = rateLimit({
   skipSuccessfulRequests: true, // Don't count successful uploads
 });
 
+// Public booking rate limiter — prevents spam bookings from a single IP
+const bookingLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: process.env.NODE_ENV === 'production' ? 10 : 50,
+  message: 'Trop de demandes de réservation depuis cette IP. Veuillez réessayer plus tard.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 module.exports = {
   securityHeaders,
   generalLimiter,
   loginLimiter,
   adminLimiter,
-  uploadLimiter
+  uploadLimiter,
+  bookingLimiter
 };
