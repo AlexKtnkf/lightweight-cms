@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const requireAuth = require('../middleware/auth');
 const { requireFeature } = require('../middleware/auth');
-const { uploadLimiter } = require('../config/security');
+const { uploadLimiter, loginLimiter } = require('../config/security');
 const { flags } = require('../src/shared/featureFlags');
 
 // Repositories (infrastructure) - from domain infrastructure
@@ -107,8 +107,9 @@ const robotsGenerator = new RobotsGenerator();
 const settingsController = new SettingsController(getSettings, updateSettings, staticGenerator, robotsGenerator, backupService, mediaBackupService);
 
 // Setup and token-based recovery must stay reachable before session auth
-router.post('/auth/reset-password', (req, res, next) => authController.resetPassword(req, res, next));
-router.post('/auth/setup-admin', (req, res, next) => authController.setupAdmin(req, res, next));
+// Rate-limit these to prevent brute-force on SETUP_TOKEN
+router.post('/auth/reset-password', loginLimiter, (req, res, next) => authController.resetPassword(req, res, next));
+router.post('/auth/setup-admin', loginLimiter, (req, res, next) => authController.setupAdmin(req, res, next));
 
 // All remaining admin routes require authentication
 router.use(requireAuth);
