@@ -17,6 +17,7 @@ const adminApiRoutes = require('./routes/admin-api');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+let server;
 
 // Trust proxy when behind reverse proxy (nginx, Cloudflare, etc.)
 // Required for correct client IPs in rate limiting and logging
@@ -281,7 +282,6 @@ app.use((req, res, next) => {
 app.use(errorHandler);
 
 // Start server function
-let server;
 function startServer() {
   server = app.listen(PORT, () => {
     logger.info(`Server running on http://localhost:${PORT}`);
