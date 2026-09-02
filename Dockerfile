@@ -24,7 +24,9 @@ WORKDIR /app
 
 # Install production deps only
 COPY package*.json ./
-RUN npm ci --omit=dev
+# The admin panel is built in the admin-build stage. Avoid running the root
+# postinstall here before the application source (including admin/) is copied.
+RUN npm ci --omit=dev --ignore-scripts
 
 # Copy application source
 COPY . .
